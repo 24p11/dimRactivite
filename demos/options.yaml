@@ -1,0 +1,6 @@
+services_exclus: toto ,titot
+gestion_doublons_rum:
+    service: service
+    pole: service
+    Centre de Traitement des Brûlés: pole
+
