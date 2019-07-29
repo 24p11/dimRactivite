@@ -1,3 +1,243 @@
+#' Récupération de la liste de l'ensemble des fichiers de remontée contenu dans un dossier
+#'
+#' @param path racine du dossier contenant les archives
+#'
+#' @return liste des fichiers d'archives disponibles
+#' @export
+#'
+#' @examples fichiers_genrsa <- scan_path(getOption("dimRactivite.path"))
+#'
+scan_path<-function(path = getOption("dimRactivite.path")){
+
+  fichiers_genrsa =NULL
+
+  ext = getOption("dimRactivite.extensions")
+
+
+  folders = list.dirs(path)
+
+  for(folder in folders){
+
+    files = list.files(folder)
+
+    for(file in files){
+
+      if( stringr::str_sub(file,-3)=='zip'){
+        r<-pmeasyr::astat(path = folder,
+                          file = file,
+                          view = F)
+        finals = r$Name
+        zfile = file
+
+
+      }else{
+
+        finals = file
+        zfile=NA
+      }
+
+      for(final in finals){
+
+        det_final = unlist(str_split(file,'\\.'))
+
+        if(any(det_final%in%ext)){
+
+          fichiers_genrsa = rbind(fichiers_genrsa,data.frame("finess" = det_final[1],
+                                                           "annee" = det_final[2],
+                                                           "mois" = det_final[3],
+                                                           "type" = det_final[4],
+                                                           "ext" = det_final[length(det_final)],
+                                                           "archive"=zfile,
+                                                           "file"=file,
+                                                           "filepath"=folder,
+                                                           "RData" =NA,
+                                                           stringsAsFactors = F)
+          )
+        }
+
+      }
+
+    }
+
+  }
+
+  return(as_tibble(fichiers_genrsa))
+
+
+}
+
+
+#' Import des principaux fichiers de remontées et valorisation des séjours et résumés
+#'
+#' @param p un noyau pmeasyr
+#' @param tarifsante si TRUE utilisation des tarifs de l'année antérieure
+#' @param save si TRUE sauvegarde un fichier .RData dans le répertoire des données de remontée
+#' @param persist si TRUE renvoie les données
+#'
+#' @return liste avec principaux fichiers de remontées, et enregistrement sur le disque si besoin
+#' @export
+#'
+#' @examples data2019 = ipmeasyr(p,tarifsante=TRUE,save=TRUE,persist=TRUE)
+#'
+imco<-function(p, tarifsante =FALSE, save = TRUE, persist = FALSE){
+
+  if(tarifsante==TRUE) {
+    tarifs      <- tarifs_mco_ghs %>% dplyr::distinct(ghs, anseqta, .keep_all = TRUE) %>% dplyr::mutate(anseqta=as.character(as.numeric(anseqta)+1))
+    supplements <- tarifs_mco_supplements %>% dplyr::mutate(anseqta=as.character(as.numeric(anseqta)+1))
+    suffixe = "tarifs_anterieurs_"
+  } else {
+    tarifs      <- tarifs_mco_ghs %>% dplyr::distinct(ghs, anseqta, .keep_all = TRUE)
+    supplements <- tarifs_mco_supplements
+    suffixe = ""
+  }
+
+  #Pour le cacul des pmct mono rum on préfère toujours utiliser les 12 derniers mois.
+  #Si l'import concerne un mois autre que décembre, on importe également si elles sont dispnibles les données M12 de l'année antérieure
+  if(p$mois !=12) deb  = p$annee -1
+  fin = p$annee
+
+  #On prévoit de modifier le noyau pour l'import
+  p_import = p
+
+  rsa_en_cours = NULL
+  rum_en_cours = NULL
+
+  for(a in (p$annee-1):p$annee){
+
+    #On change l'année et le mois du noyau d'impot en fonction du contexte
+    if(p$annee != a){
+      p_import$annee = a
+      p_import$mois = 12
+      p_import$path   = paste0(getOption("dimRactivite.path"),'/',p$finess,'/',p_import$annee,'/M',p_import$mois)
+    }
+
+    #Imports
+    rsa <- pmeasyr::irsa(p_import,typi = 3 ,tolower_names = T)
+    vrsa <- pmeasyr::vvr_rsa(p_import,tolower_names = T)
+    vano <- pmeasyr::vvr_ano_mco(p_import,tolower_names = T)
+    porg <- pmeasyr::ipo(p_import,tolower_names = T)
+    diap <- pmeasyr::idiap(p_import,tolower_names = T)
+    ium <- pmeasyr::iium(p_import,tolower_names = T)
+    pie <- pmeasyr::ipie(p_import,tolower_names = T)
+    tra <- pmeasyr::itra(p_import ,  tolower_names = T )
+    rum <-pmeasyr::irum(p_import,typi = 4 ,  tolower_names = T )
+
+    #Transformation des données
+
+    #Intégration du tra
+    rsa$rsa =  pmeasyr::inner_tra( rsa$rsa, tra )
+    rum$rum =  pmeasyr::inner_tra( rum$rum, tra )
+
+    #Intégration du type d'UMA au fihcier IUM
+    ium = left_join(ium %>% dplyr::mutate(temp=as.integer(annee)-as.integer(substr(dteaut,1,4))) %>%
+                      dplyr::arrange(noum,temp) %>% dplyr::filter(temp>=0, !duplicated(noum))  %>%
+                      dplyr::select(-temp), nomenclature_uma%>%dplyr::select(typeaut, libelle_typeaut,
+                                                                             discipline ))
+
+
+    #Intégration des type d'UMA au fichier rum
+    rum$rum = left_join(rum$rum,ium%>%dplyr::select(noum,typeaut,typehosp,libelle_typeaut,
+                                                    discipline),by=c("cdurm" = "noum"))
+    #Transformation des diagnostics du rum
+    rum<- pmeasyr::tdiag(rum)
+
+    #Valorisation des séjours
+    rsa_v <- pmeasyr::vvr_ghs_supp(rsa = vrsa,
+                                   tarifs = tarifs%>%mutate(ghs = as.character(ghs), anseqta =  as.character(anseqta)),
+                                   supplements =  supplements %>% mutate(anseqta = as.character(anseqta)),
+                                   ano = vano,
+                                   porg = porg,
+                                   diap = diap,
+                                   pie = pie,
+                                   bee = FALSE)
+
+
+    rsa_v = pmeasyr::inner_tra( rsa_v , tra )
+
+    rsa_v<-dplyr::left_join(rsa$rsa,
+                            dplyr::distinct( rsa_v, cle_rsa,.keep_all = TRUE) )
+
+
+
+
+    rum$rum =  pmeasyr::inner_tra( rum$rum, tra )
+
+    vano = vano%>%dplyr::select(names(vano)[ ! grepl('^cr',names(vano))])%>%
+             dplyr::mutate( ansor = as.character(a) )
+
+    #Objets temporaires à valoriser
+    rsa_en_cours = dplyr::bind_rows(rsa_v,rsa_en_cours)
+    rum_en_cours = dplyr::bind_rows(rum$rum,rum_en_cours)
+
+  }
+
+  #Etape 2 : valorisation des rum par séjour avec répartition des recettes par service
+
+  #pmct mono de l'année antétieure
+  pmctmono =  pmct_mono_uma(rsa_en_cours, rum_en_cours, p$annee, p$mois)
+
+  #Valorisation des rum
+  rum_valo <- vvr_rum_repa(rsa_v, rum$rum, pmctmono)
+
+  #SAUVEGARDE OBJET PAR MOIS
+
+  # for (i in max(paste0(rsa_en_cours$ansor, rsa_en_cours$moissor)):max(paste0(rsa_en_cours$ansor, rsa_en_cours$moissor))) {
+
+  i = paste0(p$annee,'_',p$mois)
+
+
+  assign( paste0('rum_valo_',suffixe,i), rum_valo )
+  assign( paste0('rsa_v_',suffixe,i), rsa )
+
+  if(!tarifsante){
+
+    assign( paste0('rsa_',i), rsa$rsa )
+    assign( paste0('rum_',i), rum)
+    assign( paste0('vano_',i), vano )
+    assign( paste0('porg_',i), pmctmono )
+    assign( paste0('diap_',i), pmctmono )
+    assign( paste0('pie_',i), pmctmono )
+    assign( paste0('pmctmono_',i), pmctmono )
+
+    save( list = c(paste0('rum_',i),
+                   paste0('rum_valo_',i),
+                   paste0('rsa_',i),
+                   paste0('rsa_v_',i),
+                   paste0('vano_',i),
+                   paste0('pmctmono_',i)),
+          file = paste0(p$path,"/",p$finess,".",p$annee,".",p$mois,".RData")
+    )
+
+  }else{
+
+    save( list = c(paste0('rum_valo_',suffixe,i),
+                   paste0('rsa_v_',suffixe,i)),
+          file = paste0(p$path,"/",p$finess,".",p$annee,".",p$mois,".",substr(suffixe,1,nchar(suffixe)-1),".RData")
+    )
+
+  }
+
+
+
+  if(persist){
+    return(list( 'rsa' = rsa$rsa,
+                 'rsa_v' = rsa_v,
+                 'rum' = rum,
+                 'rum_valo' = rum_valo,
+                 'vano'= vano,
+                 'tra'= tra,
+                 'pmctmono' = pmctmono,
+                 'pie' = pie,
+                 'diap' = diap,
+                 'prog' = porg  )
+    )
+  }
+
+}
+
+
+
+
 #' un ensemble de fonction permettant d'automatiser les impots pmeasyr et d'effectuer des opérations
 #' de transformation et de sélection des séjours
 #'
@@ -15,11 +255,11 @@
 selection_cancer_diag<-function(df = diagnostics){
 
   dplyr::inner_join(df,dplyr::as_tibble(inca_cancero),by = c("diag" = "CODE"))%>%
-    mutate(nda = substr(nas,1,9))%>%
+    dplyr::mutate(nda = substr(nas,1,9))%>%
     dplyr::inner_join(rum%>%select(nas,ipp,ansor),.)%>%
-    mutate(ipp = dplyr::if_else( (is.na(ipp) | ipp=='') ,nda,ipp))%>%
-    distinct( nda,diag,type, .keep_all= TRUE)%>%
-    select(-norum)
+    dplyr::mutate(ipp = dplyr::if_else( (is.na(ipp) | ipp=='') ,nda,ipp))%>%
+    dplyr::distinct( nda,diag,type, .keep_all= TRUE)%>%
+    dplyr::select(-norum)
 
 
 }
@@ -97,3 +337,4 @@ attribution_statut_nx_patient<-function(df){
 
   return(df)
 }
+

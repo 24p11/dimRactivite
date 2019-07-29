@@ -1,0 +1,88 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, echo = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "README-"
+)
+```
+
+# dimRactivite
+
+L'objectif du package est de standardiser la production de tableaux de bord et de données d'activité en utilisant les données PMSI et le package pmeasyr.
+
+
+## Installation
+
+You can install dimRactivite from github with:
+
+```{r gh-installation, eval = FALSE}
+# install.packages("devtools")
+devtools::install_github("24p11/dimRactivite")
+```
+
+## Imports de données
+
+Dans la perspective du suivi de l'activité de plusieurs établissement, et afin de faciliter le chargement des données dans R, le package permet de systématiser l'import des données historiques en créant un objet unique par remontée.
+
+Les fonctions d'import utilisées sont :
+- irum type 6, les diagnostics sont transposés par la fonction afin de les intégrer dans un même objet (cf pmeasyr)
+- irsa type 1 
+
+L'objet unique comprend :
+- rsa_v
+- rum
+- rum_v
+- diagnostics
+- actes
+- vano
+
+Les fichiers en entrée et sortie de genrsa sont enregistrés dans un file system respectant le formalisme proposer par G.Pressiat dans pmeasyr :
+
+```bash
++-- path
+    +-- nofiness 1
+        +-- AAAA
+           +-- MM 
+           +-- MM 
+                +-- FINESS.AAAA.MM.rsa
+                +-- FINESS.AAAA.MM.fichum
+                ....
+     +-- nofiness 2
+        +-- AAAA
+           +-- MM 
+           +-- MM 
+                +-- FINESS.AAAA.MM.rsa
+                +-- FINESS.AAAA.MM.fichum
+                ....          
+```
+
+A l'isse de l'import dans R, l'ajout de données souvent utiles et qui ne sont pas contenues dans les données PMSI peuvent être ajoutée :
+- identité patients (cf format identités patients)
+- attachement des libellés et l'arborescence de la structure de l'établissement ou du groupe hospitalier (cf format fichier structure)
+
+Pour l'analyse des données un certain nombre de référentiels sont indispensables (tarifs, nommenclatures um,...). Ceux ci sont téléchargeables avec le package referime maintenu par G. Pressiat. Ici ces références sont utilisé sous la forme d'objet dispnonibles dans l'environement et chargés en mémoire à la volée, grâce à la réalisation d'un package referentiel.
+
+## Pré-requis méthodologiques
+
+#### Type d'hospitalisation
+Une variable *type d'hospitalisation* est utilisée pour distinguer HC et HDJ. Cette variable est contruite grâce à la variable *type d'hospitalisation* du référentiel de nommenclature des uma (cf objet nommenclature_uma).
+
+#### Concaténation des objets de remontée
+
+D'une façon générale il est recommandé de concatener lors de la mise en mémoire des données (cf exemple), l'ensemble des données des différents sites. Par contre dès lors que l'on souhaite effectuer des comparaisons annuelles, la taille des objets de données peut rapidement devenir prohibitive. Un exemple de mise en mémoire des données historiques sur 5 années avec la production de tableaux de bord est disponible dans la programme demos/generation_tableaux_de_bord . Les objets issus de chaque remontée peuvent être utilisé par années ou concatener dans un seul objet annuel si la machine qui exploite les données le permet. Pour cette raison deux type de fonction ont été réalisées suivant que l'on traite un objet par année ou un objet pluri-annuel.
+
+## Example
+
+Dans la patie démos plusieurs exemples d'utilisations pour générer rapidement un ensemble de tableaux de bord.
+
+
+
+```{r example}
+## basic example code
+```

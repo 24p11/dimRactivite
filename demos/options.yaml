@@ -1,6 +1,43 @@
-services_exclus: toto ,titot
+path: "~/GH_PMSI/DATA/Remontees"
+
+arborescence:
+  - {finess}
+  - {annee}
+  - M{mois}
+
+extensions:
+  - rum
+  - rss
+  - rsa
+  - rha
+  - ano
+  - tra
+  - ium
+  - leg
+  - med
+  - medatu
+  - pie
+  - porg
+  - diap
+
+fichiers_imco:
+  - rsa
+  - tra
+  - ano
+  - ium
+  - diap
+  - porg
+  - pie
+  - rss
+
+services_exclus:
+  - toto
+  - titi
+  - rea chir
+
 gestion_doublons_rum:
     service: service
     pole: service
     Centre de Traitement des Brûlés: pole
+
 

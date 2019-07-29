@@ -38,7 +38,6 @@ labels<-labels[,-1]
 
 
 exclusionPdiff<-c('Taux de re-admissions precoces','IGS moyen')
-ServicesExclus<-NULL
 
 
 #Fichier structure

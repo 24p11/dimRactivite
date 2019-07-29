@@ -11,15 +11,28 @@
 #'
 #' @examples
 #' update_options()
-update_options<-function(file = 'options.yaml'){
+update_options<-function(file = 'demos/options.yaml'){
 
-  dimRactivite_options = yaml::read_yaml(file)
-  dimRactivite_options<-list(
-    dimRactivite.services_exclus =  stringr::str_trim( stringr::str_split(dimRactivite_options$services_exclus,',') %>% purrr::flatten_chr()),
-    dimRactivite.gestion_doublons_rum = dimRactivite_options$gestion_doublons_rum
-  )
+  dimRactivite_options_ = yaml::read_yaml('demos/options.yaml')
 
-  dimRactivite.services_exclus =
+  dimRactivite_options = list()
+
+  for( o in names(dimRactivite_options_) ) {
+
+
+    var_op <- as.name(paste0("dimRactivite.",o))
+
+    val_op <- dimRactivite_options_[[o]]
+
+    if( typeof(val_op) == "character" ){
+
+      val_op <- stringr::str_trim( stringr::str_split(val_op,',') %>% purrr::flatten_chr())
+
+    }
+    dimRactivite_options[[var_op]]<- val_op
+
+  }
+
 
   options(dimRactivite_options)
 
