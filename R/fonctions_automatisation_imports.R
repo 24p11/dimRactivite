@@ -93,6 +93,7 @@ imco<-function(p, tarifsante = FALSE, save = TRUE, persist = FALSE, pathm12 = NU
 
   #Pour le cacul des pmct mono rum on préfère toujours utiliser les 12 derniers mois.
   #Si l'import concerne un mois autre que décembre, on importe également si elles sont dispnibles les données M12 de l'année antérieure
+  #deb et fin ne semblent pas utilisés:
   if(p$mois !=12) deb  = p$annee -1
   fin = p$annee
 
@@ -189,7 +190,7 @@ imco<-function(p, tarifsante = FALSE, save = TRUE, persist = FALSE, pathm12 = NU
   if(!tarifsante){
     
     assign( paste0('rum_valo_',suffixe,i), rum_valo )
-    assign( paste0('rsa_v_',suffixe,i), rsa )
+    assign( paste0('rsa_v_',suffixe,i), rsa_v )
     assign( paste0('rsa_',i), rsa$rsa )
     assign( paste0('rum_',i), rum)
     assign( paste0('vano_',i), vano )
@@ -226,7 +227,7 @@ imco<-function(p, tarifsante = FALSE, save = TRUE, persist = FALSE, pathm12 = NU
   } else {
 
     assign( paste0('rum_valo_',suffixe,i), rum_valo )
-    assign( paste0('rsa_v_',suffixe,i), rsa )
+    assign( paste0('rsa_v_',suffixe,i), rsa_v )
     
     if(persist){
       return(list( 'rsa_v' = rsa_v,
