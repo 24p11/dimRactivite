@@ -82,12 +82,12 @@ scan_path<-function(path = getOption("dimRactivite.path")){
 imco<-function(p, tarifsante = FALSE, save = TRUE, persist = FALSE, pathm12 = NULL){
 
   if(tarifsante==TRUE) {
-    tarifs      <- referime::get_table('tarifs_mco_ghs') %>% dplyr::distinct(ghs, anseqta, .keep_all = TRUE) %>% dplyr::mutate(anseqta=as.character(as.numeric(anseqta)+1))
-    supplements <- referime::get_table('tarifs_mco_supplements') %>% dplyr::mutate(anseqta=as.character(as.numeric(anseqta)+1))
+    tarifs      <- tarifs_mco_ghs %>% dplyr::distinct(ghs, anseqta, .keep_all = TRUE) %>% dplyr::mutate(anseqta=as.character(as.numeric(anseqta)+1))
+    supplements <- tarifs_mco_supplements %>% dplyr::mutate(anseqta=as.character(as.numeric(anseqta)+1))
     suffixe = "tarifs_anterieurs_"
   } else {
-    tarifs      <- referime::get_table('tarifs_mco_ghs') %>% dplyr::distinct(ghs, anseqta, .keep_all = TRUE)
-    supplements <- referime::get_table('tarifs_mco_supplements')
+    tarifs      <- tarifs_mco_ghs %>% dplyr::distinct(ghs, anseqta, .keep_all = TRUE)
+    supplements <- tarifs_mco_supplements
     suffixe = ""
   }
 
@@ -169,7 +169,7 @@ imco<-function(p, tarifsante = FALSE, save = TRUE, persist = FALSE, pathm12 = NU
              dplyr::mutate( ansor = as.character(a) )
 
     #Objets temporaires à valoriser
-    rsa_en_cours = dplyr::bind_rows(rsa_v, rsa_en_cours)
+    rsa_en_cours = dplyr::bind_rows(dplyr::left_join(rsa$rsa, dplyr::distinct( rsa_v, cle_rsa,.keep_all = TRUE) ), rsa_en_cours)
     rum_en_cours = dplyr::bind_rows(rum$rum, rum_en_cours)
 
   }
@@ -180,7 +180,7 @@ imco<-function(p, tarifsante = FALSE, save = TRUE, persist = FALSE, pathm12 = NU
   pmctmono =  pmct_mono_uma(rsa_en_cours, rum_en_cours, p$annee, p$mois)
 
   #Valorisation des rum
-  rum_valo <- vvr_rum_repa(rsa_v, rum$rum, pmctmono)
+  rum_valo <- vvr_rum_repa(dplyr::left_join(rsa$rsa, dplyr::distinct( rsa_v, cle_rsa,.keep_all = TRUE) ), rum$rum, pmctmono)
 
   #SAUVEGARDE OBJET PAR MOIS
 
