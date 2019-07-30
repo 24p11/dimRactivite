@@ -79,7 +79,7 @@ scan_path<-function(path = getOption("dimRactivite.path")){
 #'
 #' @examples data2019 = ipmeasyr(p,tarifsante=TRUE,save=TRUE,persist=TRUE)
 #'
-imco<-function(p, tarifsante =FALSE, save = TRUE, persist = FALSE){
+imco<-function(p, tarifsante = FALSE, save = TRUE, persist = FALSE, pathm12 = NULL){
 
   if(tarifsante==TRUE) {
     tarifs      <- tarifs_mco_ghs %>% dplyr::distinct(ghs, anseqta, .keep_all = TRUE) %>% dplyr::mutate(anseqta=as.character(as.numeric(anseqta)+1))
@@ -104,11 +104,15 @@ imco<-function(p, tarifsante =FALSE, save = TRUE, persist = FALSE){
 
   for(a in (p$annee-1):p$annee){
 
-    #On change l'année et le mois du noyau d'impot en fonction du contexte
+    #On change l'année et le mois du noyau d'import en fonction du contexte
     if(p$annee != a){
       p_import$annee = a
       p_import$mois = 12
-      p_import$path   = paste0(getOption("dimRactivite.path"),'/',p$finess,'/',p_import$annee,'/M',p_import$mois)
+        if(is.null(pathm12)){
+          p_import$path = paste0(getOption("dimRactivite.path"),'/',p$finess,'/',p_import$annee,'/M',p_import$mois)
+          } else {
+          p_import$path = pathm12
+        }
     }
 
     #Imports
@@ -181,10 +185,7 @@ imco<-function(p, tarifsante =FALSE, save = TRUE, persist = FALSE){
 
   #SAUVEGARDE OBJET PAR MOIS
 
-  # for (i in max(paste0(rsa_en_cours$ansor, rsa_en_cours$moissor)):max(paste0(rsa_en_cours$ansor, rsa_en_cours$moissor))) {
-
   i = paste0(p$annee,'_',p$mois)
-
 
   assign( paste0('rum_valo_',suffixe,i), rum_valo )
   assign( paste0('rsa_v_',suffixe,i), rsa )
@@ -194,11 +195,11 @@ imco<-function(p, tarifsante =FALSE, save = TRUE, persist = FALSE){
     assign( paste0('rsa_',i), rsa$rsa )
     assign( paste0('rum_',i), rum)
     assign( paste0('vano_',i), vano )
-    assign( paste0('porg_',i), pmctmono )
-    assign( paste0('diap_',i), pmctmono )
-    assign( paste0('pie_',i), pmctmono )
+    assign( paste0('porg_',i), porg )
+    assign( paste0('diap_',i), diap )
+    assign( paste0('pie_',i), pie )
     assign( paste0('pmctmono_',i), pmctmono )
-
+    
     save( list = c(paste0('rum_',i),
                    paste0('rum_valo_',i),
                    paste0('rsa_',i),
@@ -229,7 +230,7 @@ imco<-function(p, tarifsante =FALSE, save = TRUE, persist = FALSE){
                  'pmctmono' = pmctmono,
                  'pie' = pie,
                  'diap' = diap,
-                 'prog' = porg  )
+                 'porg' = porg  )
     )
   }
 
@@ -238,7 +239,7 @@ imco<-function(p, tarifsante =FALSE, save = TRUE, persist = FALSE){
 
 
 
-#' un ensemble de fonction permettant d'automatiser les impots pmeasyr et d'effectuer des opérations
+#' un ensemble de fonction permettant d'automatiser les imports pmeasyr et d'effectuer des opérations
 #' de transformation et de sélection des séjours
 #'
 #' Warning: utilisation du package pmeasyr
