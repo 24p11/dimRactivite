@@ -79,15 +79,15 @@ scan_path<-function(path = getOption("dimRactivite.path")){
 #'
 #' @examples data2019 = ipmeasyr(p,tarifsante=TRUE,save=TRUE,persist=TRUE)
 #'
-imco<-function(p, tarifsante = FALSE, save = TRUE, persist = FALSE, pathm12 = NULL){
+imco<-function(p, tarifsante = FALSE, save = TRUE, persist = FALSE, pathm12 = NULL, nomenclature_uma = nomenclature_uma){
 
   if(tarifsante==TRUE) {
-    tarifs      <- tarifs_mco_ghs %>% dplyr::distinct(ghs, anseqta, .keep_all = TRUE) %>% dplyr::mutate(anseqta=as.character(as.numeric(anseqta)+1))
-    supplements <- tarifs_mco_supplements %>% dplyr::mutate(anseqta=as.character(as.numeric(anseqta)+1))
+    tarifs      <- referime::get_table('tarifs_mco_ghs') %>% dplyr::distinct(ghs, anseqta, .keep_all = TRUE) %>% dplyr::mutate(anseqta=as.character(as.numeric(anseqta)+1))
+    supplements <- referime::get_table('tarifs_mco_supplements') %>% dplyr::mutate(anseqta=as.character(as.numeric(anseqta)+1))
     suffixe = "tarifs_anterieurs_"
   } else {
-    tarifs      <- tarifs_mco_ghs %>% dplyr::distinct(ghs, anseqta, .keep_all = TRUE)
-    supplements <- tarifs_mco_supplements
+    tarifs      <- referime::get_table('tarifs_mco_ghs') %>% dplyr::distinct(ghs, anseqta, .keep_all = TRUE)
+    supplements <- referime::get_table('tarifs_mco_supplements')
     suffixe = ""
   }
 
@@ -124,7 +124,7 @@ imco<-function(p, tarifsante = FALSE, save = TRUE, persist = FALSE, pathm12 = NU
     ium <- pmeasyr::iium(p_import,tolower_names = T)
     pie <- pmeasyr::ipie(p_import,tolower_names = T)
     tra <- pmeasyr::itra(p_import ,  tolower_names = T )
-    rum <-pmeasyr::irum(p_import,typi = 4 ,  tolower_names = T )
+    rum <- pmeasyr::irum(p_import, typi = 4 ,  tolower_names = T )
 
     #Transformation des données
 
@@ -143,7 +143,7 @@ imco<-function(p, tarifsante = FALSE, save = TRUE, persist = FALSE, pathm12 = NU
     rum$rum = left_join(rum$rum,ium%>%dplyr::select(noum,typeaut,typehosp,libelle_typeaut,
                                                     discipline),by=c("cdurm" = "noum"))
     #Transformation des diagnostics du rum
-    rum<- pmeasyr::tdiag(rum)
+    rum <- pmeasyr::tdiag(rum)
 
     #Valorisation des séjours
     rsa_v <- pmeasyr::vvr_ghs_supp(rsa = vrsa,
