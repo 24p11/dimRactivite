@@ -79,7 +79,7 @@ scan_path<-function(path = getOption("dimRactivite.path")){
 #'
 #' @examples data2019 = ipmeasyr(p,tarifsante=TRUE,save=TRUE,persist=TRUE)
 #'
-imco<-function(p, tarifsante = FALSE, save = TRUE, persist = FALSE, pathm12 = NULL){
+imco<-function(p, tarifsante = FALSE, save = TRUE, persist = FALSE, pathm12 = NULL, nomenclature_uma = nomenclature_uma){
 
   if(tarifsante==TRUE) {
     tarifs      <- tarifs_mco_ghs %>% dplyr::distinct(ghs, anseqta, .keep_all = TRUE) %>% dplyr::mutate(anseqta=as.character(as.numeric(anseqta)+1))
@@ -135,7 +135,7 @@ imco<-function(p, tarifsante = FALSE, save = TRUE, persist = FALSE, pathm12 = NU
     #Intégration du type d'UMA au fihcier IUM
     ium = left_join(ium %>% dplyr::mutate(temp=as.integer(annee)-as.integer(substr(dteaut,1,4))) %>%
                       dplyr::arrange(noum,temp) %>% dplyr::filter(temp>=0, !duplicated(noum))  %>%
-                      dplyr::select(-temp), nomenclature_uma%>%dplyr::select(typeaut, libelle_typeaut,
+                      dplyr::select(-temp), nomenclature_uma %>%dplyr::select(typeaut, libelle_typeaut,
                                                                              discipline ))
 
 
