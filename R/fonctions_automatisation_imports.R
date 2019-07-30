@@ -79,7 +79,7 @@ scan_path<-function(path = getOption("dimRactivite.path")){
 #'
 #' @examples data2019 = ipmeasyr(p,tarifsante=TRUE,save=TRUE,persist=TRUE)
 #'
-imco<-function(p, tarifsante = FALSE, save = TRUE, persist = FALSE, pathm12 = NULL, nomenclature_uma = nomenclature_uma){
+imco<-function(p, tarifsante = FALSE, save = TRUE, persist = FALSE, pathm12 = NULL){
 
   if(tarifsante==TRUE) {
     tarifs      <- referime::get_table('tarifs_mco_ghs') %>% dplyr::distinct(ghs, anseqta, .keep_all = TRUE) %>% dplyr::mutate(anseqta=as.character(as.numeric(anseqta)+1))
@@ -158,8 +158,7 @@ imco<-function(p, tarifsante = FALSE, save = TRUE, persist = FALSE, pathm12 = NU
 
     rsa_v = pmeasyr::inner_tra( rsa_v , tra )
 
-    rsa_v<-dplyr::left_join(rsa$rsa,
-                            dplyr::distinct( rsa_v, cle_rsa,.keep_all = TRUE) )
+    # rsa_v <- dplyr::left_join(rsa$rsa, dplyr::distinct( rsa_v, cle_rsa,.keep_all = TRUE) )
 
 
 
@@ -170,8 +169,8 @@ imco<-function(p, tarifsante = FALSE, save = TRUE, persist = FALSE, pathm12 = NU
              dplyr::mutate( ansor = as.character(a) )
 
     #Objets temporaires à valoriser
-    rsa_en_cours = dplyr::bind_rows(rsa_v,rsa_en_cours)
-    rum_en_cours = dplyr::bind_rows(rum$rum,rum_en_cours)
+    rsa_en_cours = dplyr::bind_rows(rsa_v, rsa_en_cours)
+    rum_en_cours = dplyr::bind_rows(rum$rum, rum_en_cours)
 
   }
 
@@ -187,11 +186,10 @@ imco<-function(p, tarifsante = FALSE, save = TRUE, persist = FALSE, pathm12 = NU
 
   i = paste0(p$annee,'_',p$mois)
 
-  assign( paste0('rum_valo_',suffixe,i), rum_valo )
-  assign( paste0('rsa_v_',suffixe,i), rsa )
-
   if(!tarifsante){
-
+    
+    assign( paste0('rum_valo_',suffixe,i), rum_valo )
+    assign( paste0('rsa_v_',suffixe,i), rsa )
     assign( paste0('rsa_',i), rsa$rsa )
     assign( paste0('rum_',i), rum)
     assign( paste0('vano_',i), vano )
@@ -200,6 +198,21 @@ imco<-function(p, tarifsante = FALSE, save = TRUE, persist = FALSE, pathm12 = NU
     assign( paste0('pie_',i), pie )
     assign( paste0('pmctmono_',i), pmctmono )
     
+    if(persist){
+      return(list( 'rsa' = rsa$rsa,
+                   'rsa_v' = rsa_v,
+                   'rum' = rum,
+                   'rum_valo' = rum_valo,
+                   'vano'= vano,
+                   'tra'= tra,
+                   'pmctmono' = pmctmono,
+                   'pie' = pie,
+                   'diap' = diap,
+                   'porg' = porg  )
+      )
+    } 
+    
+    if(save){
     save( list = c(paste0('rum_',i),
                    paste0('rum_valo_',i),
                    paste0('rsa_',i),
@@ -208,30 +221,25 @@ imco<-function(p, tarifsante = FALSE, save = TRUE, persist = FALSE, pathm12 = NU
                    paste0('pmctmono_',i)),
           file = paste0(p$path,"/",p$finess,".",p$annee,".",p$mois,".RData")
     )
+    }
 
-  }else{
+  } else {
 
+    assign( paste0('rum_valo_',suffixe,i), rum_valo )
+    assign( paste0('rsa_v_',suffixe,i), rsa )
+    
+    if(persist){
+      return(list( 'rsa_v' = rsa_v,
+                   'rum_valo' = rum_valo ) )
+    } 
+    
+    if(save){
     save( list = c(paste0('rum_valo_',suffixe,i),
                    paste0('rsa_v_',suffixe,i)),
           file = paste0(p$path,"/",p$finess,".",p$annee,".",p$mois,".",substr(suffixe,1,nchar(suffixe)-1),".RData")
     )
+    }
 
-  }
-
-
-
-  if(persist){
-    return(list( 'rsa' = rsa$rsa,
-                 'rsa_v' = rsa_v,
-                 'rum' = rum,
-                 'rum_valo' = rum_valo,
-                 'vano'= vano,
-                 'tra'= tra,
-                 'pmctmono' = pmctmono,
-                 'pie' = pie,
-                 'diap' = diap,
-                 'porg' = porg  )
-    )
   }
 
 }
