@@ -1,4 +1,4 @@
-path: "~/GH_PMSI/DATA/Remontees"
+path: "~/GH_PMSI/DATA/GENRSA"
 
 arborescence:
   - {finess}
@@ -21,6 +21,9 @@ extensions:
   - diap
 
 fichiers_imco:
+  in :
+     - rss
+  out:
   - rsa
   - tra
   - ano
@@ -28,7 +31,6 @@ fichiers_imco:
   - diap
   - porg
   - pie
-  - rss
 
 services_exclus:
   - toto

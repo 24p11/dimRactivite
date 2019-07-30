@@ -18,7 +18,7 @@ scan_path<-function(path = getOption("dimRactivite.path")){
 
   for(folder in folders){
 
-    files = list.files(folder)
+    files = list.files(paste0(folder,'/'))
 
     for(file in files){
 
@@ -38,7 +38,7 @@ scan_path<-function(path = getOption("dimRactivite.path")){
 
       for(final in finals){
 
-        det_final = unlist(str_split(file,'\\.'))
+        det_final = unlist(str_split(final,'\\.'))
 
         if(any(det_final%in%ext)){
 
@@ -139,7 +139,7 @@ imco<-function(p, tarifsante =FALSE, save = TRUE, persist = FALSE){
     rum$rum = left_join(rum$rum,ium%>%dplyr::select(noum,typeaut,typehosp,libelle_typeaut,
                                                     discipline),by=c("cdurm" = "noum"))
     #Transformation des diagnostics du rum
-    rum<- pmeasyr::tdiag(rum)
+    rum <- pmeasyr::tdiag(rum)
 
     #Valorisation des séjours
     rsa_v <- pmeasyr::vvr_ghs_supp(rsa = vrsa,
