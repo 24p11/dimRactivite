@@ -10,6 +10,7 @@
 scan_path<-function(path = getOption("dimRactivite.path")){
 
   fichiers_genrsa =NULL
+  fichiers_rdata = NULL
 
   ext = getOption("dimRactivite.extensions")
 
@@ -21,47 +22,70 @@ scan_path<-function(path = getOption("dimRactivite.path")){
     files = list.files(paste0(folder,'/'))
 
     for(file in files){
-
-      if( stringr::str_sub(file,-3)=='zip'){
-        r<-pmeasyr::astat(path = folder,
-                          file = file,
-                          view = F)
-        finals = r$Name
-        zfile = file
-
-
+      
+      if(stringr::str_sub(file,-5)=='RData'){
+        
+        print(file)
+        
+        fichiers_rdata = c( fichiers_rdata, stringr::str_sub("750100042.2013.12.RData",1,-7) )
+        
+        
       }else{
-
-        finals = file
-        zfile=NA
+            
+              if( stringr::str_sub(file,-3)=='zip'){
+                r<-pmeasyr::astat(path = folder,
+                                  file = file,
+                                  view = F)
+                finals = r$Name
+                zfile = file
+        
+        
+              }else{
+        
+                finals = file
+                zfile=NA
+                
+              }
+        
+              for(final in finals){
+        
+                det_final = unlist(str_split(final,'\\.'))
+        
+                if(any(det_final%in%ext)){
+        
+                  fichiers_genrsa = rbind(fichiers_genrsa,data.frame("finess" = det_final[1],
+                                                                   "annee" = det_final[2],
+                                                                   "mois" = det_final[3],
+                                                                   "type" = det_final[4],
+                                                                   "ext" = det_final[length(det_final)],
+                                                                   "archive"=zfile,
+                                                                   "file"=file,
+                                                                   "filepath"=folder,
+                                                                   "RData" =NA,
+                                                                   stringsAsFactors = F)
+                  )
+                }
+        
+              }
+        
       }
-
-      for(final in finals){
-
-        det_final = unlist(str_split(final,'\\.'))
-
-        if(any(det_final%in%ext)){
-
-          fichiers_genrsa = rbind(fichiers_genrsa,data.frame("finess" = det_final[1],
-                                                           "annee" = det_final[2],
-                                                           "mois" = det_final[3],
-                                                           "type" = det_final[4],
-                                                           "ext" = det_final[length(det_final)],
-                                                           "archive"=zfile,
-                                                           "file"=file,
-                                                           "filepath"=folder,
-                                                           "RData" =NA,
-                                                           stringsAsFactors = F)
-          )
-        }
-
-      }
-
+      
     }
-
+    
+  }  
+  
+  fichiers_genrsa = as_tibble(fichiers_genrsa)
+  
+  for(rdata in fichiers_rdata){
+    
+    refs = unlist(str_split(rdata,'\\.')) 
+    
+    fichiers_genrsa<-fichiers_genrsa%>%mutate(RData = ifelse(finess == refs[1] & annee==refs[2] &mois ==refs[3],1,0))
+    
   }
+  
 
-  return(as_tibble(fichiers_genrsa))
+  return(fichiers_genrsa)
 
 
 }
@@ -118,6 +142,8 @@ adzipComplet<-function(zfichiers,ext_to_import){
 
   #Creation des fichiers manaquants si besoin
   if(length(exts_m)>0){
+    
+    dz_fichiers<-c(dz_fichiers,exts_m)
 
     #Récupératation nofiness,annee,mois avec le nom de fichier dans l'archive
     refs<-unlist(str_split(dz_fichiers[1],'\\.'))[1:3]
@@ -125,7 +151,7 @@ adzipComplet<-function(zfichiers,ext_to_import){
     for (ext_m in exts_m){
       file.create(paste0(p$path,'/',paste(c(refs[1],refs[2],refs[3],ext_m),collapse = '.')))
 
-
+      
     }
     message(
       "\n",
@@ -133,6 +159,8 @@ adzipComplet<-function(zfichiers,ext_to_import){
     )
 
   }
+  
+ return(dz_fichiers)
 
 
 }
