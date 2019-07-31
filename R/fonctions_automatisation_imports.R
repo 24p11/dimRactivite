@@ -174,24 +174,20 @@ imco<-function(p, tarifsante = FALSE, save = TRUE, persist = FALSE, pathm12 = NU
   fin = p$annee
 
   #On prévoit de modifier le noyau pour l'import
-  p_import = p
+  
 
   rsa_en_cours = NULL
   rum_en_cours = NULL
 
   for(a in deb:fin){
-  print(a)
-    
+  
+    print(a)
+    p_import = p
     p_import$annee = a
     
     #On change l'année et le mois du noyau d'import en fonction du contexte
     if(p$annee != a){
       p_import$mois = 12
-      #  if(is.null(pathm12)){
-      #    p_import$path = paste0(getOption("dimRactivite.path"))
-      #    } else {
-      #    p_import$path = pathm12
-      #  }
     }
 
     #Imports
