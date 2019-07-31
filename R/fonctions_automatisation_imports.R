@@ -25,7 +25,7 @@ scan_path<-function(path = getOption("dimRactivite.path")){
       
       if(stringr::str_sub(file,-5)=='RData'){
 
-        fichiers_rdata = c( fichiers_rdata, stringr::str_sub("750100042.2013.12.RData",1,-7) )
+        fichiers_rdata = c( fichiers_rdata, stringr::str_sub(file,1,-7) )
         
       }else{
             
@@ -58,7 +58,7 @@ scan_path<-function(path = getOption("dimRactivite.path")){
                                                                    "archive"=zfile,
                                                                    "file"=file,
                                                                    "filepath"=folder,
-                                                                   "RData" =NA,
+                                                                   "RData" =0,
                                                                    stringsAsFactors = F)
                   )
                 }
@@ -73,11 +73,13 @@ scan_path<-function(path = getOption("dimRactivite.path")){
   
   fichiers_genrsa = as_tibble(fichiers_genrsa)
   
+
+  
   for(rdata in fichiers_rdata){
     
     refs = unlist(str_split(rdata,'\\.')) 
     
-    fichiers_genrsa<-fichiers_genrsa%>%mutate(RData = ifelse(finess == refs[1] & annee==refs[2] &mois ==refs[3],1,0))
+    fichiers_genrsa<-fichiers_genrsa%>%mutate(RData = ifelse(finess == refs[1] & annee==refs[2] & mois ==refs[3],1,RData))
     
   }
   
@@ -107,7 +109,7 @@ analyse_fichiers_remontees<-function(fichiers_genrsa){
     filter(manquants>-3,rss>0,rsa>0)%>%
     separate(dossier,c('finess','annee','mois'))
   
-  return()
+  return(remontees)
   
 }
 
