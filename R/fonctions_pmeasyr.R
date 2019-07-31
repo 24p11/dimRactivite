@@ -6,7 +6,6 @@
 
 pmct_mono_uma <- function (rsa, rum, annee, mois) {
 
-  pmctmono =  pmct_mono_uma(rsa_en_cours, rum_en_cours, p$annee, p$mois)
   #Calcul : pmct mono-rum (pmctnosup_norea) + sommes recettes mono rum + nb sej monorum
   #Selection des séjours en fonction de la date (12 mois glissants) et du nombre de rum
   rsa %>%dplyr::filter( !(ansor < annee & moissor < mois) ) %>%
