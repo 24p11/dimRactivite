@@ -180,10 +180,12 @@ imco<-function(p, tarifsante = FALSE, save = TRUE, persist = FALSE, pathm12 = NU
   rum_en_cours = NULL
 
   for(a in deb:fin){
-
+  print(a)
+    
+    p_import$annee = a
+    
     #On change l'année et le mois du noyau d'import en fonction du contexte
     if(p$annee != a){
-      p_import$annee = a
       p_import$mois = 12
       #  if(is.null(pathm12)){
       #    p_import$path = paste0(getOption("dimRactivite.path"))
@@ -244,7 +246,7 @@ imco<-function(p, tarifsante = FALSE, save = TRUE, persist = FALSE, pathm12 = NU
     #Objets temporaires à valoriser pour rum et rsa avec année antérieure
     rsa_en_cours = dplyr::bind_rows(rsa_v2, rsa_en_cours)
     rum_en_cours = dplyr::bind_rows(rum$rum, rum_en_cours)
-
+    print(unique(rsa$rsa$ansor))
   }
 
   #Etape 2 : valorisation des rum par séjour avec répartition des recettes par service
