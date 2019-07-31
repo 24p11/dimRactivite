@@ -264,10 +264,7 @@ imco<-function(p, tarifsante = FALSE, save = TRUE, persist = FALSE, pathm12 = NU
     assign( paste0('diap_',i), diap )
     assign( paste0('pie_',i), pie )
     assign( paste0('pmctmono_',i), pmctmono )
-<<<<<<< HEAD
 
-=======
-    
     if(persist){
       return(list( 'rsa' = rsa$rsa,
                    'rsa_v' = rsa_v,
@@ -283,7 +280,6 @@ imco<-function(p, tarifsante = FALSE, save = TRUE, persist = FALSE, pathm12 = NU
     } 
     
     if(save){
->>>>>>> 2fd49678e5ab81bf124821f90585a671d9f05cc9
     save( list = c(paste0('rum_',i),
                    paste0('rum_valo_',i),
                    paste0('rsa_',i),
