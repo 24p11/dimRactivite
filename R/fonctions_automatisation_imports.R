@@ -149,7 +149,7 @@ adzipComplet<-function(zfichiers,ext_to_import){
 #'
 #' @examples data2019 = ipmeasyr(p,tarifsante=TRUE,save=TRUE,persist=TRUE)
 #'
-imco<-function(p, tarifsante = FALSE, save = TRUE, persist = FALSE, pathm12 = NULL){
+imco<-function(p, tarifsante = FALSE, save = TRUE, persist = FALSE, pathm12 = NULL, nomenclature_uma = nomenclature_uma){
 
   if(tarifsante==TRUE) {
     tarifs      <- tarifs_mco_ghs %>% dplyr::distinct(ghs, anseqta, .keep_all = TRUE) %>% dplyr::mutate(anseqta=as.character(as.numeric(anseqta)+1))
@@ -163,6 +163,7 @@ imco<-function(p, tarifsante = FALSE, save = TRUE, persist = FALSE, pathm12 = NU
 
   #Pour le cacul des pmct mono rum on préfère toujours utiliser les 12 derniers mois.
   #Si l'import concerne un mois autre que décembre, on importe également si elles sont dispnibles les données M12 de l'année antérieure
+  #deb et fin ne semblent pas utilisés:
   if(p$mois !=12) deb  = p$annee -1
   fin = p$annee
 
@@ -194,7 +195,7 @@ imco<-function(p, tarifsante = FALSE, save = TRUE, persist = FALSE, pathm12 = NU
     ium <- pmeasyr::iium(p_import,tolower_names = T)
     pie <- pmeasyr::ipie(p_import,tolower_names = T)
     tra <- pmeasyr::itra(p_import ,  tolower_names = T )
-    rum <-pmeasyr::irum(p_import,typi = 4 ,  tolower_names = T )
+    rum <- pmeasyr::irum(p_import, typi = 4 ,  tolower_names = T )
 
     #Transformation des données
 
@@ -205,7 +206,7 @@ imco<-function(p, tarifsante = FALSE, save = TRUE, persist = FALSE, pathm12 = NU
     #Intégration du type d'UMA au fihcier IUM
     ium = left_join(ium %>% dplyr::mutate(temp=as.integer(annee)-as.integer(substr(dteaut,1,4))) %>%
                       dplyr::arrange(noum,temp) %>% dplyr::filter(temp>=0, !duplicated(noum))  %>%
-                      dplyr::select(-temp), nomenclature_uma%>%dplyr::select(typeaut, libelle_typeaut,
+                      dplyr::select(-temp), nomenclature_uma %>%dplyr::select(typeaut, libelle_typeaut,
                                                                              discipline ))
 
 
@@ -225,43 +226,37 @@ imco<-function(p, tarifsante = FALSE, save = TRUE, persist = FALSE, pathm12 = NU
                                    pie = pie,
                                    bee = FALSE)
 
-
     rsa_v = pmeasyr::inner_tra( rsa_v , tra )
 
-    rsa_v<-dplyr::left_join(rsa$rsa,
-                            dplyr::distinct( rsa_v, cle_rsa,.keep_all = TRUE) )
-
-
-
+    rsa_v <- dplyr::left_join(rsa$rsa, dplyr::distinct( rsa_v, cle_rsa, .keep_all = TRUE) )
 
     rum$rum =  pmeasyr::inner_tra( rum$rum, tra )
 
     vano = vano%>%dplyr::select(names(vano)[ ! grepl('^cr',names(vano))])%>%
              dplyr::mutate( ansor = as.character(a) )
 
-    #Objets temporaires à valoriser
-    rsa_en_cours = dplyr::bind_rows(rsa_v,rsa_en_cours)
-    rum_en_cours = dplyr::bind_rows(rum$rum,rum_en_cours)
+    #Objets temporaires à valoriser pour rum et rsa avec année antérieure
+    rsa_en_cours = dplyr::bind_rows(rsa_v, rsa_en_cours)
+    rum_en_cours = dplyr::bind_rows(rum$rum, rum_en_cours)
 
   }
 
   #Etape 2 : valorisation des rum par séjour avec répartition des recettes par service
 
-  #pmct mono de l'année antétieure
+  #pmct mono sur les 12 mois antétieurs
   pmctmono =  pmct_mono_uma(rsa_en_cours, rum_en_cours, p$annee, p$mois)
 
-  #Valorisation des rum
+  #Valorisation des rum de la dernière année
   rum_valo <- vvr_rum_repa(rsa_v, rum$rum, pmctmono)
 
-  #SAUVEGARDE OBJET PAR MOIS
+  #SAUVEGARDE OBJET DERNIERE ANNEE
 
   i = paste0(p$annee,'_',p$mois)
 
-  assign( paste0('rum_valo_',suffixe,i), rum_valo )
-  assign( paste0('rsa_v_',suffixe,i), rsa )
-
   if(!tarifsante){
-
+    
+    assign( paste0('rum_valo_',suffixe,i), rum_valo )
+    assign( paste0('rsa_v_',suffixe,i), rsa_v )
     assign( paste0('rsa_',i), rsa$rsa )
     assign( paste0('rum_',i), rum)
     assign( paste0('vano_',i), vano )
@@ -269,7 +264,26 @@ imco<-function(p, tarifsante = FALSE, save = TRUE, persist = FALSE, pathm12 = NU
     assign( paste0('diap_',i), diap )
     assign( paste0('pie_',i), pie )
     assign( paste0('pmctmono_',i), pmctmono )
+<<<<<<< HEAD
 
+=======
+    
+    if(persist){
+      return(list( 'rsa' = rsa$rsa,
+                   'rsa_v' = rsa_v,
+                   'rum' = rum,
+                   'rum_valo' = rum_valo,
+                   'vano'= vano,
+                   'tra'= tra,
+                   'pmctmono' = pmctmono,
+                   'pie' = pie,
+                   'diap' = diap,
+                   'porg' = porg  )
+      )
+    } 
+    
+    if(save){
+>>>>>>> 2fd49678e5ab81bf124821f90585a671d9f05cc9
     save( list = c(paste0('rum_',i),
                    paste0('rum_valo_',i),
                    paste0('rsa_',i),
@@ -278,30 +292,25 @@ imco<-function(p, tarifsante = FALSE, save = TRUE, persist = FALSE, pathm12 = NU
                    paste0('pmctmono_',i)),
           file = paste0(p$path,"/",p$finess,".",p$annee,".",p$mois,".RData")
     )
+    }
 
-  }else{
+  } else {
 
+    assign( paste0('rum_valo_',suffixe,i), rum_valo )
+    assign( paste0('rsa_v_',suffixe,i), rsa_v )
+    
+    if(persist){
+      return(list( 'rsa_v' = rsa_v,
+                   'rum_valo' = rum_valo ) )
+    } 
+    
+    if(save){
     save( list = c(paste0('rum_valo_',suffixe,i),
                    paste0('rsa_v_',suffixe,i)),
           file = paste0(p$path,"/",p$finess,".",p$annee,".",p$mois,".",substr(suffixe,1,nchar(suffixe)-1),".RData")
     )
+    }
 
-  }
-
-
-
-  if(persist){
-    return(list( 'rsa' = rsa$rsa,
-                 'rsa_v' = rsa_v,
-                 'rum' = rum,
-                 'rum_valo' = rum_valo,
-                 'vano'= vano,
-                 'tra'= tra,
-                 'pmctmono' = pmctmono,
-                 'pie' = pie,
-                 'diap' = diap,
-                 'porg' = porg  )
-    )
   }
 
 }
