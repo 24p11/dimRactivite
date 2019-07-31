@@ -24,11 +24,8 @@ scan_path<-function(path = getOption("dimRactivite.path")){
     for(file in files){
       
       if(stringr::str_sub(file,-5)=='RData'){
-        
-        print(file)
-        
+
         fichiers_rdata = c( fichiers_rdata, stringr::str_sub("750100042.2013.12.RData",1,-7) )
-        
         
       }else{
             
@@ -88,6 +85,30 @@ scan_path<-function(path = getOption("dimRactivite.path")){
   return(fichiers_genrsa)
 
 
+}
+
+analyse_fichiers_remontees<-function(fichiers_genrsa){
+  
+  fichiers_genrsa<-fichiers_genrsa%>%mutate(annee = as.numeric(annee), mois = as.numeric(mois))
+  imco_files_types = getOption("dimRactivite.fichiers_imco")%>%purrr::flatten_chr()
+  o<-which(fichiers_genrsa$type%in%imco_files_types&fichiers_genrsa$annee>2012)
+  #dossiers<-table(fichiers_genrsa$filepath[o],fichiers_genrsa$type[o])
+  dossiers<-table( paste( fichiers_genrsa$finess[o],fichiers_genrsa$annee[o],fichiers_genrsa$mois[o] ) , fichiers_genrsa$type[o] )
+  dossiers[which(dossiers>0)]<-1
+  dossiers <- cbind(dossiers,'manquants'=rowSums(dossiers)-length(imco_files_types))
+  
+  dossiersRdata<-table( paste( fichiers_genrsa$finess[o],fichiers_genrsa$annee[o],fichiers_genrsa$mois[o] ) , fichiers_genrsa$RData[o] )
+  dossiersRdata<-dossiersRdata[,'1']
+  dossiersRdata[which(dossiersRdata>0)]<-1
+  dossiers <- cbind(dossiers,'RData'=dossiersRdata)
+  
+  
+  remontees<-dossiers%>%as_tibble()%>%bind_cols('dossier'=row.names(dossiers),.)%>%
+    filter(manquants>-3,rss>0,rsa>0)%>%
+    separate(dossier,c('finess','annee','mois'))
+  
+  return()
+  
 }
 
 #' Généralisation de la fonction adip de pmeasyr pour l'ensemble d'une archive in et out
@@ -209,7 +230,6 @@ imco<-function(p, tarifsante = FALSE, save = TRUE, persist = FALSE, pathm12 = NU
 
   for(a in deb:fin){
   
-    print(a)
     p_import = p
     p_import$annee = a
     
@@ -217,7 +237,11 @@ imco<-function(p, tarifsante = FALSE, save = TRUE, persist = FALSE, pathm12 = NU
     if(p$annee != a){
       p_import$mois = 12
     }
-
+    message(
+      "\n",
+      "Imports fichiers remontée: ",toString(c(p_import$finess,p_import$annee,p_import$mois)),
+      "\n"
+    )
     #Imports
     rsa <- pmeasyr::irsa(p_import,typi = 3 ,tolower_names = T)
     vrsa <- pmeasyr::vvr_rsa(p_import,tolower_names = T)
@@ -270,7 +294,7 @@ imco<-function(p, tarifsante = FALSE, save = TRUE, persist = FALSE, pathm12 = NU
     #Objets temporaires à valoriser pour rum et rsa avec année antérieure
     rsa_en_cours = dplyr::bind_rows(rsa_v2, rsa_en_cours)
     rum_en_cours = dplyr::bind_rows(rum$rum, rum_en_cours)
-    print(unique(rsa$rsa$ansor))
+
   }
 
   #Etape 2 : valorisation des rum par séjour avec répartition des recettes par service
@@ -284,6 +308,12 @@ imco<-function(p, tarifsante = FALSE, save = TRUE, persist = FALSE, pathm12 = NU
   #SAUVEGARDE OBJET DERNIERE ANNEE
 
   i = paste0(p$annee,'_',p$mois)
+  
+  message(
+    "\n",
+    "Nb séjours importés pour l'année ",    toString(unique(rsa$rsa$ansor)) , " : ",toString(nrow(rsa$rsa)),
+    "\n"
+  )
 
   if(!tarifsante){
     
