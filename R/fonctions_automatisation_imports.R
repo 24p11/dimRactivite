@@ -66,6 +66,76 @@ scan_path<-function(path = getOption("dimRactivite.path")){
 
 }
 
+#' Généralisation de la fonction adip de pmeasyr pour l'ensemble d'une archive in et out
+#' avec contrôle du type de fichier et création des fichiers manquants
+#'
+#' @param zfichiers vecteur, nom des fichiers zippés
+#' @param ext_to_import vecteur, extention des fichiers a importer
+#'
+#' @return aucun, dézip des archives en fonction du type de fichier voulus et création de fichier vide pour les types de fichier manquant
+#' @export
+#'
+#' @examples
+adzipComplet<-function(zfichiers,ext_to_import){
+
+  dz_fichiers<-NULL
+
+  for(zf in zfichiers){
+
+    noms_fichiers<-pmeasyr::astat( path = getOption("dimRactivite.path"),
+                                   file = zf,
+                                   view = F)$Name
+
+    det_noms = unique(unlist(str_split(noms_fichiers,'\\.')))
+
+    #Choix des fichiers a importer dasn l'archive en fonction des extensions voulues
+    if(grepl('OUT|out',zf)){
+      t = 'out'
+      types = intersect ( getOption("dimRactivite.fichiers_imco")$`out` , det_noms )
+    }
+    if(grepl('IN|in',zf)){
+      t = 'in'
+      types = intersect ( getOption("dimRactivite.fichiers_imco")$`in` , det_noms )
+    }
+
+
+    noms<-noms_fichiers[sapply(noms_fichiers,function(n)grepl(paste(types,collapse = '|'),n))]
+
+    dz_fichiers<-c(dz_fichiers,noms)
+
+    pmeasyr::adezip2(path = getOption("dimRactivite.path"),
+                     file = zf,
+                     liste = types,
+                     pathto = getOption("dimRactivite.path"))
+
+
+  }
+
+
+  #Vérification si tous les fichiers nécessaires sont présents
+  det_noms = unique(unlist(str_split(dz_fichiers,'\\.')))
+  exts_m<-setdiff(ext_to_import,det_noms)
+
+  #Creation des fichiers manaquants si besoin
+  if(length(exts_m)>0){
+
+    #Récupératation nofiness,annee,mois avec le nom de fichier dans l'archive
+    refs<-unlist(str_split(dz_fichiers[1],'\\.'))[1:3]
+
+    for (ext_m in exts_m){
+      file.create(paste0(p$path,'/',paste(c(refs[1],refs[2],refs[3],ext_m),collapse = '.')))
+
+
+    }
+    message(
+      "\n",
+      'Fichiers crés : ',toString(exts_m)
+    )
+
+  }
+
+
+}
 
 #' Import des principaux fichiers de remontées et valorisation des séjours et résumés
 #'
@@ -199,7 +269,7 @@ imco<-function(p, tarifsante = FALSE, save = TRUE, persist = FALSE, pathm12 = NU
     assign( paste0('diap_',i), diap )
     assign( paste0('pie_',i), pie )
     assign( paste0('pmctmono_',i), pmctmono )
-    
+
     save( list = c(paste0('rum_',i),
                    paste0('rum_valo_',i),
                    paste0('rsa_',i),
