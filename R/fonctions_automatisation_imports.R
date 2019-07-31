@@ -156,34 +156,30 @@ imco<-function(p, tarifsante = FALSE, save = TRUE, persist = FALSE, pathm12 = NU
                                    pie = pie,
                                    bee = FALSE)
 
-
     rsa_v = pmeasyr::inner_tra( rsa_v , tra )
 
-    # rsa_v <- dplyr::left_join(rsa$rsa, dplyr::distinct( rsa_v, cle_rsa,.keep_all = TRUE) )
-
-
-
+    rsa_v <- dplyr::left_join(rsa$rsa, dplyr::distinct( rsa_v, cle_rsa, .keep_all = TRUE) )
 
     rum$rum =  pmeasyr::inner_tra( rum$rum, tra )
 
     vano = vano%>%dplyr::select(names(vano)[ ! grepl('^cr',names(vano))])%>%
              dplyr::mutate( ansor = as.character(a) )
 
-    #Objets temporaires à valoriser
-    rsa_en_cours = dplyr::bind_rows(dplyr::left_join(rsa$rsa, dplyr::distinct( rsa_v, cle_rsa,.keep_all = TRUE) ), rsa_en_cours)
+    #Objets temporaires à valoriser pour rum et rsa avec année antérieure
+    rsa_en_cours = dplyr::bind_rows(rsa_v, rsa_en_cours)
     rum_en_cours = dplyr::bind_rows(rum$rum, rum_en_cours)
 
   }
 
   #Etape 2 : valorisation des rum par séjour avec répartition des recettes par service
 
-  #pmct mono de l'année antétieure
+  #pmct mono sur les 12 mois antétieurs
   pmctmono =  pmct_mono_uma(rsa_en_cours, rum_en_cours, p$annee, p$mois)
 
-  #Valorisation des rum
-  rum_valo <- vvr_rum_repa(dplyr::left_join(rsa$rsa, dplyr::distinct( rsa_v, cle_rsa,.keep_all = TRUE) ), rum$rum, pmctmono)
+  #Valorisation des rum de la dernière année
+  rum_valo <- vvr_rum_repa(rsa_v, rum$rum, pmctmono)
 
-  #SAUVEGARDE OBJET PAR MOIS
+  #SAUVEGARDE OBJET DERNIERE ANNEE
 
   i = paste0(p$annee,'_',p$mois)
 
