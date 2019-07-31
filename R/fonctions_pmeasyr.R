@@ -8,26 +8,26 @@ pmct_mono_uma <- function (rsa, rum, annee, mois) {
 
   #Calcul : pmct mono-rum (pmctnosup_norea) + sommes recettes mono rum + nb sej monorum
   #Selection des séjours en fonction de la date (12 mois glissants) et du nombre de rum
-  rsa %>%dplyr::filter( !(ansor < annee & moissor < mois) ) %>%
+  rsa %>%dplyr::filter( !(ansor < annee & moissor < mois), noghs!="9999") %>%
     dplyr::filter(nbrum==1)%>%
     dplyr::inner_join(., rum %>% dplyr::select(nas, nofiness, cdurm, typeaut))  %>%
     distinct( nas, .keep_all= TRUE)  %>%
     dplyr::group_by( nofiness, cdurm, typeaut ) %>%
     dplyr::summarise(pmctnosup_norea = mean( rec_base, na.rm = TRUE ),
                      recbeenosup_norea = sum( rec_base, na.rm = TRUE ),
-                     nbnosup_norea = length( rec_base ) ) -> temp2
+                     nbnosup_norea = length( rec_base ) ) -> temp1
 
-  #Calcul des pmct par uma (non mono rum)
-  rsa %>%dplyr::filter(ansor < annee & moissor < mois) %>%
+  #Calcul des pmct par uma (non mono rum) pour la rea
+  rsa %>%dplyr::filter(!(ansor < annee & moissor < mois), noghs!="9999") %>%
     dplyr::inner_join(., rum %>% dplyr::select(nas, nofiness, cdurm, typeaut))  %>%
     #une seule ligne par séjour et uma
     distinct(  nofiness, cdurm, nas, .keep_all= TRUE)   %>%
     dplyr::group_by( nofiness, cdurm, typeaut ) %>%
     dplyr::summarise( pmctnosup_rea=mean(rec_base, na.rm = TRUE),
                       recbeenosup_rea=sum(rec_base, na.rm = TRUE),
-                      nbnosup_rea=length(rec_base)) -> temp3
+                      nbnosup_rea=length(rec_base)) -> temp2
 
-  tempfinal <-  inner_join(temp2, temp3) %>%
+  tempfinal <-  inner_join(temp1, temp2) %>%
     dplyr::mutate(pmctnosup = dplyr::if_else(substr(typeaut,1,2)=="01",
                                              pmctnosup_rea,
                                              pmctnosup_norea),
@@ -86,8 +86,7 @@ vvr_rum_repa <- function (rsa, rum, pmctmono) {
   actesapherese <- "FEFF001|FEFF002|FEJF001|FEJF002|FEJF004|FEJF005|FEJF007|FEJF009|FEPF001|FEPF002|FEPF003|FEPF004|FEPF005|FERP001"
 
   #creation fichier intermediaire des valorisations:
-  rsa %>% dplyr::mutate(ansor = ansor) %>%
-    dplyr::select(nas,duree,nbrum,ansor,moissor,dplyr::starts_with("rec_"),
+  rsa %>% dplyr::select(nas,duree,nbrum,ansor,moissor,dplyr::starts_with("rec_"),
                   nbsuprea,nbsupsi,nbsupstf,nbsuprep,nbsupsrc,nbsupreaped,nbsupnn1,
                   nbsupnn2,nbsupnn3,nbsupcaisson,nb_rdth) -> fullrsatemp1
 
@@ -98,13 +97,15 @@ vvr_rum_repa <- function (rsa, rum, pmctmono) {
     dplyr::mutate(adial = stringr::str_count(actes, actesdialyse),
                   ardt = stringr::str_count(actes, actesradio),
                   aaph = stringr::str_count(actes, actesapherese),
-                  asdc = stringr::str_count(actes, actessdc)) ->fullrsatemp1B
+                  asdc = stringr::str_count(actes, actessdc)) ->fullrsatemp2
 
-  fullrsatemp1B%>%dplyr::group_by(nas) %>%
+  fullrsatemp2%>%dplyr::group_by(nas) %>%
     dplyr::summarise( # sommes des coefficients de répartition mixtes durée rum + pmctmono
-      sumpmctimenosup=sum(pmctnosup*(dureesejpart+1), na.rm = TRUE),
+      # sumpmctimenosup=ifelse(sum(pmctnosup*(dureesejpart+1), na.rm = TRUE)==0, 1, sum(pmctnosup*(dureesejpart+1), na.rm = TRUE)),
+      sumpmctimenosup= sum(pmctnosup*(dureesejpart+1), na.rm = TRUE),
       #sommes pmct monorum
-      sumpmctnosup=sum(pmctnosup,na.rm = TRUE),
+      # sumpmctnosup=ifelse(sum(pmctnosup, na.rm = TRUE)==0, 1, sum(pmctnosup, na.rm = TRUE)),
+      sumpmctnosup=sum(pmctnosup, na.rm = TRUE),
       nsrea=first(nbsuprea),
       #soins intensifs issus de réa
       nssir=pmax(first(nbsupsi),0) ,
@@ -153,9 +154,9 @@ vvr_rum_repa <- function (rsa, rum, pmctmono) {
       # rec_time = recettes ghs repartition temps de passage
       rec_time = ((dureesejpart+1)/(duree+nbrum)) * rec_bee,
       #rec_pmctmono = recettes ghs répartition pmct monorum
-      rec_pmctmono = (pmctnosup / sumpmctnosup) * rec_bee,
+      rec_pmctmono = ifelse(is.na(pmctnosup), rec_bee, (pmctnosup / sumpmctnosup) * rec_bee),
       #rec_pmctmonotime1 = recettes ghs répartition temps + mono rum
-      rec_pmctmonotime1 = (pmctnosup*(dureesejpart+1)/sumpmctimenosup) * rec_bee,
+      rec_pmctmonotime1 = ifelse(is.na(pmctnosup), rec_bee, (pmctnosup*(dureesejpart+1)/sumpmctimenosup) * rec_bee),
       #rec_pmctmonotime2 = recettes ghs avec moyenne 2 répartitions
 
       rec_pmctmonotime2 = (rec_time+rec_pmctmono)/2,
@@ -295,8 +296,8 @@ vvr_rum_repa <- function (rsa, rum, pmctmono) {
       rec_sdc_repa = ifelse(grepl(actessdc,actes),
                             rec_sdc * (stringr::str_count(actes, actessdc)/ssdc),
                             0),
-      #rec_rehosp_ghm_repa = recettes ré-hospitalisation
-      rec_rehosp_ghm_repa = rec_rehosp_ghm * ((dureesejpart+1)/(duree+nbrum)),
+      #rec_rehosp_ghm_repa = recettes ré-hospitalisation [ici annulation des rec_rehosp_ghm=NA, mais serait à corriger directement à l'import]
+      rec_rehosp_ghm_repa = ifelse(is.na(rec_rehosp_ghm), 0, rec_rehosp_ghm * ((dureesejpart+1)/(duree+nbrum))),
 
       #rec_sup_repa = recettes ensemble des suppléments avec clé répartition
       rec_sup_repa = rec_rea_repa + rec_rep_repa +  rec_stf_hr_repa + rec_sir_repa + rec_src_repa +
@@ -315,14 +316,14 @@ vvr_rum_repa <- function (rsa, rum, pmctmono) {
       #coeftime = coéfficients de répartition temporel
       coeftime=(dureesejpart+1)/(duree+nbrum),
       #coefpmctmono = coéfficients de répartition pmct
-      coefpmctmono=pmctnosup/sumpmctnosup,
+      coefpmctmono=ifelse(is.na(pmctnosup), 1, pmctnosup/sumpmctnosup),
       #coefpmctmonotime1 = coéfficients de répartition pmctmonotime1
-      coefpmctmonotime1=pmctnosup*(dureesejpart+1)/sumpmctimenosup,
+      coefpmctmonotime1=ifelse(is.na(pmctnosup), 1, pmctnosup*(dureesejpart+1)/sumpmctimenosup),
       #coefpmctmonotime2 = coéfficients de répartition pmctmonotime2
       coefpmctmonotime2=(coeftime+coefpmctmono)/2 ) %>%
     dplyr::select(nofiness,cle_rsa,nas,norum,nbrum,
-                  ansor='ansor',
-                  moissor='moissor',
+                  ansor,
+                  moissor,
                   dplyr::ends_with("_repa"),
                   'coeftime',
                   'valotime',
@@ -332,5 +333,6 @@ vvr_rum_repa <- function (rsa, rum, pmctmono) {
                   'valopmctmonotime1',
                   'coefpmctmonotime2',
                   'valopmctmonotime2') -> temprumfull
+  
   return(temprumfull)
 }
