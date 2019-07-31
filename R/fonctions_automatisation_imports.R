@@ -129,7 +129,7 @@ adzipComplet<-function(zfichiers,ext_to_import){
     }
     message(
       "\n",
-      'Fichiers crés : ',toString(exts_m)
+      'Fichiers créés : ',toString(exts_m)
     )
 
   }
@@ -149,7 +149,7 @@ adzipComplet<-function(zfichiers,ext_to_import){
 #'
 #' @examples data2019 = ipmeasyr(p,tarifsante=TRUE,save=TRUE,persist=TRUE)
 #'
-imco<-function(p, tarifsante = FALSE, save = TRUE, persist = FALSE, pathm12 = NULL, nomenclature_uma = nomenclature_uma){
+imco<-function(p, tarifsante = FALSE, save = TRUE, persist = FALSE, pathm12 = NULL){
 
   if(tarifsante==TRUE) {
     tarifs      <- tarifs_mco_ghs %>% dplyr::distinct(ghs, anseqta, .keep_all = TRUE) %>% dplyr::mutate(anseqta=as.character(as.numeric(anseqta)+1))
@@ -164,7 +164,13 @@ imco<-function(p, tarifsante = FALSE, save = TRUE, persist = FALSE, pathm12 = NU
   #Pour le cacul des pmct mono rum on préfère toujours utiliser les 12 derniers mois.
   #Si l'import concerne un mois autre que décembre, on importe également si elles sont dispnibles les données M12 de l'année antérieure
   #deb et fin ne semblent pas utilisés:
-  if(p$mois !=12) deb  = p$annee -1
+
+  if(p$mois !=12){
+    deb  = p$annee -1
+  }else{
+    deb = p$annee
+  }
+  
   fin = p$annee
 
   #On prévoit de modifier le noyau pour l'import
@@ -173,17 +179,17 @@ imco<-function(p, tarifsante = FALSE, save = TRUE, persist = FALSE, pathm12 = NU
   rsa_en_cours = NULL
   rum_en_cours = NULL
 
-  for(a in (p$annee-1):p$annee){
+  for(a in deb:fin){
 
     #On change l'année et le mois du noyau d'import en fonction du contexte
     if(p$annee != a){
       p_import$annee = a
       p_import$mois = 12
-        if(is.null(pathm12)){
-          p_import$path = paste0(getOption("dimRactivite.path"),'/',p$finess,'/',p_import$annee,'/M',p_import$mois)
-          } else {
-          p_import$path = pathm12
-        }
+      #  if(is.null(pathm12)){
+      #    p_import$path = paste0(getOption("dimRactivite.path"))
+      #    } else {
+      #    p_import$path = pathm12
+      #  }
     }
 
     #Imports
@@ -228,7 +234,7 @@ imco<-function(p, tarifsante = FALSE, save = TRUE, persist = FALSE, pathm12 = NU
 
     rsa_v = pmeasyr::inner_tra( rsa_v , tra )
 
-    rsa_v <- dplyr::left_join(rsa$rsa, dplyr::distinct( rsa_v, cle_rsa, .keep_all = TRUE) )
+    rsa_v2 <- dplyr::left_join(rsa$rsa, dplyr::distinct( rsa_v, cle_rsa, .keep_all = TRUE) )
 
     rum$rum =  pmeasyr::inner_tra( rum$rum, tra )
 
@@ -236,7 +242,7 @@ imco<-function(p, tarifsante = FALSE, save = TRUE, persist = FALSE, pathm12 = NU
              dplyr::mutate( ansor = as.character(a) )
 
     #Objets temporaires à valoriser pour rum et rsa avec année antérieure
-    rsa_en_cours = dplyr::bind_rows(rsa_v, rsa_en_cours)
+    rsa_en_cours = dplyr::bind_rows(rsa_v2, rsa_en_cours)
     rum_en_cours = dplyr::bind_rows(rum$rum, rum_en_cours)
 
   }
@@ -247,7 +253,7 @@ imco<-function(p, tarifsante = FALSE, save = TRUE, persist = FALSE, pathm12 = NU
   pmctmono =  pmct_mono_uma(rsa_en_cours, rum_en_cours, p$annee, p$mois)
 
   #Valorisation des rum de la dernière année
-  rum_valo <- vvr_rum_repa(rsa_v, rum$rum, pmctmono)
+  rum_v <- vvr_rum_repa(rsa_v2, rum$rum, pmctmono)
 
   #SAUVEGARDE OBJET DERNIERE ANNEE
 
@@ -255,7 +261,7 @@ imco<-function(p, tarifsante = FALSE, save = TRUE, persist = FALSE, pathm12 = NU
 
   if(!tarifsante){
     
-    assign( paste0('rum_valo_',suffixe,i), rum_valo )
+    assign( paste0('rum_v_',suffixe,i), rum_v )
     assign( paste0('rsa_v_',suffixe,i), rsa_v )
     assign( paste0('rsa_',i), rsa$rsa )
     assign( paste0('rum_',i), rum)
@@ -265,11 +271,23 @@ imco<-function(p, tarifsante = FALSE, save = TRUE, persist = FALSE, pathm12 = NU
     assign( paste0('pie_',i), pie )
     assign( paste0('pmctmono_',i), pmctmono )
 
+
+    if(save){
+    save( list = c(paste0('rum_',i),
+                   paste0('rum_v_',i),
+                   paste0('rsa_',i),
+                   paste0('rsa_v_',i),
+                   paste0('vano_',i),
+                   paste0('pmctmono_',i)),
+          file = paste0(p$path,"/",p$finess,".",p$annee,".",p$mois,".RData")
+    )
+    }
+    
     if(persist){
       return(list( 'rsa' = rsa$rsa,
                    'rsa_v' = rsa_v,
                    'rum' = rum,
-                   'rum_valo' = rum_valo,
+                   'rum_v' = rum_v,
                    'vano'= vano,
                    'tra'= tra,
                    'pmctmono' = pmctmono,
@@ -279,33 +297,25 @@ imco<-function(p, tarifsante = FALSE, save = TRUE, persist = FALSE, pathm12 = NU
       )
     } 
     
-    if(save){
-    save( list = c(paste0('rum_',i),
-                   paste0('rum_valo_',i),
-                   paste0('rsa_',i),
-                   paste0('rsa_v_',i),
-                   paste0('vano_',i),
-                   paste0('pmctmono_',i)),
-          file = paste0(p$path,"/",p$finess,".",p$annee,".",p$mois,".RData")
-    )
-    }
 
   } else {
 
-    assign( paste0('rum_valo_',suffixe,i), rum_valo )
+    assign( paste0('rum_v_',suffixe,i), rum_v )
     assign( paste0('rsa_v_',suffixe,i), rsa_v )
-    
-    if(persist){
-      return(list( 'rsa_v' = rsa_v,
-                   'rum_valo' = rum_valo ) )
-    } 
+
     
     if(save){
-    save( list = c(paste0('rum_valo_',suffixe,i),
+    save( list = c(paste0('rum_v_',suffixe,i),
                    paste0('rsa_v_',suffixe,i)),
           file = paste0(p$path,"/",p$finess,".",p$annee,".",p$mois,".",substr(suffixe,1,nchar(suffixe)-1),".RData")
     )
     }
+    
+    
+    if(persist){
+      return(list( 'rsa_v' = rsa_v,
+                   'rum_v' = rum_v ) )
+    } 
 
   }
 
