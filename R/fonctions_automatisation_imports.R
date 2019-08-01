@@ -91,17 +91,23 @@ scan_path<-function(path = getOption("dimRactivite.path")){
 
 analyse_fichiers_remontees<-function(fichiers_genrsa){
   
-  fichiers_genrsa<-fichiers_genrsa%>%mutate(annee = as.numeric(annee), mois = as.numeric(mois))
+  fichiers_genrsa<-fichiers_genrsa%>%mutate(annee = as.numeric(annee),
+                                            mois = as.numeric(mois),
+                                            RData = factor(RData,levels=c('0','1')))
+  
+                                            
   imco_files_types = getOption("dimRactivite.fichiers_imco")%>%purrr::flatten_chr()
   o<-which(fichiers_genrsa$type%in%imco_files_types&fichiers_genrsa$annee>2012)
   #dossiers<-table(fichiers_genrsa$filepath[o],fichiers_genrsa$type[o])
   dossiers<-table( paste( fichiers_genrsa$finess[o],fichiers_genrsa$annee[o],fichiers_genrsa$mois[o] ) , fichiers_genrsa$type[o] )
   dossiers[which(dossiers>0)]<-1
   dossiers <- cbind(dossiers,'manquants'=rowSums(dossiers)-length(imco_files_types))
-  
+
   dossiersRdata<-table( paste( fichiers_genrsa$finess[o],fichiers_genrsa$annee[o],fichiers_genrsa$mois[o] ) , fichiers_genrsa$RData[o] )
   dossiersRdata<-dossiersRdata[,'1']
+  
   dossiersRdata[which(dossiersRdata>0)]<-1
+  
   dossiers <- cbind(dossiers,'RData'=dossiersRdata)
   
   
