@@ -178,6 +178,8 @@ maj_variable_RData<-function( remontees, p = NULL ){
                                                       0,RData)
       )
   }
+  
+  return(remontees)
 }
 
 #' Généralisation de la fonction adip de pmeasyr pour l'ensemble d'une archive in et out
