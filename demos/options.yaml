@@ -22,15 +22,15 @@ extensions:
 
 fichiers_imco:
   in :
-     - rss
+    - rss
   out:
-  - rsa
-  - tra
-  - ano
-  - ium
-  - diap
-  - porg
-  - pie
+    - rsa
+    - tra
+    - ano
+    - ium
+    - diap
+    - porg
+    - pie
 
 services_exclus:
   - toto

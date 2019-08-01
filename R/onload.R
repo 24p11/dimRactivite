@@ -13,7 +13,7 @@
 #' update_options()
 update_options<-function(file = 'demos/options.yaml'){
 
-  dimRactivite_options_ = yaml::read_yaml('demos/options.yaml')
+  dimRactivite_options_ = yaml::read_yaml(file)
 
   dimRactivite_options = list()
 
@@ -38,17 +38,10 @@ update_options<-function(file = 'demos/options.yaml'){
 
 }
 
-dimRactivite_default_options <- list(
-  dimRactivite.services_exclus = NULL,
-  dimRactivite.gestion_doublons_rum = list(
-    "service"= "service",
-    "pole"= "service"
-  )
-)
 
 .onLoad <- function(libname, pkgname) {
 
-  options(dimRactivite_default_options)
+  update_options()
 
   invisible()
 }

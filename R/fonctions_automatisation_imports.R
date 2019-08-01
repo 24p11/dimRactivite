@@ -7,13 +7,10 @@
 #'
 #' @examples fichiers_genrsa <- scan_path(getOption("dimRactivite.path"))
 #'
-scan_path<-function(path = getOption("dimRactivite.path")){
+scan_path<-function( path = getOption("dimRactivite.path"), ext = getOption("dimRactivite.extensions") ){
 
   fichiers_genrsa =NULL
   fichiers_rdata = NULL
-
-  ext = getOption("dimRactivite.extensions")
-
 
   folders = list.dirs(path)
 
@@ -89,7 +86,16 @@ scan_path<-function(path = getOption("dimRactivite.path")){
 
 }
 
-analyse_fichiers_remontees<-function(fichiers_genrsa){
+#' Lecture des fichiers en sortie de scan_path pour vérification de leur contenu et préparation aux imports
+#'
+#' @param fichiers_genrsa tibble en sortie de scan_path
+#' @param recent logical, si TRUE considère par défaut que le .RData du dernier mois est manquant
+#'
+#' @return tibble avec liste des fichiers par remontée
+#' @export
+#'
+#' @examples
+analyse_fichiers_remontees<-function( fichiers_genrsa){
   
   fichiers_genrsa<-fichiers_genrsa%>%mutate(annee = as.numeric(annee),
                                             mois = as.numeric(mois),
@@ -110,13 +116,68 @@ analyse_fichiers_remontees<-function(fichiers_genrsa){
   
   dossiers <- cbind(dossiers,'RData'=dossiersRdata)
   
-  
   remontees<-dossiers%>%as_tibble()%>%bind_cols('dossier'=row.names(dossiers),.)%>%
     filter(manquants>-3,rss>0,rsa>0)%>%
     separate(dossier,c('finess','annee','mois'))
+    #%>%
+    #mutate(annee = as.numeric(annee),mois = as.numeric(mois))%>%
+    #inner_join(. , 
+    #           fichiers_genrsa%>%distinct(finess,annee,mois,archive,.keep_all = T)%>%
+    #             group_by(finess,annee,mois)%>% summarise( archives = paste(archive,collapse = ',')) %>%ungroup()%>%
+    #             mutate(annee = as.numeric(annee),mois = as.numeric(mois))
+    #           )
   
+
   return(remontees)
   
+}
+
+update_remontees_dispo<-function( path = getOption("dimRactivite.path"), ext = getOption("dimRactivite.extensions") ){
+  
+  #Liste des fichiers présents dans le dossier racine
+  fichiers_genrsa <- scan_path( path, ext )
+  
+  #Analyse des fichiers et classement par remontée
+  remontees_dispo <- analyse_fichiers_remontees( fichiers_genrsa )
+  
+  
+  return(remontees_dispo)
+  
+  
+}
+
+
+maj_variable_RData<-function( remontees, p = NULL ){
+  
+  #Si pas de noyau la variable .RData mise à jour est celle des remontées les plus récentes
+  if( is.null(p) ){
+  
+    recents<-remontees%>%filter(as.numeric(annee)> annee_ref-anteriorite, RData==1)%>%
+      group_by(finess)%>%summarise(annee=max(annee))%>%
+      group_by(finess,annee)%>%summarise(mois = max(as.numeric(mois)))
+
+    for(i in 1:nrow(recents)){
+      
+      p_modif= pmeasyr::noyau_pmeasyr(finess = recents$finess[i] ,
+                                annee =  recents$annee[i],
+                                mois = recents$mois[i],
+                                path   = getOption("dimRactivite.path")
+      )
+ 
+      
+      remontees<-maj_variable_RData(remontees,p_modif)
+      
+      
+    }
+    
+  }else{
+  
+      remontees<-remontees %>% mutate(RData = ifelse( finess == p$finess &
+                                                        annee == p$annee &
+                                                        mois == p$mois,
+                                                      0,RData)
+      )
+  }
 }
 
 #' Généralisation de la fonction adip de pmeasyr pour l'ensemble d'une archive in et out
@@ -192,6 +253,145 @@ adzipComplet<-function(zfichiers,ext_to_import){
  return(dz_fichiers)
 
 
+}
+
+
+#' Création des fichiers .RData contenant l'ensemble des données d'une remontée à partir du tableau d'analyse des fichiers de remontée (analyse_remontee)
+#'
+#' @param dossiers_remontees tibble en sortie de  analyse_remontee
+#' @param fichiers_genrsa tibble en sortie de  scan_path avec analyse de l'ensemble des fichiers du dossier racine
+
+#'
+#' @return ecriture sur le disque d'1 .RData de sauvegarde pour chaque remontée
+#' @export
+#'
+#' @examples
+save_remontees<-function(dossiers_remontees,fichiers_genrsa){
+  
+  for(i in 1:nrow(dossiers_remontees)){
+    
+    if(dossiers_remontees$RData[i]==0){
+      
+      #Noyau
+      p= pmeasyr::noyau_pmeasyr(finess =dossiers_remontees$finess[i] ,
+                                annee = as.numeric(dossiers_remontees$annee[i]),
+                                mois = as.numeric(dossiers_remontees$mois[i]),
+                                path   = getOption("dimRactivite.path")
+      )
+      
+      #Fichiers zip (in et out) de la remontée en cours
+      files<-fichiers_genrsa%>%dplyr::filter(finess == p$finess,
+                                             annee ==  as.numeric(p$annee),
+                                             mois == as.numeric(p$mois),
+                                             substr(file,nchar(file)-2,nchar(file))=="zip")%>%
+        dplyr::group_by(file)%>%dplyr::summarise(types =paste0(type, collapse = ","))
+      
+      #Dezippage des fichiers archive en fonction de la sélection des types de fichiers (et création d'un fichier vide si manquant)
+      dz_files<-adzipComplet(files$file,imco_files_types)
+      
+      #Pour les années incomplètes on décompresse également l'année antérieure si disponible pour calcul des pmct mono uma
+      if(as.numeric(dossiers_remontees$mois[i])<12){
+        
+        pN1= pmeasyr::noyau_pmeasyr(finess =dossiers_remontees$finess[i] ,
+                                    annee = as.numeric(dossiers_remontees$annee[i])-1,
+                                    mois = 12,
+                                    path   = paste0(getOption("dimRactivite.path"))
+        )
+        
+        filesN1<-fichiers_genrsa%>%dplyr::filter(finess == pN1$finess,
+                                                 annee ==  pN1$annee,
+                                                 mois ==pN1$mois)%>%
+          dplyr::group_by(file)%>%dplyr::summarise(types =paste0(type, collapse = ","))
+        
+        if(nrow(filesN1)>0){
+          dz_filesN1<-adzipComplet(filesN1$file,imco_files_types)
+        }
+      }
+      
+      dt<-imco(p,persist = T)
+      
+      
+      ###Suppression des fichiers
+      pmeasyr::adelete( p, 
+                        liste = getOption("dimRactivite.fichiers_imco")[['in']], 
+                        type = "in")
+      
+      pmeasyr::adelete( p, 
+                        liste = getOption("dimRactivite.fichiers_imco")[['out']], 
+                        type = "out")
+      
+      
+      if(as.numeric(dossiers_remontees$mois[i])<12){
+        pmeasyr::adelete( pN1, 
+                          liste = getOption("dimRactivite.fichiers_imco")[['in']], 
+                          type = "in")
+        
+        pmeasyr::adelete( pN1, 
+                          liste = getOption("dimRactivite.fichiers_imco")[['out']], 
+                          type = "out")
+      }
+      
+      
+    }
+    
+    
+  }
+  
+}
+
+#' Title
+#'
+#' @param remontees_sel tibble de type analyse_remontee avec l'ensemble des année à charger
+#'
+#' @return
+#' @export écrit en mémoire les objets définitifs rum,rum_v,rsa,rsa_v,
+#'
+#' @examples
+load_all<- function(remontees_sel){
+  
+
+  
+    rsa <<- NULL
+    rsa_v <<- NULL
+    rum <<- NULL
+    rum_v <<- NULL
+    diagnostics <<- NULL
+    actes <<- NULL
+    vano <<- NULL
+  
+  
+    for(i in 1:nrow(remontees_sel)){
+      
+      p= pmeasyr::noyau_pmeasyr(finess =remontees_sel$finess[i] ,
+                                annee = remontees_sel$annee[i],
+                                mois = remontees_sel$mois[i],
+                                path   = getOption("dimRactivite.path")
+      )
+      
+      
+      refs = remontees_sel[1,]%>%flatten_chr()
+      
+      load(paste0(getOption("dimRactivite.path"),'/',p$finess,'.',p$annee,'.',p$mois,'.RData'))
+      
+      rum <<- bind_rows(rum,get(paste0('rum','_',p$annee,'_',p$mois))[['rum']])
+      diagnostics <<- bind_rows(diagnostics,get(paste0('rum','_',p$annee,'_',p$mois))[['diags']])
+      actes <<- bind_rows(actes,get(paste0('rum','_',p$annee,'_',p$mois))[['actes']])
+      rum_v <<- bind_rows(rum,get(paste0('rum_v','_',p$annee,'_',p$mois)))
+      rsa <<- bind_rows(rsa_v,get(paste0('rsa','_',p$annee,'_',p$mois)))
+      rsa_v <<- bind_rows(rsa_v,get(paste0('rsa_v','_',p$annee,'_',p$mois)))
+      vano <<- bind_rows(vano,get(paste0('vano','_',p$annee,'_',p$mois)))
+      
+      rm(list=c(paste0('rum','_',p$annee,'_',p$mois),
+                paste0('rum_v_',p$annee,'_',p$mois),
+                paste0('rsa_',p$annee,'_',p$mois),
+                paste0('rsa_v_',p$annee,'_',p$mois),
+                paste0('vano_',p$annee,'_',p$mois),
+                paste0('pmctmono_',p$annee,'_',p$mois))
+      )
+      
+      
+    }
+  
 }
 
 #' Import des principaux fichiers de remontées et valorisation des séjours et résumés
