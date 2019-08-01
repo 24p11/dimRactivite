@@ -203,12 +203,12 @@ adzipComplet<-function(zfichiers,ext_to_import){
 imco<-function(p, tarifsante = FALSE, save = TRUE, persist = FALSE, pathm12 = NULL){
 
   if(tarifsante==TRUE) {
-    tarifs      <- tarifs_mco_ghs %>% dplyr::distinct(ghs, anseqta, .keep_all = TRUE) %>% dplyr::mutate(anseqta=as.character(as.numeric(anseqta)+1))
-    supplements <- tarifs_mco_supplements %>% dplyr::mutate(anseqta=as.character(as.numeric(anseqta)+1))
+    tarifs      <- referime::get_table('tarifs_mco_ghs') %>% dplyr::distinct(ghs, anseqta, .keep_all = TRUE) %>% dplyr::mutate(anseqta=as.character(as.numeric(anseqta)+1))
+    supplements <- referime::get_table('tarifs_mco_supplements') %>% dplyr::mutate(anseqta=as.character(as.numeric(anseqta)+1))
     suffixe = "tarifs_anterieurs_"
   } else {
-    tarifs      <- tarifs_mco_ghs %>% dplyr::distinct(ghs, anseqta, .keep_all = TRUE)
-    supplements <- tarifs_mco_supplements
+    tarifs      <- referime::get_table('tarifs_mco_ghs') %>% dplyr::distinct(ghs, anseqta, .keep_all = TRUE)
+    supplements <- referime::get_table('tarifs_mco_supplements')
     suffixe = ""
   }
 
