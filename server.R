@@ -1,5 +1,5 @@
 
-options(shiny.maxRequestSize=100*1024^2) 
+options(shiny.maxRequestSize=10000*1024^2) 
 
 function(input, output, session) { 
   
