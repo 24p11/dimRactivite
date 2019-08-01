@@ -1,0 +1,12 @@
+library(shiny)
+library(shinydashboard)
+library(tidyverse)
+library(pmeasyr)
+# library(referime)
+library(referentiels)
+
+# source('R/import_shiny.R')
+source('R/fonctions_automatisation_imports.R')
+source('R/fonctions_pmeasyr.R')
+
+ok <<- 0
