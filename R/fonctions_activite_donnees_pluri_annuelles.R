@@ -1362,20 +1362,25 @@ get_tdb<-function(df, indicateurs, pivot = 'ansor'){
 #'
 #' @examples
 
-get_activite_sejours<-function(df){
+get_activite_sejours<-function( df, structure ){
+  
     tdb <-list()
-    tdb[['services']] <- table(df %>%  distinct(nofiness,cle_rsa,ansor,service,.keep_all = T)%>%
-                                 select(service,ansor,typehosp))
-    tdb[['poles']] <- table(df %>%  distinct(nofiness,cle_rsa,ansor,service,.keep_all = T)%>%
-                              select(pole,ansor,typehosp))
-    tdb[['hopitaux']]  <- table(df %>%  distinct(nofiness,cle_rsa,ansor,.keep_all = T)%>%
-                                  select(hopital,ansor,typehosp))
-    tdb[['gh']] <- table(df %>% distinct(nofiness,cle_rsa,ansor,.keep_all = T)%>%
-                           select(typehosp,ansor))
+    
+    tdb[['services']] <- table( df %>%  distinct( nofiness, cle_rsa, ansor, service, .keep_all = T)%>%
+                                 select(service, ansor, typehosp) )
+    
+    tdb[['poles']] <- table( df %>%  distinct( nofiness, cle_rsa, ansor, service, .keep_all = T )%>%
+                              select( pole, ansor, typehosp ) )
+    
+    tdb[['hopitaux']]  <- table( df %>%  distinct(nofiness, cle_rsa, ansor, .keep_all = T)%>%
+                                  select(hopital, ansor, typehosp ) )
+    
+    tdb[['gh']] <- table(df %>% distinct( nofiness, cle_rsa, ansor, .keep_all = T )%>%
+                           select( typehosp, ansor ) )
 
-    tdb <- order_by_structure(tdb)
+    tdb <- order_by_structure( tdb, structure )
 
-    tdb_final<-cbind(get_diff(tdb$hc),NA,get_diff(tdb$hp))
+    tdb_final<-cbind( get_diff(tdb$hc), NA, get_diff(tdb$hp) )
 
     return(tdb_final)
 
@@ -1390,18 +1395,22 @@ get_activite_sejours<-function(df){
 #'
 #' @examples
 
-get_activite_recettes<-function(df){
+get_activite_recettes<-function( df, structure ){
+  
   tdb_v <-list()
 
   tdb_v[['services']] <- round( with( df, tapply( valopmctmonotime1, list(service,ansor,typehosp), sum, na.rm=T ) ) )
+  
   tdb_v[['poles']]  <- round( with( df, tapply( valopmctmonotime1, list(pole,ansor,typehosp), sum, na.rm=T ) ) )
+  
   tdb_v[['hopitaux']] <- round( with( df, tapply( valopmctmonotime1, list(hopital,ansor,typehosp), sum, na.rm=T ) ) )
+  
   tdb_v[['gh']] <- t(round( with( df, tapply( valopmctmonotime1, list(ansor,typehosp), sum, na.rm=T ) ) ))
 
-  tdb_v <- order_by_structure(tdb_v)
+  tdb_v <- order_by_structure( tdb_v, structure )
 
-  tdb_v_final<-cbind(get_diff(tdb_v$hc),NA,get_diff(tdb_v$hp))
+  tdb_v_final<-cbind( get_diff(tdb_v$hc), NA, get_diff(tdb_v$hp) )
 
-  return(tdb_final)
+  return(tdb_v_final)
 
 }

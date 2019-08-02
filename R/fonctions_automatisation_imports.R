@@ -97,19 +97,21 @@ scan_path<-function( path = getOption("dimRactivite.path"), ext = getOption("dim
 #' @examples
 analyse_fichiers_remontees<-function( fichiers_genrsa){
   
-  fichiers_genrsa<-fichiers_genrsa%>%mutate(annee = as.numeric(annee),
-                                            mois = as.numeric(mois),
-                                            RData = factor(RData,levels=c('0','1')))
-  
-                                            
   imco_files_types = getOption("dimRactivite.fichiers_imco")%>%purrr::flatten_chr()
-  o<-which(fichiers_genrsa$type%in%imco_files_types&fichiers_genrsa$annee>2012)
+  
+  df<-fichiers_genrsa%>%filter(annee>2012,type%in%imco_files_types)%>%
+                                      mutate(annee = as.numeric(annee),
+                                            mois = as.numeric(mois),
+                                            RData = factor(RData,levels=c('0','1')),
+                                            type = factor(type,levels = imco_files_types))
+  
+
   #dossiers<-table(fichiers_genrsa$filepath[o],fichiers_genrsa$type[o])
-  dossiers<-table( paste( fichiers_genrsa$finess[o],fichiers_genrsa$annee[o],fichiers_genrsa$mois[o] ) , fichiers_genrsa$type[o] )
+  dossiers<-table( paste( df$finess,df$annee,df$mois ) , df$type )
   dossiers[which(dossiers>0)]<-1
   dossiers <- cbind(dossiers,'manquants'=rowSums(dossiers)-length(imco_files_types))
 
-  dossiersRdata<-table( paste( fichiers_genrsa$finess[o],fichiers_genrsa$annee[o],fichiers_genrsa$mois[o] ) , fichiers_genrsa$RData[o] )
+  dossiersRdata<-table( paste( df$finess,df$annee,df$mois ) , df$RData )
   dossiersRdata<-dossiersRdata[,'1']
   
   dossiersRdata[which(dossiersRdata>0)]<-1
@@ -152,22 +154,24 @@ maj_variable_RData<-function( remontees, p = NULL ){
   #Si pas de noyau la variable .RData mise à jour est celle des remontées les plus récentes
   if( is.null(p) ){
   
-    recents<-remontees%>%filter(as.numeric(annee)> annee_ref-anteriorite, RData==1)%>%
-      group_by(finess)%>%summarise(annee=max(annee))%>%
-      group_by(finess,annee)%>%summarise(mois = max(as.numeric(mois)))
-
-    for(i in 1:nrow(recents)){
+    if( 1 %in% unique(remontees_dispo$RData) ){
+      recents<-remontees_dispo %>% filter( RData==1 )%>%
+        group_by( finess ) %>% summarise( annee=max(annee) ) %>%
+        group_by( finess, annee )%>%summarise( mois = max(as.numeric(mois) ) )
+   
+      for(i in 1:nrow(recents)){
+        
+        p_modif= pmeasyr::noyau_pmeasyr(finess = recents$finess[i] ,
+                                  annee =  recents$annee[i],
+                                  mois = recents$mois[i],
+                                  path   = getOption("dimRactivite.path")
+        )
+   
+        
+        remontees<-maj_variable_RData(remontees,p_modif)
+        
       
-      p_modif= pmeasyr::noyau_pmeasyr(finess = recents$finess[i] ,
-                                annee =  recents$annee[i],
-                                mois = recents$mois[i],
-                                path   = getOption("dimRactivite.path")
-      )
- 
-      
-      remontees<-maj_variable_RData(remontees,p_modif)
-      
-      
+      }
     }
     
   }else{
@@ -241,7 +245,7 @@ adzipComplet<-function(zfichiers,ext_to_import){
     refs<-unlist(str_split(dz_fichiers[1],'\\.'))[1:3]
 
     for (ext_m in exts_m){
-      file.create(paste0(p$path,'/',paste(c(refs[1],refs[2],refs[3],ext_m),collapse = '.')))
+      file.create(paste0(getOption("dimRactivite.path"),'/',paste(c(refs[1],refs[2],refs[3],ext_m),collapse = '.')))
 
       
     }
@@ -257,6 +261,57 @@ adzipComplet<-function(zfichiers,ext_to_import){
 
 }
 
+adzipRemonteee<-function( p, fichiers_genrsa, ext_to_import = NULL ){
+  
+  imco_files_types = getOption("dimRactivite.fichiers_imco")%>%purrr::flatten_chr()
+  
+  if(is.null(ext_to_import)){
+    
+    ext_to_import = getOption("dimRactivite.fichiers_imco")%>%purrr::flatten_chr()
+  }
+  
+  #Fichiers zip (in et out) de la remontée en cours
+  files<-fichiers_genrsa%>%dplyr::filter(finess == p$finess,
+                                         annee ==  as.numeric(p$annee),
+                                         mois == as.numeric(p$mois),
+                                         substr(file,nchar(file)-2,nchar(file))=="zip")%>%
+    dplyr::group_by(file)%>%dplyr::summarise(types =paste0(type, collapse = ","))
+  
+  #Dezippage des fichiers archive en fonction de la sélection des types de fichiers (et création d'un fichier vide si manquant)
+  dz_files <- adzipComplet(files$file,imco_files_types)
+}
+
+#' Vérification de l'exhaustivité du fichier structure
+#'
+#' @param rum tiblle de type rum
+#' @param fichier_structure tibble, structure 
+#'
+#' @return
+#' @export message d'erreur
+#'
+#' @examples
+verif_structure<-function(rum,fichier_structure){
+  
+  manq<-rum%>%filter(! cdurm %in% fichier_structure$cdurm )
+  
+  if(nrow(manq)==0){
+    message(
+      "\n",
+      "Toutes les UMA sont renseignées dans le fichier structure"
+    )
+  }else{
+    
+    message(
+      "\n",
+      "Les UMA suivantes sont manquantes dans le fichier structure"
+    )
+    
+    print(table(manq$cdurm,format(manq$d8soue,'%Y-%m'),manq$typehosp,manq$nofiness))
+    
+  }
+  
+}
+
 
 #' Création des fichiers .RData contenant l'ensemble des données d'une remontée à partir du tableau d'analyse des fichiers de remontée (analyse_remontee)
 #'
@@ -269,6 +324,8 @@ adzipComplet<-function(zfichiers,ext_to_import){
 #'
 #' @examples
 save_remontees<-function(dossiers_remontees,fichiers_genrsa){
+  
+  imco_files_types = getOption("dimRactivite.fichiers_imco")%>%purrr::flatten_chr()
   
   for(i in 1:nrow(dossiers_remontees)){
     
@@ -371,15 +428,14 @@ load_all<- function(remontees_sel){
       )
       
       
-      refs = remontees_sel[1,]%>%flatten_chr()
-      
+
       load(paste0(getOption("dimRactivite.path"),'/',p$finess,'.',p$annee,'.',p$mois,'.RData'))
       
       rum <<- bind_rows(rum,get(paste0('rum','_',p$annee,'_',p$mois))[['rum']])
       diagnostics <<- bind_rows(diagnostics,get(paste0('rum','_',p$annee,'_',p$mois))[['diags']])
       actes <<- bind_rows(actes,get(paste0('rum','_',p$annee,'_',p$mois))[['actes']])
-      rum_v <<- bind_rows(rum,get(paste0('rum_v','_',p$annee,'_',p$mois)))
-      rsa <<- bind_rows(rsa_v,get(paste0('rsa','_',p$annee,'_',p$mois)))
+      rum_v <<- bind_rows(rum_v,get(paste0('rum_v','_',p$annee,'_',p$mois)))
+      rsa <<- bind_rows(rsa,get(paste0('rsa','_',p$annee,'_',p$mois)))
       rsa_v <<- bind_rows(rsa_v,get(paste0('rsa_v','_',p$annee,'_',p$mois)))
       vano <<- bind_rows(vano,get(paste0('vano','_',p$annee,'_',p$mois)))
       
@@ -467,7 +523,10 @@ imco<-function(p, tarifsante = FALSE, save = TRUE, persist = FALSE, pathm12 = NU
 
     #Intégration du tra
     rsa$rsa =  pmeasyr::inner_tra( rsa$rsa, tra )
-    rum$rum =  pmeasyr::inner_tra( rum$rum, tra )
+    
+    rum$rum =  pmeasyr::inner_tra( rum$rum, tra %>% dplyr::select(cle_rsa,nas,dtsort), sel=2)%>%
+      mutate(ansor = format(dtsort,'%Y'),moissor = format(dtsort,'%m'))%>%
+      select(-dtsort)
 
     #Intégration du type d'UMA au fihcier IUM
     ium = left_join(ium %>% dplyr::mutate(temp=as.integer(annee)-as.integer(substr(dteaut,1,4))) %>%
@@ -492,11 +551,13 @@ imco<-function(p, tarifsante = FALSE, save = TRUE, persist = FALSE, pathm12 = NU
                                    pie = pie,
                                    bee = FALSE)
 
-    rsa_v = pmeasyr::inner_tra( rsa_v , tra )
+    rsa_v <- pmeasyr::inner_tra( rsa_v , tra %>% dplyr::select(cle_rsa,nas,dtsort), sel=2)%>%
+      mutate(ansor = format(dtsort,'%Y'),moissor = format(dtsort,'%m'))%>%select(-dtsort)%>%
+      mutate(nofiness = p_import$nofiness)
 
     rsa_v2 <- dplyr::left_join(rsa$rsa, dplyr::distinct( rsa_v, cle_rsa, .keep_all = TRUE) )
 
-    rum$rum =  pmeasyr::inner_tra( rum$rum, tra )
+    
 
     vano = vano%>%dplyr::select(names(vano)[ ! grepl('^cr',names(vano))])%>%
              dplyr::mutate( ansor = as.character(a) )
@@ -625,68 +686,3 @@ selection_cancer_diag<-function(df = diagnostics){
 #' @section Warning: utilise lae resultat de la fonction  \code{\link{selection_cancer_diag}}
 #' @examples
 #'
-selection_cancer_pat<-function(df){
-
-  df%>%mutate(score_confiance_diag_cancer = dplyr::if_else(type=='a',1,10))%>%
-    group_by(ipp,diag,APPAREIL,ORGANE)%>%
-    summarise(score_confiance_diag_cancer = sum(score_confiance_diag_cancer))%>%
-    ungroup()%>%
-    group_by(ipp)%>%
-    filter(score_confiance_diag_cancer == max(score_confiance_diag_cancer))%>%
-    distinct(ipp, .keep_all= TRUE)
-}
-
-
-#' Attribution du type de chirurgie M4 pour les objets de type rsa
-#' Les rsa de cancerologie sont préalablerment selectionnés en utilisant les fonctions \code{\link{selection_cancer_diag}} et
-#' \code{\link{selection_cancer_pat}}. Les objets en sortie de ces deux fonctions sont concaténés avec un objet rsa et mis en entrée de
-#' la fonction pour attribution du type M4 de cancer
-#'
-#' @param df  un tibble de type rsa concaténé avec un tibble diagnostic en sortie de \code{\link{selection_cancer_pat}}
-#'
-#' @return un tibble de type rsa
-#' @export
-#'
-#' @examples
-#'
-attribution_type_M4<-function(df){
-
-  df<-df%>% dplyr::mutate(type_chirugie = NA)
-  for (nom_liste in c("ChirurgeCancersDigestif","ChirurgieCancersGynecologique",
-                      "ChirurgieCancersORL_Maxilo","ChirurgieCancersSein","ChirurgieCancersThorax",
-                      "ChirurgieCancersThyoroide","ChirurgieCancersUrologie","CancersSNC",
-                      "CancersOsTissusMou","ChirurgieCancersThyroide","CancersDeLaPeau")){
-
-    df <- df %>% dplyr::mutate(type_chirugie = ifelse(dp %in% listes_cim[[nom_liste]]$code & gptype == 'C', nom_liste, type_chirugie))
-
-  }
-
-  return(df)
-}
-
-#' Attribution du statut nouveau patient pour les objets de type rsa (utilisé pour la cancérologie)
-#' Les rsa de cancerologie sont préalablerment selectionnés en utilisant les fonctions \code{\link{selection_cancer_diag}} et
-#' \code{\link{selection_cancer_pat}}. Les objets en sortie de ces deux fonctions sont concaténés avec un objet rsa et mis en entrée de
-#'
-#' @param df  un tibble de type rsa concaténé avec un tibble diagnostic en sortie de \code{\link{selection_cancer_pat}}
-#'
-#' @return un tibble de type rsa
-#' @export
-#'
-#' @examples
-#'
-attribution_statut_nx_patient<-function(df){
-
-  ansor_deb<-max(df$ansor); ansor_fin<-min(df$ansor)
-
-  df<-df%>%dplyr::mutate(nx_pat = 'N')
-
-  for(a in ansor_deb:ansor_fin){
-    tmp <- df %>% dplyr::filter(ansor %in% (a-3):(a-1) )%>% dplyr::select(ipp) %>% purrr::flatten_chr() %>% unique()
-    df <- df%>%dplyr::mutate(nx_pat = ifelse(! ipp %in% tmp & ansor == a,'O',nx_pat))
-
-  }
-
-  return(df)
-}
-

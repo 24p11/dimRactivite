@@ -2,11 +2,9 @@
 ##Tableaux de bord intranet
 ##
 ################################################
-#source(paste(PathR,'PROGRAMMES/FCT_SERVICES/ACTIVITES_TRANSVERSALES/TABLEAUX_DE_BORD/UpDateTableauxDeBord.R',sep=''))
 
-# Principe general :
-#   les tableaux de bord sont calcules par la fonction GetTableauDeBord, ecrits au format csv et envoyes au serveur intranet
-#   les arguments de la fonction sont un tableau de donnees de type sejour
+#Génération de tableaux de bord d'activité après chargement des données pmeasyr
+#si besoin : load("~/GH_PMSI/DATA/WD/Rpmeasyr.RData")
 
 library(tidyverse)
 library (RCurl)
@@ -14,16 +12,16 @@ library(jsonlite)
 library(referentiels)
 
 
+#Année et mois en cours
 mois=as.numeric(format(Sys.Date()-50,'%m'));Mois=format(Sys.Date()-50,'%m')
 annee=as.numeric(format(Sys.Date()-55,'%Y'));
 
-#Chemins pour les sorties
-path=paste0(dirname(rstudioapi::getSourceEditorContext()$path),'/')
+#Chemins pour l'es sorties'écriture des fichiers de sortie
 path_res="~/GH_PMSI/ACTIVITE_MSI/ANALYSES/TABLEAUX_DE_BORD/"
 
 
-###liste des indicateurs disponibles, légendes, indicateurs à calculer pour chaque niveau de regroupement (service/pole/hopial)
-references<-read.table(paste0(path,'indicateurs.xls',sep=''),
+###Liste des indicateurs disponibles, légendes, indicateurs à calculer pour chaque niveau de regroupement (service/pole/hopial)
+references<-read.table('demos/indicateurs.xls',
                        sep='\t',
                        header=F,fill=T,
                        na.strings = c("NA",""),stringsAsFactor=F,fileEncoding = 'latin1')
@@ -40,26 +38,42 @@ labels<-labels[,-1]
 exclusionPdiff<-c('Taux de re-admissions precoces','IGS moyen')
 
 
-#Fichier structure
-fichier_structure <- readxl::read_excel('~/GH_PMSI/DATA/Structures/structures.xlsx',
-                                        col_types = c( "text" , "text" , "text" , "text" ,"text" ,
-                                                       "text" , "text" , "text" , "text" )
-)
-
-names(fichier_structure) <- c('nofiness','hopital','cdurm','uma_locale','uma_locale2',
-                              'libelle_um','service','regroupement1','pole')
 
 
+#######################################################################################################################
+###Tableaux de bord généraux
+#######################################################################################################################
+df <- get_data(rum, a = (annee-5):annee, m = 1:mois )
+tdb <- get_activite_sejours( df, structure )
+
+path_file=paste0(path_res,'/',annee,'/','TableauDeBordGeneral',annee,stringr::str_pad(mois,2,"left","0"),'cum.xls')  
+write.table( tdb, file=path_file, sep='\t', row.names=T, col.names=NA, na='' , fileEncoding = "latin1" )
 
 
-#chargement des fonctions
-source(paste0(dirname(rstudioapi::getSourceEditorContext()$path),'/fonctions.R'))
+df <- get_data(df, a = (annee-5):annee, m = mois )
+tdb <- get_activite_sejours( df, structure )
 
-#Import des données pmeasyt
-load("~/GH_PMSI/DATA/WD/Rpmsi_pmeasyr.RData")
+path_file=paste0(path_res,'/',annee,'/','TableauDeBordGeneral',annee,stringr::str_pad(mois,2,"left","0"),'mens.xls')  
+write.table( tdb, file=path_file, sep='\t', row.names=T, col.names=NA, na='' , fileEncoding = "latin1" )
+
+df<-get_data(inner_join(rum,rum_v), a =(annee-5):annee, m = 1:mois )
+tdb <- get_activite_recettes( df, structure )
+
+path_file=paste0(path_res,'/',annee,'/','TableauDeBordValorisation',annee,stringr::str_pad(mois,2,"left","0"),'cum.xls')  
+write.table( tdb, file=path_file, sep='\t', row.names=T, col.names=NA, na='' , fileEncoding = "latin1" )
 
 
+df <- get_data(df, a = (annee-5):annee, m = mois )
+tdb <- get_activite_recettes( df, structure )
+
+path_file=paste0(path_res,'/',annee,'/','TableauDeBordValorisation',annee,stringr::str_pad(mois,2,"left","0"),'mens.xls')  
+write.table( tdb, file=path_file, sep='\t', row.names=T, col.names=NA, na='' , fileEncoding = "latin1" )
+
+
+
+#####################################################################################################################
 #Prération des données pour le suivi de l'activité de cancérologie
+#####################################################################################################################
 cancer_diag <- selection_cancer_diag(diagnostics)
 cancer_pat <- selection_cancer_pat(cancer_diag)
 cancer_rsa <- dplyr::inner_join(cancer_pat,
@@ -69,33 +83,9 @@ cancer_rsa <- dplyr::inner_join(cancer_pat,
   attribution_type_M4(.)%>%
   attribution_statut_nx_patient(.)
 
-
-
-###Tableaux de bord généraux
-services = unique(fichier_structure$service)
-poles = unique(fichier_structure$pole)
-df<-get_data(rum,a =(annee-5):annee,m = 1:mois,regles =F)
-
-
-df<-get_data(inner_join(rum,rum_valo),a =(annee-5):annee,m = 1:mois,regles =F)
-
-get_activite_sejours
-get_activite_recettes
-tdb_j <-list()
-
-tdb_j[['services']] <- round( with( df, tapply( dureesejpart, list(service,ansor,typehosp), sum, na.rm=T ) ) )
-tdb_j[['poles']]  <- round( with( df, tapply( dureesejpart, list(pole,ansor,typehosp), sum, na.rm=T ) ) )
-tdb_j[['hopitaux']] <- round( with( df, tapply( dureesejpart, list(hopital,ansor,typehosp), sum, na.rm=T ) ) )
-tdb_j[['gh']] <- t(round( with( df, tapply( dureesejpart, list(ansor,typehosp), sum, na.rm=T ) ) ))
-
-tdb_j <- order_by_structure(tdb_j)
-
-tdb_j_final<-cbind(get_diff(tdb_j$hc),NA,get_diff(tdb_j$hp))
-
-
-
-#Niveau hopital
-
+#######################################################################################################################
+#Tableaux de bords thématiques
+#######################################################################################################################
 niveau = "hopital"
 
 for (hopital in unique(fichier_structure$hopital) ){

@@ -1,5 +1,11 @@
 
 #####################################################################################################################
+##Paramètre des imports
+#####################################################################################################################
+profondeur_imports = 6
+
+
+#####################################################################################################################
 ##Création fichier .RData par remontée
 #####################################################################################################################
 
@@ -18,7 +24,7 @@ View(remontees_dispo%>%arrange(annee,mois,finess))
 
 #Préparation de la création des ficihers à créer par la fonction save_remontee
 #Exemple de de selection éventuelle de certaines remontées (par défaut tous les .RData qui n'existent pas seront crées)
-#   dossiers_remontees<-remontees_dispo%>%filter(finess == p$finess,annee == p$annee, mois == p$mois)
+#dossiers_remontees<-remontees_dispo%>%filter(finess == p$finess,annee == p$annee, mois == p$mois)
 dossiers_remontees<-remontees_dispo
 
 
@@ -33,8 +39,27 @@ save_remontees(dossiers_remontees,fichiers_genrsa)
 #Mise à jour de la liste des remontées disponibles
 # par défaut les .RData du mois le plus récent sont systématiquement considérées comme manquantes
 remontees_dispo<-update_remontees_dispo()
-#Selection des remontées
-load_all(remontees_dispo%>%filter(annee > 2013))
 
-save(list = c('rum','rum_v','diagnostics','actes','rsa','rsa_v','vano'),file = paste0(getOption("dimRactivite.path"),'/Rpmeasyr.RData') )
+sel_remontees_import<-remontees_dispo%>%filter(as.numeric(annee)> max(as.numeric(remontees_dispo$annee))-profondeur_imports, RData==1)%>%
+  group_by(finess,annee)%>%summarise(mois = max(as.numeric(mois)))
+
+#Selection des remontées
+load_all(sel_remontees_import)
+
+#Chargement du fichier structure
+fichier_structure <- readxl::read_excel("demos/structures.xlsx",
+                                        col_types = c( "text" , "text" , "text" , "text" ,"text" ,
+                                                       "text" , "text" , "text" , "text" ),
+                                        col_names = c('nofiness','hopital','cdurm','uma_locale','uma_locale2',
+                                                      'libelle_um','service','regroupement1','pole'),
+                                        skip = 1
+                                        )
+verif_structure(rum,fichier_structure)
+
+rum <- rum %>% left_join( ., fichier_structure ) %>%
+      mutate(pole = ifelse(is.na(pole),'Erreurs',pole),
+             service = ifelse(is.na(service),'Erreur service non renseignées',service))
+
+save(list = c('rum','rum_v','diagnostics','actes','rsa','rsa_v','vano'),
+     file = paste0(getOption("dimRactivite.path"),'/Rpmeasyr.RData') )
 

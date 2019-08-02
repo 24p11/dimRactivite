@@ -20,20 +20,20 @@ get_data<-function( df, ref = 'ansor', m, a, val = NULL, niveau = NULL, opt = T 
 
   if(ref =='ansor'){
 
-    df <- df  %>% filter (as.numeric(ansor) %in% a,
-                          as.numeric(moissor) %in% m)
+    df <- df  %>% filter ( as.numeric(ansor) %in% a,
+                           as.numeric(moissor) %in% m )
 
   }else{
 
-    df <- df  %>% filter (as.numeric(format(!!sym(ref),'%Y')) %in% a,
-                          as.numeric(format(!!sym(ref),'%m')) %in% m)
+    df <- df  %>% filter ( as.numeric( format( !!sym(ref), '%Y') ) %in% a,
+                           as.numeric( format( !!sym(ref), '%m') ) %in% m )
 
   }
 
 
   if( !is.null(niveau) & !is.null(val) ){
 
-    df <- df %>% filter (!!sym(niveau)%in%val)
+    df <- df %>% filter ( !!sym(niveau) %in% val )
 
   }
 
@@ -67,43 +67,32 @@ get_data<-function( df, ref = 'ansor', m, a, val = NULL, niveau = NULL, opt = T 
 #'
 options_locales<-function(df,val=NULL,niveau=NULL){
 
-  if(!is.null(getOption("dimRactivite.services_exclus"))){
+  if( !is.null( getOption("dimRactivite.services_exclus") ) & "service" %in% names(df) ){
 
-      df<- df %>% filter(!service%in%getOption("dimRactivite.services_exclus"))
+      df <- df %>% filter( !service %in% getOption("dimRactivite.services_exclus") )
   }
 
   if(is.null(niveau)){
 
-    df<-df %>% distinct(nofiness,ansor,cle_rsa,.keep_all = T) %>% mutate(doublon = 1)
+    df <- df %>% distinct( nofiness, ansor, cle_rsa, .keep_all = T ) %>% mutate( doublon = 1 )
   }
 
-  #Dédoublonnage en fonction des paramètre optionnels
+  #Dédoublonnage en fonction des paramètres optionnels
   #On cherche dans val ou niveau la valeur d'une variable de déboublonnage
-  if(!is.null(niveau) & !is.null(getOption("dimRactivite.gestion_doublons_rum"))){
+  if( !is.null(niveau) & !is.null( getOption("dimRactivite.gestion_doublons_rum") ) ){
 
-    for(i in names(getOption("dimRactivite.gestion_doublons_rum"))){
+    for(i in names( getOption("dimRactivite.gestion_doublons_rum") ) ){
 
-      n =getOption("dimRactivite.gestion_doublons_rum")[[i]]
+      n = getOption("dimRactivite.gestion_doublons_rum")[[i]]
 
-      if(niveau == i){
+      if( niveau == i | val == i  ){
 
-        df <- df %>% group_by( nofiness, ansor, cle_rsa, !!sym(n) )%>%
-          arrange( nofiness,ansor, cle_rsa, !!sym(n), d8eeue ) %>%
-          mutate( nb_rum = n(),
-                  doublon = if_else( row_number() == 1,1,0 ) )
-
-
+        df <- df %>%  group_by( nofiness, ansor, cle_rsa, !!sym(n) )%>%
+                      arrange( nofiness,ansor, cle_rsa, !!sym(n), d8eeue ) %>%
+                      mutate( nb_rum = n(),
+                              doublon = if_else( row_number() == 1,1,0 ) )
       }
 
-      if(val == i){
-
-        df <- df %>% group_by( nofiness, ansor, cle_rsa, !!sym(n) )%>%
-          arrange( nofiness,ansor, cle_rsa, !!sym(n), d8eeue ) %>%
-          mutate( nb_rum = n(),
-                  doublon = if_else( row_number() == 1,1,0 ) )
-
-
-      }
 
     }
 
@@ -260,10 +249,14 @@ IP_SEJOUR<-function(df){
 #' @export
 #'
 #' @examples
-order_by_structure<-function(tdb){
+order_by_structure<-function( tdb, structure ){
+  
+  
+  services = unique(fichier_structure$service)
+  poles = unique(fichier_structure$pole)
 
-  tdb$hc <- rbind( "GH" = tdb$gh['C',], NA, tdb$hopitaux[,,"C"] )
-  tdb$hp <- rbind( "GH" = tdb$gh['P',], NA, tdb$hopitaux[,,"P"] )
+  tdb$hc <- rbind( NA, "Groupe Hospitalier" = NA, tdb$hopitaux[,,"C"], "Total GH" = tdb$gh['C',] )
+  tdb$hp <- rbind( NA, "Groupe Hospitalier" = NA, tdb$hopitaux[,,"P"], "Total GH" = tdb$gh['P',] )
 
   for (p in poles){
 
@@ -313,4 +306,69 @@ get_diff<-function(df){
   return(df)
 }
 
+
+selection_cancer_pat<-function(df){
+  
+  df%>%mutate(score_confiance_diag_cancer = dplyr::if_else(type=='a',1,10))%>%
+    group_by(ipp,diag,APPAREIL,ORGANE)%>%
+    summarise(score_confiance_diag_cancer = sum(score_confiance_diag_cancer))%>%
+    ungroup()%>%
+    group_by(ipp)%>%
+    filter(score_confiance_diag_cancer == max(score_confiance_diag_cancer))%>%
+    distinct(ipp, .keep_all= TRUE)
+}
+
+
+#' Attribution du type de chirurgie M4 pour les objets de type rsa
+#' Les rsa de cancerologie sont préalablerment selectionnés en utilisant les fonctions \code{\link{selection_cancer_diag}} et
+#' \code{\link{selection_cancer_pat}}. Les objets en sortie de ces deux fonctions sont concaténés avec un objet rsa et mis en entrée de
+#' la fonction pour attribution du type M4 de cancer
+#'
+#' @param df  un tibble de type rsa concaténé avec un tibble diagnostic en sortie de \code{\link{selection_cancer_pat}}
+#'
+#' @return un tibble de type rsa
+#' @export
+#'
+#' @examples
+#'
+attribution_type_M4<-function(df){
+  
+  df<-df%>% dplyr::mutate(type_chirugie = NA)
+  for (nom_liste in c("ChirurgeCancersDigestif","ChirurgieCancersGynecologique",
+                      "ChirurgieCancersORL_Maxilo","ChirurgieCancersSein","ChirurgieCancersThorax",
+                      "ChirurgieCancersThyoroide","ChirurgieCancersUrologie","CancersSNC",
+                      "CancersOsTissusMou","ChirurgieCancersThyroide","CancersDeLaPeau")){
+    
+    df <- df %>% dplyr::mutate(type_chirugie = ifelse(dp %in% listes_cim[[nom_liste]]$code & gptype == 'C', nom_liste, type_chirugie))
+    
+  }
+  
+  return(df)
+}
+
+#' Attribution du statut nouveau patient pour les objets de type rsa (utilisé pour la cancérologie)
+#' Les rsa de cancerologie sont préalablerment selectionnés en utilisant les fonctions \code{\link{selection_cancer_diag}} et
+#' \code{\link{selection_cancer_pat}}. Les objets en sortie de ces deux fonctions sont concaténés avec un objet rsa et mis en entrée de
+#'
+#' @param df  un tibble de type rsa concaténé avec un tibble diagnostic en sortie de \code{\link{selection_cancer_pat}}
+#'
+#' @return un tibble de type rsa
+#' @export
+#'
+#' @examples
+#'
+attribution_statut_nx_patient<-function(df){
+  
+  ansor_deb<-max(df$ansor); ansor_fin<-min(df$ansor)
+  
+  df<-df%>%dplyr::mutate(nx_pat = 'N')
+  
+  for(a in ansor_deb:ansor_fin){
+    tmp <- df %>% dplyr::filter(ansor %in% (a-3):(a-1) )%>% dplyr::select(ipp) %>% purrr::flatten_chr() %>% unique()
+    df <- df%>%dplyr::mutate(nx_pat = ifelse(! ipp %in% tmp & ansor == a,'O',nx_pat))
+    
+  }
+  
+  return(df)
+}
 
