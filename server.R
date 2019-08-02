@@ -1,10 +1,19 @@
 
 options(shiny.maxRequestSize=10000*1024^2) 
-
+nsites <<- NULL
+hopitaux <<- NULL
+annee <<- NULL
+mois <<- NULL
+ok <<- 0
+pmsidata <<- NULL
+pmsidataant <<- NULL 
+  
 function(input, output, session) { 
   
   url <- a("à cette page", href = "http://sls-dbim02.sls.aphp.fr:3838/4115983/servyce/")
   output$urlservyce <- renderUI({tagList("Une interface d'analyse des données par service est disponible ", url)})
+  
+  output$readme1 <- renderUI({HTML(paste("", "", "Le chargement des données doit être effectué ainsi:", "1) charger les bons fichiers genrsa directement dans l'interface de gauche (differents finess possibles),", "2) cliquer sur -Imports et calculs- puis attendre la fin des traitements,", "3) lorsque le traitement est fini, cliquer sur telechargement pour sauvegarder les fichiers au format RData", "", "", "", "", sep="<br/>"))})
   
   load <- reactive( {
 
@@ -21,12 +30,7 @@ function(input, output, session) {
     file.copy(struct[[1,'datapath']], paste0("temp/", struct[[1,'name']]))
 
     #Formatage du fichier structure
-    struct <- readxl::read_excel(paste0("temp/", struct[[1,'name']]), col_types = c( "text" , "text" , "text" , "text" ,"text" , "text" , "text" , "text" , "text" ) )
-    names(struct) <- c('nofiness', 'hopital', 'cdurm', 'uma_locale', 'uma_locale2',  'libelle_um', 'service', 'regroupement1', 'pole')
-    fichier_structure <<- struct
-    
-    # nomenclature_uma <<- readxl::read_excel('/mnt/commons/Groupe_de_travail/GH_PMSI/DATA/Structures/nomenclatureum_uf.xlsx', col_types = c( "text" , "text" , "text" , "text" ,"text") )
-    # names(nomenclature_uma) <<- c('typeaut', 'libelle_typeaut', 'mode_hospitalisation', 'discipline','historique')
+    # fichier_structure <<- readxl::read_excel(paste0("temp/", input$struct[[1,'name']]), col_types = c( "text" , "text" , "text" , "text" ,"text" , "text" , "text" , "text" , "text" ), col_names = c('nofiness', 'hopital', 'cdurm', 'uma_locale', 'uma_locale2',  'libelle_um', 'service', 'regroupement1', 'pole'), skip = 1  )
     
     #Extraction des informations à partir des fichiers chargés NB: ICI INTRODUIRE DES VERIFICATIONS SUR LES FICHIERS CHARGES !!!
     infocourant <- as_tibble(courant) %>% separate(., name, into = c("finess", "annee", "mois"), sep = "\\.", remove = FALSE)
@@ -35,7 +39,8 @@ function(input, output, session) {
     hopitaux <<- unique(infocourant$finess)
     annee <<- as.numeric(unique(infocourant$annee))
     mois <<- as.numeric(unique(infocourant$mois))
-
+    ok <<- 0
+   
   } )  
   
   observeEvent( input$launch, {
@@ -45,7 +50,7 @@ function(input, output, session) {
       incProgress(0.1, detail = paste("copie des fichiers"))
       
       load()
-
+      
       incProgress(0.2, detail = paste("calcul des valorisations"))
       
       rsa_full <- NULL
@@ -64,7 +69,7 @@ function(input, output, session) {
         
       p <- noyau_pmeasyr(finess = f,  annee = annee, mois = mois, path   = 'temp/')
       
-      pmsi <- imco(p = p, save = TRUE, persist = TRUE, tarifsante = FALSE)
+      pmsi <- imco(p = p, save = FALSE, persist = TRUE, tarifsante = FALSE)
       
       rsa_full = bind_rows(pmsi$rsa,rsa_full)
       rsa_v_full = bind_rows(pmsi$rsa_v,rsa_v_full)
@@ -81,6 +86,8 @@ function(input, output, session) {
       }
       
       # suf <- paste0("_", annee, formatC(mois, width = 2, format = "d", flag = "0"))
+      
+      fichier_structure <- readxl::read_excel(paste0("temp/", input$struct[[1,'name']]), col_types = c( "text" , "text" , "text" , "text" ,"text" , "text" , "text" , "text" , "text" ), col_names = c('nofiness', 'hopital', 'cdurm', 'uma_locale', 'uma_locale2',  'libelle_um', 'service', 'regroupement1', 'pole'), skip = 1  )
       
       rum <- dplyr::left_join(rum_full, fichier_structure)
       rum_v <- rum_v_full
@@ -100,7 +107,7 @@ function(input, output, session) {
         
         p <- noyau_pmeasyr(finess = f,  annee = annee, mois = mois, path   = 'temp/')
         
-        pmsi <- imco(p = p, save = TRUE, persist = TRUE, tarifsante = TRUE)
+        pmsi <- imco(p = p, save = FALSE, persist = TRUE, tarifsante = TRUE)
         
         rsa_v_ant <- bind_rows(pmsi$rsa_v,rsa_v_ant)
         rum_v_ant <- bind_rows(pmsi$rum_v,rum_v_ant)
@@ -111,34 +118,34 @@ function(input, output, session) {
       
       incProgress(0.4, detail = paste("élimination des fichiers"))
       
-      # do.call(file.remove, list(list.files("temp/", full.names = TRUE)))
+      do.call(file.remove, list(list.files("temp/", full.names = TRUE)))
       
       ok <<- 1
       
     } )
   } )
 
-  output$rendu1 <- renderText( {
+  output$readme2 <- renderText( {
     courant <- input$courant ; consol <- input$consol ; struct <- input$struct ; ok <- ok
     if (is.null(courant) | is.null(consol) | is.null(struct)) {
-      return(paste("", "", "     Attendez la fin de tous les uploads puis cliquez sur Import des données", "", "", sep="\n"))
+      return(paste("Attendre la fin de tous les uploads puis cliquer sur -Import et calculs-", sep="\n"))
       } else {
         if(ok != 1){
-          return(paste("", "", "     Attendez la fin des calculs puis cliquez sur Download", "", "", sep="\n"))
+          return(paste("Cliquer sur -Import et calculs-, attendre la fin du chargement puis cliquez sur -Téléchargement-", sep="\n"))
         } else {
-          return(paste("", "", paste0("     Données produites pour ", nsites, " sites, à M", mois, " de ", annee,"."), "     Vous pouvez maintenant télécharger l'objet R", "", "", sep="\n"))
+          return(paste(paste0("Données produites pour ", nsites, " sites, à M", mois, " de ", annee,"."), " Vous pouvez maintenant télécharger l'objet R", sep="\n"))
         }
       }
   })
 
-  output$rendu2 <- downloadHandler(
+  output$rendu1 <- downloadHandler(
     filename = function() { paste0("pmsi_", annee, "_M", mois, "_", Sys.Date(), ".RData") },
     content = function(file) {
-      save(pmsidata, file = file) } )
+      save(pmsidata, file = file, compress = "xz", compression_level = 9 ) } )
 
-  output$rendu3 <- downloadHandler(
+  output$rendu2 <- downloadHandler(
     filename = function() { paste0("pmsi_tarifs_anterieurs_", annee, "_M", mois, "_", Sys.Date(), ".RData") },
     content = function(file) {
-      save(pmsidataant, file = file) } )
+      save(pmsidataant, file = file, compress = "xz", compression_level = 9 ) } )
   
 }
