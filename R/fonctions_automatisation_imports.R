@@ -651,38 +651,3 @@ imco<-function(p, tarifsante = FALSE, save = TRUE, persist = FALSE, pathm12 = NU
 
 
 
-#' un ensemble de fonction permettant d'automatiser les imports pmeasyr et d'effectuer des opérations
-#' de transformation et de sélection des séjours
-#'
-#' Warning: utilisation du package pmeasyr
-
-#' Selection des diagnostics de cancerologie pour un objet pmeasyr diagnostics
-#'
-#' @param df un tibble de type diagnostic
-#'
-#' @return une sélection de df pour la cancerologie
-#' @export
-#' @section Warning: utilise la liste inca_cancero
-#' @examples
-
-selection_cancer_diag<-function(df = diagnostics){
-
-  dplyr::inner_join(df,dplyr::as_tibble(inca_cancero),by = c("diag" = "CODE"))%>%
-    dplyr::mutate(nda = substr(nas,1,9))%>%
-    dplyr::inner_join(rum%>%select(nas,ipp,ansor),.)%>%
-    dplyr::mutate(ipp = dplyr::if_else( (is.na(ipp) | ipp=='') ,nda,ipp))%>%
-    dplyr::distinct( nda,diag,type, .keep_all= TRUE)%>%
-    dplyr::select(-norum)
-
-
-}
-
-#' Attribution d'un diagnostic de cancer par patient pour un objet de type diagnotics en sortie de \code{\link{selection_cancer_diag}}
-#'
-#' @param df  un tibble de type diagnostic en sortie de \code{\link{selection_cancer_diag}}
-#'
-#' @return un tibble de type diagnostic comprenant une ligne par patient selectionne comme etant le diagnostic de cancer unique pour l'analyse de l'activite
-#' @export
-#' @section Warning: utilise lae resultat de la fonction  \code{\link{selection_cancer_diag}}
-#' @examples
-#'
