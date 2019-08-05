@@ -1,16 +1,20 @@
 
 options(shiny.maxRequestSize=10000*1024^2) 
+infofiles <<- NULL
 nsites <<- NULL
 hopitaux <<- NULL
 annee <<- NULL
 mois <<- NULL
-ok <<- 0
 pmsidata <<- NULL
 pmsidataant <<- NULL 
+addpie <<- NULL
+addporg <<- NULL
+adddiap <<- NULL
 do.call(file.remove, list(list.files("../temp/", full.names = TRUE)))
 
-
 function(input, output, session) { 
+  
+  check <- reactiveValues(ok = NULL)
   
   url <- a("à cette page", href = "http://sls-dbim02.sls.aphp.fr:3838/4115983/servyce/")
   output$urlservyce <- renderUI({tagList("Une interface d'analyse des données par service est disponible ", url)})
@@ -22,25 +26,8 @@ function(input, output, session) {
     courant <- input$courant ; consol <- input$consol ; struct <- input$struct
     if (is.null(courant) | is.null(consol) | is.null(struct)) {return(NULL)}
     
-    courant <<- courant
     print(courant)
     
-    # extensions:
-    # - rum
-    # - rss
-    # - rsa
-    # - rha
-    # - ano
-    # - tra
-    # - ium
-    # - leg
-    # - med
-    # - medatu
-    # - pie
-    # - porg
-    # - diap
-    
-
     #Copier ou extraire les fichier 
     for(i in 1:length(courant$datapath)) {
       if(tools::file_ext(courant[[i,'datapath']])=="zip") {
@@ -60,7 +47,7 @@ function(input, output, session) {
     
     #Extraction des informations à partir des fichiers chargés NB: ICI INTRODUIRE DES VERIFICATIONS SUR LES FICHIERS CHARGES !!!
     infofiles <<- tibble::enframe(name=NULL, list.files("../temp/")) %>% dplyr::rename(name=value) %>% separate(., name, into = c("finess", "annee", "mois"), sep = "\\.", remove = FALSE) %>% dplyr::mutate(ext=tools::file_ext(name))
-    # nsites <<- n_distinct(infofiles$finess)
+    nsites <<- n_distinct(infofiles$finess)
     hopitaux <<- unique(infofiles$finess)
     annee <<- max(as.numeric(infofiles$annee))
     mois <<- min(as.numeric(infofiles$mois))
@@ -69,21 +56,18 @@ function(input, output, session) {
     file.copy(struct[[1,'datapath']], paste0("../temp/", struct[[1,'name']]))
     #Formatage du fichier structure
     # fichier_structure <<- readxl::read_excel(paste0("../temp/", input$struct[[1,'name']]), col_types = c( "text" , "text" , "text" , "text" ,"text" , "text" , "text" , "text" , "text" ), col_names = c('nofiness', 'hopital', 'cdurm', 'uma_locale', 'uma_locale2',  'libelle_um', 'service', 'regroupement1', 'pole'), skip = 1  )
-    
-    ok <<- 0
-   
+
     print(infofiles)
     
     #Créer les fichiers manquants pour pie/porg/diap seulement:
-    addpie <<- NULL
-    addporg <<- NULL
-    adddiap <<- NULL
     for(n in infofiles[infofiles$ext=="rsa",'name']) {
-      if(nrow(dplyr::filter(infofiles, name==stringr::str_replace(n, ".rsa", ".pie"))) == 0) { addpie <<- stringr::str_replace(n, ".rsa", ".pie"); file.create(paste0("../temp/", addpie)) ; print("1 fichier .pie créé")}
-      if(nrow(dplyr::filter(infofiles, name==stringr::str_replace(n, ".rsa", ".porg"))) == 0) { addporg <<- stringr::str_replace(n, ".rsa", ".porg"); file.create(paste0("../temp/", addporg)) ; print("1 fichier .porg créé") }
-      if(nrow(dplyr::filter(infofiles, name==stringr::str_replace(n, ".rsa", ".diap"))) == 0) { adddiap <<- stringr::str_replace(n, ".rsa", ".diap"); file.create(paste0("../temp/", adddiap)) ; print("1 fichier .diap créé") }
+      if(nrow(dplyr::filter(infofiles, name==stringr::str_replace(n, ".rsa", ".pie"))) == 0) { addpie <<- stringr::str_replace(n, ".rsa", ".pie"); file.create(paste0("../temp/", addpie)) ; print("fichier(s) .pie créé")}
+      if(nrow(dplyr::filter(infofiles, name==stringr::str_replace(n, ".rsa", ".porg"))) == 0) { addporg <<- stringr::str_replace(n, ".rsa", ".porg"); file.create(paste0("../temp/", addporg)) ; print("fichier(s) .porg créé") }
+      if(nrow(dplyr::filter(infofiles, name==stringr::str_replace(n, ".rsa", ".diap"))) == 0) { adddiap <<- stringr::str_replace(n, ".rsa", ".diap"); file.create(paste0("../temp/", adddiap)) ; print("fichier(s) .diap créé") }
     }
 
+    check$ok <- 0
+    
   } )  
   
   output$readme2 <- renderDT( {
@@ -184,32 +168,34 @@ function(input, output, session) {
       
       do.call(file.remove, list(list.files("../temp/", full.names = TRUE)))
       
-      ok <<- 1
+      check$ok <- 1
      } )
     }
   } )
 
   output$readme3 <- renderText( {
-    courant <- input$courant ; consol <- input$consol ; struct <- input$struct ; ok <- ok
-    if (is.null(courant) | is.null(consol) | is.null(struct)) {
+    courant <- input$courant ; consol <- input$consol ; struct <- input$struct ; ok <- check$ok
+    if ((is.null(courant) | is.null(consol) | is.null(struct)) & is.null(ok)) {
       return(paste("Uploader les fichiers et attendre la fin de la copie des fichiers", sep="\n"))
-      } else {
-        if(ok != 1){
-          return(paste("Cliquer sur -Import et calculs-, attendre la fin du chargement puis cliquez sur -Téléchargement-", sep="\n"))
-        } else {
+      } 
+    if (!is.null(courant) & !is.null(consol) & !is.null(struct) & ok == 0) {
+      return(paste("Cliquer sur -Import et calculs-, attendre la fin du chargement puis cliquez sur -Téléchargement-", sep="\n"))
+      }
+    if (!is.null(courant) & !is.null(consol) & !is.null(struct) & ok == 1) {
           return(paste(paste0("Données produites pour ", nsites, " sites, à M", mois, " de ", annee,"."), " Vous pouvez maintenant télécharger l'objet R", sep="\n"))
-        }
       }
   })
 
   output$rendu1 <- downloadHandler(
     filename = function() { paste0("pmsi_", annee, "_M", mois, "_", Sys.Date(), ".RData") },
     content = function(file) {
-      save(pmsidata, file = file, compress = "xz", compression_level = 9 ) } )
+      withProgress( message = "Compression des données", value = 0.3, { save(pmsidata, file = file) } )
+                    } )
 
   output$rendu2 <- downloadHandler(
     filename = function() { paste0("pmsi_tarifs_anterieurs_", annee, "_M", mois, "_", Sys.Date(), ".RData") },
     content = function(file) {
-      save(pmsidataant, file = file, compress = "xz", compression_level = 9 ) } )
+      withProgress( message = "Compression des données", value = 0.3, { save(pmsidataant, file = file) } )
+                    } )
   
 }
