@@ -74,10 +74,10 @@ options_locales<-function(DF,val=NULL,niveau=NULL){
 
   if( !is.null( getOption("dimRactivite.services_exclus") ) & "service" %in% names(df) ){
 
-    DF <- DF %>% filter( !service %in% getOption("dimRactivite.services_exclus") )
+    DF <- DF %>% dplyr::filter( !service %in% getOption("dimRactivite.services_exclus") )
   }
   
-  DF <- DF %>% distinct( nofiness, ansor, cle_rsa, .keep_all = T ) %>% mutate( doublon = 1 )
+  DF <- DF %>% dplyr::group_by( nofiness, ansor, cle_rsa, .keep_all = T ) %>% dplyr::mutate( doublon = 1 ) %>% ungroup()
 
   #Dédoublonnage en fonction des paramètres optionnels
   #On cherche dans val ou niveau la valeur d'une variable de déboublonnage

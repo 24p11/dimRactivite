@@ -461,14 +461,14 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
   ###########################################################################
   if('nbsuprea'%in%indicateurs){
 
-    tb[['nbsuprea']]<-with(df,tapply(nbsuprea_repa,pivot,sum))
+    tb[['nbsuprea']]<-round(with(df,tapply(nbsuprea_repa,pivot,sum)))
 
   }
 
 
   if('nssir'%in%indicateurs){
 
-    tb[['nssir']]<-with(df,tapply(nssir_repa,pivot,sum))
+    tb[['nssir']]<- round(with(df,tapply(nssir_repa,pivot,sum)))
 
   }
 
@@ -479,7 +479,7 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
 
   if('p_nbsuprea'%in%indicateurs){
 
-    tb[['p_nbsuprea']]<-round(tb[['nbsuprea']]*100/( tb[['nbsuprea']]+ tb[['nssir']]))
+    tb[['p_nbsuprea']]<-round(round(tb[['nbsuprea']]*100/( tb[['nbsuprea']]+ tb[['nssir']])))
 
   }
 
@@ -488,13 +488,13 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
   ############################################################################
   if('nsstf'%in%indicateurs){
 
-    tb[['nsstf']]<-with(df,tapply(nssir_repa+nsstf_repa,pivot,sum))
+    tb[['nsstf']]<- round(with(df,tapply(nssir_repa+nsstf_repa,pivot,sum)))
   }
 
 
   if('stf_hr'%in%indicateurs){
 
-    tb[['stf_hr']]<-tapply(df$nsstf_repa,df$pivot,sum)
+    tb[['stf_hr']]<-round(tapply(df$nsstf_repa,df$pivot,sum))
 
   }
 
@@ -502,7 +502,7 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
   ############################################################################
   if('nbsupsrc'%in%indicateurs){
 
-    tb[['nbsupsrc']]<-tapply(df$nbsupsrc_repa,df$pivot,sum)
+    tb[['nbsupsrc']]<-round(tapply(df$nbsupsrc_repa,df$pivot,sum))
 
   }
 
@@ -1316,21 +1316,21 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
   ###########################################################################
   #Sejours extremes (bornes)
   ###########################################################################
-  if('NbSejDMSp30j'%in%indicateurs){
+  if('nb_sej_sup30'%in%indicateurs){
 
-    tb[['NbSejDMSp30j']]<-table( df%>%filter(duree > 30) %>% filter(doublon == 1) %>% select(pivot) )
+    tb[['nb_sej_sup30']]<-table( df%>%filter(duree > 30) %>% filter(doublon == 1) %>% select(pivot) )
 
   }
 
-  if('NbSejBH'%in%indicateurs){
+  if('nb_sej_bh'%in%indicateurs){
 
     tmp = df%>%filter(nbjrbs>0)
 
-    tb[['NbSejBH']]<-table( tmp %>% filter(doublon == 1) %>% select(pivot) )
+    tb[['nb_sej_bh']]<-table( tmp %>% filter(doublon == 1) %>% select(pivot) )
   }
 
   if('pSejBH'%in%indicateurs){
-    tb[['pSejBH']]<-round(tb[['NbSejBH']] * 100 / tb[['HCtot']]
+    tb[['p_sej_bh']]<-round(tb[['nb_sej_bh']] * 100 / tb[['HCtot']]
                           ,digit=1)
   }
 

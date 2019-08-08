@@ -146,3 +146,7 @@ for ( val in vals ){
 }
 
 
+
+
+df<-get_data(inner_join(rum,rum_v), a =(annee-5):annee, m = 1:mois )
+tdb_v[['hopitaux']] <- round( with( df, tapply( valopmctmonotime1, list(hopital,ansor,typehosp), sum, na.rm=T ) ) )
