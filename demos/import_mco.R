@@ -58,7 +58,7 @@ verif_structure(rum,fichier_structure)
 
 rum <- rum %>% left_join( ., fichier_structure ) %>%
       mutate(pole = ifelse(is.na(pole),'Erreurs',pole),
-             service = ifelse(is.na(service),'Erreur service non renseignées',service))
+             service = ifelse(is.na(service),'Erreur service non renseigné',service))
 
 save(list = c('rum','rum_v','diagnostics','actes','rsa','rsa_v','vano'),
      file = paste0(getOption("dimRactivite.path"),'/Rpmeasyr.RData') )
