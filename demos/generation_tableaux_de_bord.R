@@ -17,8 +17,8 @@ library(referime)
 mois=as.numeric(format(Sys.Date()-50,'%m'));Mois=format(Sys.Date()-50,'%m')
 annee=as.numeric(format(Sys.Date()-55,'%Y'));
 
-#Chemins pour l'es sorties'écriture des fichiers de sortie
-path_res="~/GH_PMSI/ACTIVITE_MSI/ANALYSES/TABLEAUX_DE_BORD/"
+#Chemins pour les sorties écriture des fichiers de sortie
+path_res = getOption('dimRactivite.path_tdb_files')
 
 #Chargement du fichier structure
 fichier_structure <- readxl::read_excel("demos/structures.xlsx",

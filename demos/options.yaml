@@ -1,4 +1,5 @@
 path: "~/GH_PMSI/DATA/GENRSA"
+path_tdb_files: "~/GH_PMSI/ACTIVITE_MSI/ANALYSES/TABLEAUX_DE_BORD/"
 
 arborescence:
   - {finess}
