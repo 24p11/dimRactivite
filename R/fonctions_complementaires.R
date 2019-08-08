@@ -1,3 +1,5 @@
+is.date <- function(x) inherits(x, 'Date')
+
 #' Selection de données en fonction de critère temporels et géographique (lieu d'hopsitalisation)
 #'  Applicable sur des objets en sortie de pmeasyr
 #' @param df tibble, un tibble en sortie de pmeasyr
@@ -15,17 +17,18 @@
 #' @export
 #'
 #' @examples
-get_data<-function( df, ref = 'ansor', m, a, val = NULL, niveau = NULL, opt = T ){
+get_data<-function( DF, ref = 'ansor', m, a, val = NULL, niveau = NULL, opt = T ){
 
 
-  if(ref =='ansor'){
+  if( ref == 'ansor' ){
 
-    df <- df  %>% filter ( as.numeric(ansor) %in% a,
-                           as.numeric(moissor) %in% m )
+    DF <- DF  %>% filter ( as.numeric(ansor) %in% a,
+                           as.numeric(moissor) %in% m )%>%
+      mutate(ansor = factor(ansor,levels = min(a):max(a)))
 
   }else{
 
-    df <- df  %>% filter ( as.numeric( format( !!sym(ref), '%Y') ) %in% a,
+    DF <- DF  %>% filter ( as.numeric( format( !!sym(ref), '%Y') ) %in% a,
                            as.numeric( format( !!sym(ref), '%m') ) %in% m )
 
   }
@@ -33,19 +36,21 @@ get_data<-function( df, ref = 'ansor', m, a, val = NULL, niveau = NULL, opt = T 
 
   if( !is.null(niveau) & !is.null(val) ){
 
-    df <- df %>% filter ( !!sym(niveau) %in% val )
+    DF <- DF %>% filter ( !!sym(niveau) %in% val )
 
   }
 
 
   if( opt == T ){
 
-    df <- options_locales( df, val, niveau )
+    DF <- options_locales( DF, val, niveau )
 
   }
+  
+  
 
 
-  return(df)
+  return(DF)
 }
 
 
@@ -65,17 +70,14 @@ get_data<-function( df, ref = 'ansor', m, a, val = NULL, niveau = NULL, opt = T 
 #' @examples
 #'
 #'
-options_locales<-function(df,val=NULL,niveau=NULL){
+options_locales<-function(DF,val=NULL,niveau=NULL){
 
   if( !is.null( getOption("dimRactivite.services_exclus") ) & "service" %in% names(df) ){
 
-      df <- df %>% filter( !service %in% getOption("dimRactivite.services_exclus") )
+    DF <- DF %>% filter( !service %in% getOption("dimRactivite.services_exclus") )
   }
-
-  if(is.null(niveau)){
-
-    df <- df %>% distinct( nofiness, ansor, cle_rsa, .keep_all = T ) %>% mutate( doublon = 1 )
-  }
+  
+  DF <- DF %>% distinct( nofiness, ansor, cle_rsa, .keep_all = T ) %>% mutate( doublon = 1 )
 
   #Dédoublonnage en fonction des paramètres optionnels
   #On cherche dans val ou niveau la valeur d'une variable de déboublonnage
@@ -87,10 +89,11 @@ options_locales<-function(df,val=NULL,niveau=NULL){
 
       if( niveau == i | val == i  ){
 
-        df <- df %>%  group_by( nofiness, ansor, cle_rsa, !!sym(n) )%>%
+        DF <- DF %>%  group_by( nofiness, ansor, cle_rsa, !!sym(n) )%>%
                       arrange( nofiness,ansor, cle_rsa, !!sym(n), d8eeue ) %>%
                       mutate( nb_rum = n(),
-                              doublon = if_else( row_number() == 1,1,0 ) )
+                              doublon = if_else( row_number() == 1, 1, 0 ) )%>%
+                      ungroup()
       }
 
 
@@ -98,7 +101,7 @@ options_locales<-function(df,val=NULL,niveau=NULL){
 
   }
 
-  return(df)
+  return(DF)
 
 }
 
@@ -209,11 +212,11 @@ diff_tb<-function(t){
 #'
 #' @examples
 IP_SERVICE<-function(df){
-  df%>%filter(noghs!=9999,duree>0,dms_bn>0)%>%
+  df%>%filter(noghs!=9999,duree>0,dms_n>0)%>%
     distinct( nofiness,ansor,cle_rsa,service, .keep_all= TRUE)
 
   NUMERATEUR<-sum(df$dureesejpart,na.rm=T)
-  DENOMINATEUR<-sum(df$dms_bn*df$coeftime,na.rm=T)
+  DENOMINATEUR<-sum(df$dms_n*df$coeftime,na.rm=T)
   IP  <-round(NUMERATEUR/DENOMINATEUR,digit=2)
   return(IP)
 }
@@ -227,11 +230,11 @@ IP_SERVICE<-function(df){
 #'
 #' @examples
 IP_SEJOUR<-function(df){
-  df<-df%>%filter(noghs!=9999,duree>0,dms_bn>0)%>%
+  df<-df%>%filter(noghs!=9999,duree>0,dms_n>0)%>%
     distinct(ansor,nofiness,cle_rsa,.keep_all = T)
 
   NUMERATEUR<-sum(df$duree,na.rm=T)
-  DENOMINATEUR<-sum(df$dms_bn,na.rm=T)
+  DENOMINATEUR<-sum(df$dms_n,na.rm=T)
   IP  <-round(NUMERATEUR/DENOMINATEUR,digit=2)
   return(IP)
 }
@@ -320,14 +323,11 @@ get_diff<-function(df){
 #' @section Warning: utilise la liste inca_cancero
 #' @examples
 
-selection_cancer_diag<-function(df = diagnostics){
+selection_cancer_diag<-function( diagnostics ){
   
-  dplyr::inner_join(df,dplyr::as_tibble(inca_cancero),by = c("diag" = "code"))%>%
-    dplyr::mutate(nda = substr(nas,1,9))%>%
-    dplyr::inner_join(rum%>%select(nas,ipp,ansor),.)%>%
-    dplyr::mutate(ipp = dplyr::if_else( (is.na(ipp) | ipp=='') ,nda,ipp))%>%
-    dplyr::distinct( nda,diag,type, .keep_all= TRUE)%>%
-    dplyr::select(-norum)
+  dplyr::inner_join( diagnostics, dplyr::as_tibble( inca_cancero ), by = c("diag" = "code") )%>%
+    dplyr::mutate( nda = substr(nas,1,9) )%>%
+    dplyr::distinct( nda, diag, position, .keep_all= TRUE )
   
   
 }
@@ -342,15 +342,16 @@ selection_cancer_diag<-function(df = diagnostics){
 #' @examples
 #'
 
-selection_cancer_pat<-function(df){
+selection_cancer_pat<-function( df, df_ano ){
   
-  df%>%mutate(score_confiance_diag_cancer = dplyr::if_else(type=='a',1,10))%>%
-    group_by(ipp,diag,APPAREIL,ORGANE)%>%
+  df%>%mutate(score_confiance_diag_cancer = dplyr::if_else(position==5,1,10))%>%
+    inner_join(., df_ano )%>%
+    group_by(noanon,diag,appareil,organe)%>%
     summarise(score_confiance_diag_cancer = sum(score_confiance_diag_cancer))%>%
     ungroup()%>%
-    group_by(ipp)%>%
+    group_by(noanon)%>%
     filter(score_confiance_diag_cancer == max(score_confiance_diag_cancer))%>%
-    distinct(ipp, .keep_all= TRUE)
+    distinct(noanon, .keep_all= TRUE)
 }
 
 
@@ -368,13 +369,13 @@ selection_cancer_pat<-function(df){
 #'
 attribution_type_M4<-function(df){
   
-  df<-df%>% dplyr::mutate(type_chirugie = NA)
-  for (nom_liste in c("ChirurgeCancersDigestif","ChirurgieCancersGynecologique",
-                      "ChirurgieCancersORL_Maxilo","ChirurgieCancersSein","ChirurgieCancersThorax",
-                      "ChirurgieCancersThyoroide","ChirurgieCancersUrologie","CancersSNC",
-                      "CancersOsTissusMou","ChirurgieCancersThyroide","CancersDeLaPeau")){
+  df<-df%>% dplyr::mutate(type_chirurgie = NA)
+  for (nom_liste in c("chirurge_cancers_digestif","chirurgie_cancers_gynecologique",
+                      "chirurgie_cancers_orl_maxilo","chirurgie_cancers_sein","chirurgie_cancers_thorax",
+                      "chirurgie_cancers_urologie","cancers_snc",
+                      "cancers_os_tissus_mou","chirurgie_cancers_thyroide","cancers_de_la_peau")){
     
-    df <- df %>% dplyr::mutate(type_chirugie = ifelse(dp %in% listes_cim[[nom_liste]]$code & gptype == 'C', nom_liste, type_chirugie))
+    df <- df %>% dplyr::mutate(type_chirurgie = ifelse(dp %in% get(nom_liste)$code & gptype == 'C', nom_liste, type_chirurgie))
     
   }
   
@@ -399,8 +400,8 @@ attribution_statut_nx_patient<-function(df){
   df<-df%>%dplyr::mutate(nx_pat = 'N')
   
   for(a in ansor_deb:ansor_fin){
-    tmp <- df %>% dplyr::filter(ansor %in% (a-3):(a-1) )%>% dplyr::select(ipp) %>% purrr::flatten_chr() %>% unique()
-    df <- df%>%dplyr::mutate(nx_pat = ifelse(! ipp %in% tmp & ansor == a,'O',nx_pat))
+    tmp <- df %>% dplyr::filter(ansor %in% (a-3):(a-1) )%>% dplyr::select(noanon) %>% purrr::flatten_chr() %>% unique()
+    df <- df%>%dplyr::mutate(nx_pat = ifelse(! noanon %in% tmp & ansor == a,'O',nx_pat))
     
   }
   
