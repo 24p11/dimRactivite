@@ -154,9 +154,9 @@ maj_variable_RData<-function( remontees, p = NULL ){
   #Si pas de noyau la variable .RData mise à jour est celle des remontées les plus récentes
   if( is.null(p) ){
   
-    if( 1 %in% unique(remontees_dispo$RData) ){
-      recents<-remontees_dispo %>% filter( RData==1 )%>%
-        group_by( finess ) %>% summarise( annee=max(annee) ) %>%
+    if( 1 %in% unique(remontees$RData) ){
+      
+      recents<-remontees %>% filter( RData==1 , annee == max(annee) )%>% 
         group_by( finess, annee )%>%summarise( mois = max(as.numeric(mois) ) )
    
       for(i in 1:nrow(recents)){
@@ -167,7 +167,6 @@ maj_variable_RData<-function( remontees, p = NULL ){
                                   path   = getOption("dimRactivite.path")
         )
    
-        
         remontees<-maj_variable_RData(remontees,p_modif)
         
       
