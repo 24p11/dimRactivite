@@ -45,9 +45,9 @@ labels<-as.data.frame(references[!duplicated(references$var),c('var','libelle','
 row.names(labels)<-labels$var
 labels<-labels[,-1]
 
-
+#Présents dans fichiers structure, absent référentiels
 prep_string(str)[!prep_string(str)%in%names(references)]
-
+#Présents référentiels, absents fichier structure
 names(references)[!names(references)%in%c(prep_string(str),'tdb','niv','libelle','var','variable','dataframe','referentiel')]
 
 
@@ -58,10 +58,13 @@ exclusionPdiff<-c('Taux de re-admissions precoces','IGS moyen')
 #Prération des DMS base nationale
 #####################################################################################################################
 ghm_dms_nationales<-referime::get_table("ghm_dms_nationales")
+
+#Merge rsa, dms pour les cas ou la référence dans ghm_dms_nationales = ghs
 rsa_dms1<-inner_join(rsa%>%unite("ghm",gpcmd,gptype,gpnum,gpcompx,sep="")%>%
                        rename(ghs = noghs)%>%
                        select(nofiness,cle_rsa,ansor,anseqta,ghs,ghm),
                      ghm_dms_nationales%>%filter(ghs!=""))
+#Merge rsa, dms pour les cas ou la référence dans ghm_dms_nationales = ghm
 rsa_dms2<-inner_join(rsa%>%unite("ghm",gpcmd,gptype,gpnum,gpcompx,sep="")%>%
                        select(nofiness,cle_rsa,ansor,anseqta,ghm),
                      ghm_dms_nationales%>%filter(ghs==""))
