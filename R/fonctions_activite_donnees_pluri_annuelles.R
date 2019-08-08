@@ -1651,6 +1651,15 @@ make_tdb<-function(val,niveau,annee,mois){
   #Données mensuelles
   df <- df %>% filter( as.numeric(moissor) == mois )
   
+  if (nrow(df)==0) {
+    message(
+      "\n",
+      toString(niveau)," " , toString(val), " aucune donnée retrouvée dans les rum mensuels (",toString(mois),") \n"
+    )
+    return(NA)
+  }
+  
+  
   for (nom_tableau in noms_tableaux){
     
     inds=get_indicateurs(nom=nom_tableau,val=val)
