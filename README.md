@@ -17,22 +17,17 @@ devtools::install_github("24p11/dimRactivite")
 Imports de données
 ------------------
 
-Le package propose des fonctions permettant des systématiser les imports pmeasyr et générer des tableaux de bord paramétrables à partir des objects R crées à partir de ces imports. Il utilise le format de lecture pmeasyr irum type 6 et irsa type 1 pour générer un objet unique .RData qui comprend: - rsa\_v - rum - rum\_v - diagnostics - actes .
+Le package dimRactivite propose des fonctions permettant des systématiser les imports pmeasyr (seule la partie MCO a été développée à ce jour) pour fusionner les données de différentes années et de différents établissements. Ces données pourront ensuite ensuite être anlysées pour réaliser le suivi de l'activité des établissements.
 
-Dans la perspective du suivi de l'activité de plusieurs établissement
+dimRactivite utilise le format de lecture pmeasyr irum type 6 et irsa type 1 pour générer un objet unique .RData par remontée et qui comprend les tableaux de données suivants : rsa - rsa\_v - rum - rum\_v - diagnostics - actes - vano . Ces objets sont ensuite importés dans R et concaténées pour former un enviroment de travail comprenant l'ensemble des données disponibles
 
-``` bash
-+-- path
-    +-- nofiness
-        +-- AAAA
-           +-- MM 
-```
+Comme préconisé par G.Pressiat dans la documentation du package pmeasyr, dimRactivite utilisera un dossier unique comprenant l'ensemble des fichiers en entrée et sortie de GENRSA. Les fichiers contenu dans ce dossier seront anylisées, les fichiers .RData seront crées s'ils n'existent pas encore, puis les données seront automatiquement intégrées dans R (par défaut la dernière remontée disponible par année est intégrée).
 
-Example
--------
+Pour ce faire on utilise les standards de nommage des fichiers entrée et sortie de GENRSA qui sont de la forme : FINESS.ANNEE.MOIS.ext
 
-Dans la patie démos plusieurs exemples d'utilisations pour générer rapidement un ensemble de tableaux de bord.
+Génration de tableaux de bord
+------------------
 
-``` r
-## basic example code
+
+
 ```
