@@ -40,6 +40,6 @@ Démos
 Des scripts de démonstration sont inclus dans le package afin de montrer l'utilisation des différentes fonctions :
 ```
 + demos
-  ---- import_pmeasyr.R
-  ---- generation_tableaux_de_bord.R
+  +--- import_pmeasyr.R
+  +--- generation_tableaux_de_bord.R
 ```
