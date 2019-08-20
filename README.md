@@ -8,8 +8,7 @@ L'objectif du package est de standardiser la production de tableaux de bord et d
 Installation
 ------------
 
-You can install dimRactivite from github with:
-
+Vous pouvez installer le package directement depuis github:
 ``` r
 # install.packages("devtools")
 devtools::install_github("24p11/dimRactivite")
@@ -18,7 +17,7 @@ devtools::install_github("24p11/dimRactivite")
 Imports de données
 ------------------
 
-Le package propose des fonctions permettant des systématiser les imports pmeasyr en utilisant le modèle de file system proposer par G.Pressiat. Il utilise le format de lecture irum type 6 et irsa type 1 pour générer un objet unique .RData qui dont le chargement sera accélérer et qui comprend: - rsa\_v - rum - rum\_v - diagnostics - actes
+Le package propose des fonctions permettant des systématiser les imports pmeasyr et générer des tableaux de bord paramétrables à partir des objects R crées à partir de ces imports. Il utilise le format de lecture pmeasyr irum type 6 et irsa type 1 pour générer un objet unique .RData qui comprend: - rsa\_v - rum - rum\_v - diagnostics - actes .
 
 Dans la perspective du suivi de l'activité de plusieurs établissement
 
