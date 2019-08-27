@@ -13,6 +13,9 @@ library(referentiels)
 library(referime)
 
 
+#Si fichier genrsatemporaire
+tmp = TRUE
+
 #Année et mois en cours
 mois=as.numeric(format(Sys.Date()-50,'%m'));Mois=format(Sys.Date()-50,'%m')
 annee=as.numeric(format(Sys.Date()-55,'%Y'));
@@ -71,7 +74,7 @@ rsa_dms2<-inner_join(rsa%>%unite("ghm",gpcmd,gptype,gpnum,gpcompx,sep="")%>%
 rsa_dms<-bind_rows(rsa_dms1%>%select(nofiness,cle_rsa,ansor,dms_n),
                    rsa_dms2%>%select(nofiness,cle_rsa,ansor,dms_n)
                    )
-                   
+rm(rsa_dms1,rsa_dms2)   
 #####################################################################################################################
 #Prération des données pour le suivi de l'activité de cancérologie
 #####################################################################################################################
@@ -88,27 +91,27 @@ cancer_rsa <- dplyr::inner_join(cancer_pat,
 #######################################################################################################################
 ###Tableaux de bord généraux
 #######################################################################################################################
-df<-get_data(inner_join(rum,rum_v), a =(annee-5):annee, m = 1:mois )
+df<-get_data(inner_join(rum,rum_v), a =(annee-3):annee, m = 1:mois )
 
 
 tdb <- get_activite_sejours( df, structure )
 path_file=paste0(path_res,'/',annee,'/','TableauDeBordGeneral',annee,stringr::str_pad(mois,2,"left","0"),'cum.xls')  
-write.table( tdb, file=path_file, sep='\t', row.names=T, col.names=NA, na='' , fileEncoding = "latin1" )
+write.table( tdb, file=path_file, sep='\t', row.names=T, col.names=NA, na='' , fileEncoding = "utf-8" )
 
 tdb <- get_activite_recettes( df, structure )
 path_file=paste0(path_res,'/',annee,'/','TableauDeBordValorisation',annee,stringr::str_pad(mois,2,"left","0"),'cum.xls')  
-write.table( tdb, file=path_file, sep='\t', row.names=T, col.names=NA, na='' , fileEncoding = "latin1" )
+write.table( tdb, file=path_file, sep='\t', row.names=T, col.names=NA, na='' , fileEncoding = "utf-8" )
 
 
 df <- df %>% filter( as.numeric(moissor) == mois )
 
 tdb <- get_activite_sejours( df, structure )
 path_file=paste0(path_res,'/',annee,'/','TableauDeBordGeneral',annee,stringr::str_pad(mois,2,"left","0"),'mens.xls')  
-write.table( tdb, file=path_file, sep='\t', row.names=T, col.names=NA, na='' , fileEncoding = "latin1" )
+write.table( tdb, file=path_file, sep='\t', row.names=T, col.names=NA, na='' , fileEncoding = "utf-8" )
 
 tdb <- get_activite_recettes( df, structure )
 path_file=paste0(path_res,'/',annee,'/','TableauDeBordValorisation',annee,stringr::str_pad(mois,2,"left","0"),'mens.xls')  
-write.table( tdb, file=path_file, sep='\t', row.names=T, col.names=NA, na='' , fileEncoding = "latin1" )
+write.table( tdb, file=path_file, sep='\t', row.names=T, col.names=NA, na='' , fileEncoding = "utf-8" )
 
 
 

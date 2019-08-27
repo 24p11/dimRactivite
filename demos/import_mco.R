@@ -56,10 +56,25 @@ fichier_structure <- readxl::read_excel("demos/structures.xlsx",
                                         )
 verif_structure(rum,fichier_structure)
 
-rum <- rum %>% left_join( ., fichier_structure ) %>%
-      mutate(pole = ifelse(is.na(pole),'Erreurs',pole),
-             service = ifelse(is.na(service),'Erreur service non renseigné',service))
-
+if(tmp == TRUE){
+  
+  rum1 <- rum %>% filter( ansor == annee ) %>% rename(uma_locale = cdurm) %>% left_join( ., fichier_structure ) %>%
+    mutate(pole = ifelse(is.na(pole),'Erreurs',pole),
+           service = ifelse(is.na(service),'Erreur service non renseigné',service))
+  
+  rum2 <- rum  %>% filter( ansor != annee ) %>% left_join( ., fichier_structure ) %>%
+    mutate(pole = ifelse(is.na(pole),'Erreurs',pole),
+           service = ifelse(is.na(service),'Erreur service non renseigné',service))
+  
+  rum <- dplyr::bind_rows( rum1, rum2 )
+  
+  rm(rum1,rum2)
+  
+}else{
+    rum <- rum %>% left_join( ., fichier_structure ) %>%
+          mutate(pole = ifelse(is.na(pole),'Erreurs',pole),
+                 service = ifelse(is.na(service),'Erreur service non renseigné',service))
+}
 save(list = c('rum','rum_v','diagnostics','actes','rsa','rsa_v','vano'),
      file = paste0(getOption("dimRactivite.path"),'/Rpmeasyr.RData') )
 

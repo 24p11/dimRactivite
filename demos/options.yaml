@@ -38,6 +38,20 @@ services_exclus:
   - titi
   - rea chir
 
+fichier_strucure:
+  nom :
+   - structure.xlsx
+  colonnes :
+   - nofiness
+   - site
+   - cdurm
+   - code_um1
+   - code_um2
+   - libelle_um
+   - service
+   - regroupement2
+   - pole
+
 gestion_doublons_rum:
     service: service
     pole: service
