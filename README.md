@@ -18,11 +18,7 @@ devtools::install_github("24p11/dimRactivite")
 
 Le package dimRactivite propose des fonctions permettant des systématiser les imports pmeasyr (seule la partie MCO a été développée à ce jour) afin de fusionner les données de différentes années et de différents établissements. Ces données pourront ensuite ensuite être anlysées pour réaliser le suivi de l'activité des établissements.
 
-dimRactivite utilise le format de lecture pmeasyr irum type 6 et irsa type 1 pour générer un objet unique .RData par remontée et qui comprend les tableaux de données suivants : rsa - rsa\_v - rum - rum\_v - diagnostics - actes - vano . Ces objets sont ensuite importés dans R et concaténées pour former un enviroment de travail comprenant l'ensemble des données disponibles.
-
-Pour ce faire on utilise les standards de nommage des fichiers entrée et sortie de GENRSA contenus dans l'archive zippée et qui sont de la forme : FINESS.AAAA.MM.ext .
-
-Enfin des informations complèmentaires non contenus dans les formats officiels peuvent être intégrées, en particulier des informations sur les structures permettant de générer des tableaux de bord compréhensibles. Pour les structures et les indentités patients, des formats xlsx sont utilisés. L'intégration de ces nouvelles variables est réalisée à la fin de la procédure d'import.
+Des informations complèmentaires non contenus dans les formats officiels peuvent être intégrées, en particulier des informations sur les structures permettant de générer des tableaux de bord compréhensibles. 
 
 
 #### Génration de tableaux de bord
