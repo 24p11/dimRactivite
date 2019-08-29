@@ -20,8 +20,6 @@ Le package dimRactivite propose des fonctions permettant des systématiser les i
 
 dimRactivite utilise le format de lecture pmeasyr irum type 6 et irsa type 1 pour générer un objet unique .RData par remontée et qui comprend les tableaux de données suivants : rsa - rsa\_v - rum - rum\_v - diagnostics - actes - vano . Ces objets sont ensuite importés dans R et concaténées pour former un enviroment de travail comprenant l'ensemble des données disponibles.
 
-Comme préconisé par G.Pressiat dans la documentation du package pmeasyr, dimRactivite utilisera un dossier unique comprenant l'ensemble des fichiers zippés en entrée et sortie de GENRSA. Les fichiers contenus dans ce dossier seront anylisées, les fichiers .RData seront crées s'ils n'existent pas encore, puis les données seront automatiquement intégrées dans R (par défaut la remontée la plus récente est prise en compte).
-
 Pour ce faire on utilise les standards de nommage des fichiers entrée et sortie de GENRSA contenus dans l'archive zippée et qui sont de la forme : FINESS.AAAA.MM.ext .
 
 Enfin des informations complèmentaires non contenus dans les formats officiels peuvent être intégrées, en particulier des informations sur les structures permettant de générer des tableaux de bord compréhensibles. Pour les structures et les indentités patients, des formats xlsx sont utilisés. L'intégration de ces nouvelles variables est réalisée à la fin de la procédure d'import.
@@ -70,8 +68,9 @@ où option_name est le nom de l'option.
 
 Organisation du file system
 ---------------------------
-Suivant les recommandations d’utilisation du pacakge pmeasyr [les archives PMSI](https://guillaumepressiat.github.io/pmeasyr/archives.html), l'ensemble d'achives GENRSA sont enregistés dans un même dossier. L'adresse de ce dossier est renseigné dans l'option du fichier de configuration
-path
+Comme préconisé par G.Pressiat dans la documentation du package pmeasyr [les archives PMSI](https://guillaumepressiat.github.io/pmeasyr/archives.html), dimRactivite utilisera un dossier unique comprenant l'ensemble des fichiers zippés en entrée et sortie de GENRSA. Les fichiers contenus dans ce dossier seront anylisées, les fichiers .RData seront crées s'ils n'existent pas encore, puis les données seront automatiquement intégrées dans R (par défaut la remontée la plus récente est prise en compte).
+
+L'adresse de ce dossier est renseigné dans l'option du fichier de configuration ``` path ```  .
 
 Import des données PMSI
 -----------------------
@@ -107,7 +106,12 @@ Ces fonctions font appel aux données de référentiels suivantes (disponibles d
 
 Génération des tableaux de bord
 -----------------------
-On distingue un permier ensemble de tableaux de bord permettant de suivre l'évolution anuelle d'un seul indicateurs sur l'ensmble des niveaux de structure, en prenant toujours le principe de distinguer hopsitalisation complète et hospitalisation partielle. On dispose de tableaux de suivi de l'activité, des recettes et du nombre de journées. Puis un autre ensemble de tableaux permettent de suivre l'évolution annuelle pour un niveau de structure (groupe hospitalier, établissement, pole, service,...) d'un ensemble d'indicateurs. Le package permet de le calcul d'environ 200 indicateurs répartis dans tableaux de bord thématiques (activité, DIM, médical).
+
+Les scripts ***demos*** donne des exemples pour générer différents type de tableaux de bord.
+
+On distingue un permier ensemble de tableaux de bord permettant de suivre l'évolution anuelle d'un seul indicateurs sur l'ensmble des niveaux de structure, en prenant toujours le principe de distinguer hopsitalisation complète et hospitalisation partielle. On dispose de tableaux de suivi de l'activité, des recettes et du nombre de journées.
+
+Un autre ensemble de tableaux permet de suivre l'évolution annuelle pour chaque niveau (groupe hospitalier, établissement, pole, service,...) d'un ensemble d'indicateurs. Le package permet de le calcul d'environ 200 indicateurs répartis dans tableaux de bord thématiques (activité, DIM, médical).
 
 
 
