@@ -70,4 +70,59 @@ getOption("dimRactivite.option_name")
 
 où option_name est le nom de l'option.
 
-```
+Organisation du file system
+---------------------------
+Suivant les recommandations d’utilisation du pacakge pmeasyr [les archives PMSI](https://guillaumepressiat.github.io/pmeasyr/archives.html), l'ensemble d'achives GENRSA sont enregistés dans un même dossier. L'adresse de ce dossier est renseigné dans l'option du fichier de configuration
+path
+
+Import des données PMSI
+-----------------------
+La fonction ```scan_path``` permet d'obteir des statistique sur l'ensemble des fichiers disponibles dans le dossier racinela lecture de l'ensemble des fichiers archives
+
+La fonction ```imco()``` permet de sauvegarder les fichiers d'une même remontée mco dans un seule archive .RData, ce qui accélère beaucoup le chargement des données dès lors que l'on souhaite traiter plusieurs remontées. 
+
+Les scripts ***demos*** donne des exemples d'automatisation de cette procédure. Nous recommandons d'utiliser la fonction ```scan_path()``` qui permettra une meilleure systématisation.
+
+La procédure permet l'import des fichiers suivants (cf [doc irsa](https://guillaumepressiat.github.io/pmeasyr/import-des-donnees.html#rsa)):
+- out
+  * rsa (pmeasyr::irsa type 3, intégration du tra avec pmeasyr::inner_tra)
+  * tra
+  * ano (sauvegardé sous la forme vano avec données de valorisation)
+  * ium
+  * diap
+  * porg
+  * pie
+- in
+  * rss (pmeasyr::irum type 4, transposition des diagnostics, intégration du tra avec pmeasyr::inner_tra)
+
+La procédure réalise également des opérations de transformation et de valorisation : 
+ - intégration du tra (cf inner_tra)
+ - ajout au rum des variables de fichier ium et des typologie des autorisations, 
+ - valorisation des rsa ,
+ - valorisation des rum (cf fonction vvr_rum_repa)
+ - ajout des données de facturation à l'ano (vvr_ano_mco)
+
+Ces fonctions font appel aux données de référentiels suivantes (disponibles dans le package ***referentiels***) :
+ - nomenclature_uma
+ - tarifs_mco_ghs
+ - tarifs_mco_supplements 
+
+Au final la fonction ```imco()``` permet de créer un objet unique nommé FINESS_AAAA_NN.RData qui comprend les objets :
+ - rsa_v_AAAA (tibble)
+ - rum_v_AAAA (tibble)
+ - vano_AAAA (tibble)
+ - rsa_AAAA (tibble partie fixe + stream actes et diagnostics cf [doc irsa](https://guillaumepressiat.github.io/pmeasyr/import-des-donnees.html#rsa))
+ - tra_AAAA 
+ - ium_AAAA 
+ - diap_AAAA
+ - pie_AAAA
+ - rss_AAAA (liste de 3 tibbles : rum, actes, diags cf [doc irss](https://guillaumepressiat.github.io/pmeasyr/import-des-donnees.html#rss)) 
+
+L'option ***persist = TRUE*** retourne les ces objets sous forme d'une liste.
+
+L'option ***tarifsante = TRUE*** permet le calcul avec les tarifs de l'année antérieure.
+
+
+
+
+
