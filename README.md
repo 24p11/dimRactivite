@@ -5,8 +5,7 @@ dimRactivite
 
 L'objectif du package est de standardiser la production de tableaux de bord et de données permettatn le suivi de l'activité en utilisant les données PMSI et le package pmeasyr. Il permet le suivi de l'activité sur un ensemble d'établissements et sur plusieurs années.
 
-Installation
-------------
+#### Installation
 
 Vous pouvez installer le package directement depuis github:
 ``` r
