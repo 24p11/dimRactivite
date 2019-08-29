@@ -44,6 +44,7 @@ Des scripts de démonstration sont inclus dans le package afin de montrer l'util
 + demos
   +--- import_pmeasyr.R
   +--- generation_tableaux_de_bord.R
+```
 
 Paramètres
 ------------------
@@ -54,16 +55,19 @@ Par défaut le fichier de paramètre se trouve dans le dossier  du package.
 ``` 
 + demos
   +---- options.yaml
-  ```
+```
+
 #### Accès aux options
 L'ensemble des paramètres seront chargés lors de l'appel du package. Il est possible de recharger ces paramètres après modification :
 ```r
 upate_options()
 ```
+
 Les options du package sont accessibles une fois le package installé par la fonction :
 ```r
 getOption("dimRactivite.option_name")
 ```
+
 où option_name est le nom de l'option.
 
 ```
