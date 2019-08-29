@@ -14,8 +14,8 @@ Vous pouvez installer le package directement depuis github:
 devtools::install_github("24p11/dimRactivite")
 ```
 
-Imports de données
-------------------
+#### Imports de données
+
 
 Le package dimRactivite propose des fonctions permettant des systématiser les imports pmeasyr (seule la partie MCO a été développée à ce jour) afin de fusionner les données de différentes années et de différents établissements. Ces données pourront ensuite ensuite être anlysées pour réaliser le suivi de l'activité des établissements.
 
@@ -28,8 +28,8 @@ Pour ce faire on utilise les standards de nommage des fichiers entrée et sortie
 Enfin des informations complèmentaires non contenus dans les formats officiels peuvent être intégrées, en particulier des informations sur les structures permettant de générer des tableaux de bord compréhensibles. Pour les structures et les indentités patients, des formats xlsx sont utilisés. L'intégration de ces nouvelles variables est réalisée à la fin de la procédure d'import.
 
 
-Génration de tableaux de bord
-------------------
+#### Génration de tableaux de bord
+
 
 Une fois les données intégrées, des fonctions de générations automatiques de tableaux de bord sont disponibles. Pour l'instant, ces tableaux de bords sont produits sous forme de fichiers csv.
 
