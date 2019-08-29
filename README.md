@@ -40,6 +40,18 @@ Paramètres
 ------------------
 L'ensemble des paramètres nécessaires au bon fonctionnement du package (chemin des fichiers, nombre d'année d'antériorité pour génération des tableaux de bord, variables du fichier structure,... ) sont décrit dans un fichier yaml.
 
+### Fichier de paramètres
+Par défaut le fichier de paramètre se trouve dans le dossier ```/demos``` du package.
+
+L'ensemble des paramètres seront chargés lors de l'appel du package. Il est possible de recharger ces paramètres après modification :
+```r
+upate_options()
+```
+Les options du package sont accessibles une fois le package installé par la fonction :
+```r
+getOption("dimRactivite.option_name")
+```
+où option_name est le nom de l'option.
 
 Démos
 ------------------
