@@ -25,7 +25,7 @@ Des scripts de démonstration sont inclus dans le package afin de montrer l'util
   +--- generation_tableaux_de_bord.R
 ```
 
-Un scénation complet d'import et de génération peut être trouver dans la vignette 
+Un scénatio complet d'import et de génération peut être trouver dans la vignette 
 
 Organisation du file system
 ---------------------------
