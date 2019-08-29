@@ -77,11 +77,16 @@ path
 
 Import des données PMSI
 -----------------------
-La fonction ```scan_path``` permet d'obteir des statistique sur l'ensemble des fichiers disponibles dans le dossier racinela lecture de l'ensemble des fichiers archives
+L'import des données pmsi se fait en plusieurs étapes :
+- La fonction ```scan_path()``` permet d'obtneir la listes de fichier de remontée disponibles dans le dossier racine, elle produit un df ```fichiers_genrsa```.
+- La fonction ```analyse_fichier_remontee(fichiers_genrsa)``` analyse l'ensemble des ficihers disponible et permet repère les fichier .RData déjà disponibles, elle produit un df ```remontees_dispo```
+- La fonction ```save_remontee(remontees_dispo)``` créer et sauve le fichier .RData
+   * décompression des fichiers de l'archive 
+   * ```imco(p)``` qui permet de sauvegarder les fichiers d'une même remontée mco dans un seule archive .RData, ce qui accélère beaucoup le chargement des données dès lors que l'on souhaite traiter plusieurs remontées. 
 
-La fonction ```imco()``` permet de sauvegarder les fichiers d'une même remontée mco dans un seule archive .RData, ce qui accélère beaucoup le chargement des données dès lors que l'on souhaite traiter plusieurs remontées. 
+- La fonction ```load_all(remontees_dispo)``` charge dans R l'ensemble des remontées disponibles dans ```remontees_dispo```.
 
-Les scripts ***demos*** donne des exemples d'automatisation de cette procédure. Nous recommandons d'utiliser la fonction ```scan_path()``` qui permettra une meilleure systématisation.
+Les scripts ***demos*** donne des exemples d'automatisation de cette procédure. 
 
 La procédure permet l'import des fichiers suivants (cf [doc irsa](https://guillaumepressiat.github.io/pmeasyr/import-des-donnees.html#rsa)):
 - out
