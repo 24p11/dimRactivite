@@ -36,13 +36,26 @@ La procédure utilise les niveaux de structure tels qu'ils sont défnis dans les
 
 On distingue un permier ensemble de tableaux de bord permettant de suivre l'évolution anuelle d'un seul indicateurs sur l'ensmble des niveaux de structure, en prenant toujours le principe de distinguer hopsitalisation complète et hospitalisation partielle. On dispose de tableaux de suivi de l'activité, des recettes et du nombre de journées. Puis un autre ensemble de tableaux permettent de suivre l'évolution annuelle pour un niveau de structure (groupe hospitalier, établissement, pole, service,...) d'un ensemble d'indicateurs. Le package permet de le calcul d'environ 200 indicateurs répartis dans tableaux de bord thématiques (activité, DIM, médical).
 
+
+#### Démos
+
+Des scripts de démonstration sont inclus dans le package afin de montrer l'utilisation des différentes fonctions :
+```
++ demos
+  +--- import_pmeasyr.R
+  +--- generation_tableaux_de_bord.R
+
 Paramètres
 ------------------
 L'ensemble des paramètres nécessaires au bon fonctionnement du package (chemin des fichiers, nombre d'année d'antériorité pour génération des tableaux de bord, variables du fichier structure,... ) sont décrit dans un fichier yaml.
 
-### Fichier de paramètres
-Par défaut le fichier de paramètre se trouve dans le dossier ```/demos``` du package.
-
+#### Fichier de paramètres
+Par défaut le fichier de paramètre se trouve dans le dossier  du package.
+``` 
++ demos
+  +---- options.yaml
+  ```
+#### Accès aux options
 L'ensemble des paramètres seront chargés lors de l'appel du package. Il est possible de recharger ces paramètres après modification :
 ```r
 upate_options()
@@ -53,11 +66,4 @@ getOption("dimRactivite.option_name")
 ```
 où option_name est le nom de l'option.
 
-Démos
-------------------
-Des scripts de démonstration sont inclus dans le package afin de montrer l'utilisation des différentes fonctions :
-```
-+ demos
-  +--- import_pmeasyr.R
-  +--- generation_tableaux_de_bord.R
 ```
