@@ -34,8 +34,6 @@ Une fois les données intégrées, des fonctions de générations automatiques d
 
 La procédure utilise les niveaux de structure tels qu'ils sont défnis dans les paramètres du fichier structure pour décliner les différents niveaux de calcul des indicateurs de suivi.
 
-On distingue un permier ensemble de tableaux de bord permettant de suivre l'évolution anuelle d'un seul indicateurs sur l'ensmble des niveaux de structure, en prenant toujours le principe de distinguer hopsitalisation complète et hospitalisation partielle. On dispose de tableaux de suivi de l'activité, des recettes et du nombre de journées. Puis un autre ensemble de tableaux permettent de suivre l'évolution annuelle pour un niveau de structure (groupe hospitalier, établissement, pole, service,...) d'un ensemble d'indicateurs. Le package permet de le calcul d'environ 200 indicateurs répartis dans tableaux de bord thématiques (activité, DIM, médical).
-
 
 #### Démos
 
@@ -77,18 +75,13 @@ path
 
 Import des données PMSI
 -----------------------
-L'import des données pmsi se fait en plusieurs étapes :
-- La fonction ```scan_path()``` permet d'obtneir la listes de fichier de remontée disponibles dans le dossier racine, elle produit un df ```fichiers_genrsa```.
-- La fonction ```analyse_fichier_remontee(fichiers_genrsa)``` analyse l'ensemble des ficihers disponible et permet repère les fichier .RData déjà disponibles, elle produit un df ```remontees_dispo```
-- La fonction ```save_remontee(remontees_dispo)``` créer et sauve le fichier .RData
-   * décompression des fichiers de l'archive 
-   * ```imco(p)``` qui permet de sauvegarder les fichiers d'une même remontée mco dans un seule archive .RData, ce qui accélère beaucoup le chargement des données dès lors que l'on souhaite traiter plusieurs remontées. 
 
-- La fonction ```load_all(remontees_dispo)``` charge dans R l'ensemble des remontées disponibles dans ```remontees_dispo```.
+Les scripts ***demos*** donne des exemples d'automatisation de la procédure d'import automatique qui procède par plusieurs étapes. 
 
-Les scripts ***demos*** donne des exemples d'automatisation de cette procédure. 
+Cette procédure utilise le fichier GENRSA suivant l'import des fichiers suivants (cf [doc irsa](https://guillaumepressiat.github.io/pmeasyr/import-des-donnees.html#rsa)):
 
-La procédure permet l'import des fichiers suivants (cf [doc irsa](https://guillaumepressiat.github.io/pmeasyr/import-des-donnees.html#rsa)):
+- in
+  * rss (pmeasyr::irum type 4, transposition des diagnostics, intégration du tra avec pmeasyr::inner_tra)
 - out
   * rsa (pmeasyr::irsa type 3, intégration du tra avec pmeasyr::inner_tra)
   * tra
@@ -97,8 +90,6 @@ La procédure permet l'import des fichiers suivants (cf [doc irsa](https://guill
   * diap
   * porg
   * pie
-- in
-  * rss (pmeasyr::irum type 4, transposition des diagnostics, intégration du tra avec pmeasyr::inner_tra)
 
 La procédure réalise également des opérations de transformation et de valorisation : 
  - intégration du tra (cf inner_tra)
@@ -112,22 +103,11 @@ Ces fonctions font appel aux données de référentiels suivantes (disponibles d
  - tarifs_mco_ghs
  - tarifs_mco_supplements 
 
-Au final la fonction ```imco()``` permet de créer un objet unique nommé FINESS_AAAA_NN.RData qui comprend les objets :
- - rsa_v_AAAA (tibble)
- - rum_v_AAAA (tibble)
- - vano_AAAA (tibble)
- - rsa_AAAA (tibble partie fixe + stream actes et diagnostics cf [doc irsa](https://guillaumepressiat.github.io/pmeasyr/import-des-donnees.html#rsa))
- - tra_AAAA 
- - ium_AAAA 
- - diap_AAAA
- - pie_AAAA
- - rss_AAAA (liste de 3 tibbles : rum, actes, diags cf [doc irss](https://guillaumepressiat.github.io/pmeasyr/import-des-donnees.html#rss)) 
-
-L'option ***persist = TRUE*** retourne les ces objets sous forme d'une liste.
-
-L'option ***tarifsante = TRUE*** permet le calcul avec les tarifs de l'année antérieure.
 
 
+Génération des tableaux de bord
+-----------------------
+On distingue un permier ensemble de tableaux de bord permettant de suivre l'évolution anuelle d'un seul indicateurs sur l'ensmble des niveaux de structure, en prenant toujours le principe de distinguer hopsitalisation complète et hospitalisation partielle. On dispose de tableaux de suivi de l'activité, des recettes et du nombre de journées. Puis un autre ensemble de tableaux permettent de suivre l'évolution annuelle pour un niveau de structure (groupe hospitalier, établissement, pole, service,...) d'un ensemble d'indicateurs. Le package permet de le calcul d'environ 200 indicateurs répartis dans tableaux de bord thématiques (activité, DIM, médical).
 
 
 
