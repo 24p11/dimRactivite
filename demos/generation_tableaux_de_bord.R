@@ -4,7 +4,7 @@
 ################################################
 
 #Génération de tableaux de bord d'activité après chargement des données pmeasyr
-#si besoin : load(paste0(getOption("dimRactivite.path"),"/Rpmeasyr.RData"))
+#si besoin : load("~/GH_PMSI/DATA/GENRSA/Rpmeasyr.RData")
 
 library(tidyverse)
 library (RCurl)
@@ -12,9 +12,6 @@ library(jsonlite)
 library(referentiels)
 library(referime)
 
-
-#Si fichier genrsatemporaire
-tmp = TRUE
 
 #Année et mois en cours
 mois=as.numeric(format(Sys.Date()-50,'%m'));Mois=format(Sys.Date()-50,'%m')

@@ -1,3 +1,42 @@
+#Si fichier genrsatemporaire
+tmp = TRUE
+
+#Année et mois en cours
+mois=as.numeric(format(Sys.Date()-50,'%m'));Mois=format(Sys.Date()-50,'%m')
+annee=as.numeric(format(Sys.Date()-55,'%Y'));
+
+
+
+#Chargement du fichier structure
+fichier_structure <- readxl::read_excel("demos/structures.xlsx",
+                                        col_types = c( "text" , "text" , "text" , "text" ,"text" ,
+                                                       "text" , "text" , "text" , "text" ),
+                                        col_names = c('nofiness','hopital','cdurm','uma_locale','uma_locale2',
+                                                      'libelle_um','service','regroupement1','pole'),
+                                        skip = 1
+)
+verif_structure(rum,fichier_structure)
+
+if(tmp == TRUE){
+  
+  rum1 <- rum %>% filter( ansor == annee ) %>% rename(uma_locale = cdurm) %>% left_join( ., fichier_structure ) %>%
+    mutate(pole = ifelse(is.na(pole),'Erreurs',pole),
+           service = ifelse(is.na(service),'Erreur service non renseigné',service))
+  
+  rum2 <- rum  %>% filter( ansor != annee ) %>% left_join( ., fichier_structure ) %>%
+    mutate(pole = ifelse(is.na(pole),'Erreurs',pole),
+           service = ifelse(is.na(service),'Erreur service non renseigné',service))
+  
+  rum <- dplyr::bind_rows( rum1, rum2 )
+  
+  rm(rum1,rum2)
+  
+}else{
+  rum <- rum %>% left_join( ., fichier_structure ) %>%
+    mutate(pole = ifelse(is.na(pole),'Erreurs',pole),
+           service = ifelse(is.na(service),'Erreur service non renseigné',service))
+}
+
 
 load('~/GH_PMSI/DATA/WD/identites_historique.RData')
 
@@ -36,14 +75,19 @@ save(identites_historique,file = '~/GH_PMSI/DATA/WD/identites_historique.RData')
 
 rsa<-dplyr::right_join(identites,rsa)
 rum<-dplyr::right_join(identites,rum)
-rum_save<-rum
 
-rum<-inner_join(rum,rum_valo)
+
+rum_save <- rum
+rsa_save <- rsa
+
+rum<-inner_join(rum,rum_v)
+rsa<-inner_join(rsa,rsa_v)
 #Sauvegarde de l'objet final disponible dans le working directory
-save(rsa, rum, diagnostics, actes, ano, pmctmono, file = '~/GH_PMSI/DATA/WD/Rpmsi_pmeasyr_dispose.RData')
+save(rsa, rum, diagnostics, actes, vano,  file = '~/GH_PMSI/DATA/WD/Rpmsi_pmeasyr_dispose.RData')
 
 rum<-rum_save
-save(rsa, rum, rum_valo, diagnostics, actes, ano, pmctmono, file = '~/GH_PMSI/DATA/WD/Rpmsi_pmeasyr.RData')
-rm(rum_save);gc()
+rsa<-rsa_save
+save( rsa, rsa_v, rum, rum_v, diagnostics, actes, vano, file = '~/GH_PMSI/DATA/WD/Rpmsi_pmeasyr.RData')
+rm(rum_save,rsa_save);gc()
 
 

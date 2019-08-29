@@ -17,7 +17,7 @@ fichiers_genrsa <- scan_path()
 remontees_dispo<-analyse_fichiers_remontees(fichiers_genrsa)
 
 #Par défaut, les .RData de l'année en cours sont considérés comme à faire
-remontees_dispo<-maj_variable_RData(remontees_dispo)
+
 
 View(remontees_dispo%>%arrange(annee,mois,finess))
 
@@ -45,36 +45,3 @@ sel_remontees_import<-remontees_dispo%>%filter(as.numeric(annee)> max(as.numeric
 
 #Selection des remontées
 load_all(sel_remontees_import)
-
-#Chargement du fichier structure
-fichier_structure <- readxl::read_excel("demos/structures.xlsx",
-                                        col_types = c( "text" , "text" , "text" , "text" ,"text" ,
-                                                       "text" , "text" , "text" , "text" ),
-                                        col_names = c('nofiness','hopital','cdurm','uma_locale','uma_locale2',
-                                                      'libelle_um','service','regroupement1','pole'),
-                                        skip = 1
-                                        )
-verif_structure(rum,fichier_structure)
-
-if(tmp == TRUE){
-  
-  rum1 <- rum %>% filter( ansor == annee ) %>% rename(uma_locale = cdurm) %>% left_join( ., fichier_structure ) %>%
-    mutate(pole = ifelse(is.na(pole),'Erreurs',pole),
-           service = ifelse(is.na(service),'Erreur service non renseigné',service))
-  
-  rum2 <- rum  %>% filter( ansor != annee ) %>% left_join( ., fichier_structure ) %>%
-    mutate(pole = ifelse(is.na(pole),'Erreurs',pole),
-           service = ifelse(is.na(service),'Erreur service non renseigné',service))
-  
-  rum <- dplyr::bind_rows( rum1, rum2 )
-  
-  rm(rum1,rum2)
-  
-}else{
-    rum <- rum %>% left_join( ., fichier_structure ) %>%
-          mutate(pole = ifelse(is.na(pole),'Erreurs',pole),
-                 service = ifelse(is.na(service),'Erreur service non renseigné',service))
-}
-save(list = c('rum','rum_v','diagnostics','actes','rsa','rsa_v','vano'),
-     file = paste0(getOption("dimRactivite.path"),'/Rpmeasyr.RData') )
-

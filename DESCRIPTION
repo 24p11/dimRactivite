@@ -23,4 +23,8 @@ Imports: tidyverse,
     stringr,
     yaml,
     purrr
-Suggests: pmeasyr
+Suggests: 
+    pmeasyr,
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr

@@ -95,7 +95,7 @@ scan_path<-function( path = getOption("dimRactivite.path"), ext = getOption("dim
 #' @export
 #'
 #' @examples
-analyse_fichiers_remontees<-function( fichiers_genrsa){
+analyse_fichiers_remontees <- function( fichiers_genrsa ){
   
   imco_files_types = getOption("dimRactivite.fichiers_imco")%>%purrr::flatten_chr()
   
@@ -129,7 +129,8 @@ analyse_fichiers_remontees<-function( fichiers_genrsa){
     #             mutate(annee = as.numeric(annee),mois = as.numeric(mois))
     #           )
   
-
+  remontees <- maj_variable_RData(remontees)
+  
   return(remontees)
   
 }
@@ -156,8 +157,8 @@ maj_variable_RData<-function( remontees, p = NULL ){
   
     if( 1 %in% unique(remontees$RData) ){
       
-      recents<-remontees %>% filter( RData==1 , annee == max(annee) )%>% 
-        group_by( finess, annee )%>%summarise( mois = max(as.numeric(mois) ) )
+      recents<-remontees %>% filter( RData==1 , annee == max( as.numeric(annee) ) )%>% 
+        group_by( finess, annee )%>%summarise( mois = max( as.numeric(mois) ) )
    
       for(i in 1:nrow(recents)){
         
@@ -367,7 +368,7 @@ save_remontees<-function(dossiers_remontees,fichiers_genrsa){
       }
       
       dt<-imco(p,persist = T)
-      
+      dt<-imco(p,tarifsante = T)      
       
       ###Suppression des fichiers
       pmeasyr::adelete( p, 
