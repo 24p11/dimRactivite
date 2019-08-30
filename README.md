@@ -25,7 +25,7 @@ Des scripts de démonstration sont inclus dans le package afin de montrer l'util
   +--- generation_tableaux_de_bord.R
 ```
 
-Un scénatio complet d'import et de génération peut être trouver dans la vignette 
+Un scénario complet d'import et de génération peut être trouver dans la vignette [Génération de tableaux de bord PMSI avec pmeasyr](https://2411.github.io/pmeasyr/articles/generation-tableaux-de-bord-pmsi.html) .
 
 Organisation du file system
 ---------------------------

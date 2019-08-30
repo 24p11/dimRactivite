@@ -2,7 +2,7 @@ Package: dimRactivite
 Type: Package
 Title: Exploitation des données PMSI au format pmeasyr
 Version: 0.1.0
-Author: c(
+Author@R: c(
   person("Rémi", "Flicoteaux", email = "remi.flicoteaux@aphp.fr", role = c("aut", "cre")),
   person("Fabrice", "Danjou", email = "fabrice.danjou@aphp.fr", role = c("aut", "cre")),
   person("Bernard", "Nouby", email = "bernard.noubiyoumbi@aphp.fr", role = c("aut", "cre"))
