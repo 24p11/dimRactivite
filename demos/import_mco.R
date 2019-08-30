@@ -34,16 +34,13 @@ dossiers_remontees<-remontees_dispo
 
 
 #Création et sauvegarde des .RData de remontée (si manquant)
-save_remontees(dossiers_remontees,fichiers_genrsa)
+#Mise à jour de la liste des remontées disponibles
+remontees_dispo <- save_remontees(dossiers_remontees,fichiers_genrsa)
 
 
 #####################################################################################################################
 #Import des fichiers sauvegardés dans le .RData
 #####################################################################################################################
-
-#Mise à jour de la liste des remontées disponibles
-# par défaut les .RData du mois le plus récent sont systématiquement considérées comme manquantes
-remontees_dispo<-update_remontees_dispo()
 
 sel_remontees_import<-remontees_dispo%>%filter(as.numeric(annee)> max(as.numeric(remontees_dispo$annee))-profondeur_imports, RData==1)%>%
   group_by(finess,annee)%>%summarise(mois = max(as.numeric(mois)))
