@@ -25,7 +25,7 @@ verif_structure(rum,fichier_structure)
 
 if(tmp == TRUE){
   
-  rum1 <- rum %>% filter( ansor == annee ) %>% rename(uma_locale = cdurm) %>% left_join( ., fichier_structure ) %>%
+  rum1 <- rum %>% filter( ansor == annee ) %>% rename(uma_locale = cdurm) %>% left_join( ., fichier_structure %>% dplyr::distinct(uma_locale,.keep_all =TRUE) ) %>%
     mutate(pole = ifelse(is.na(pole),'Erreurs',pole),
            service = ifelse(is.na(service),'Erreur service non renseigné',service))
   
