@@ -2,7 +2,7 @@
 % Please edit documentation in R/fonctions_automatisation_imports.R
 \name{adzipComplet}
 \alias{adzipComplet}
-\title{Généralisation de la fonction adip de pmeasyr pour l'ensemble d'une archive in et out
+\title{Généralisation de la fonction adzip de pmeasyr pour l'ensemble d'une archive in et out
 avec contrôle du type de fichier et création des fichiers manquants}
 \usage{
 adzipComplet(zfichiers, ext_to_import)
@@ -16,6 +16,6 @@ adzipComplet(zfichiers, ext_to_import)
 aucun, dézip des archives en fonction du type de fichier voulus et création de fichier vide pour les types de fichier manquant
 }
 \description{
-Généralisation de la fonction adip de pmeasyr pour l'ensemble d'une archive in et out
+Généralisation de la fonction adzip de pmeasyr pour l'ensemble d'une archive in et out
 avec contrôle du type de fichier et création des fichiers manquants
 }

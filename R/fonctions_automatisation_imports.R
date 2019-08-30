@@ -3,7 +3,7 @@
 #' @param path racine du dossier contenant les archives
 #'
 #' @return liste des fichiers d'archives disponibles
-#' @export
+#' @export scan_path
 #'
 #' @examples fichiers_genrsa <- scan_path(getOption("dimRactivite.path"))
 #'
@@ -92,7 +92,7 @@ scan_path<-function( path = getOption("dimRactivite.path"), ext = getOption("dim
 #' @param recent logical, si TRUE considère par défaut que le .RData du dernier mois est manquant
 #'
 #' @return tibble avec liste des fichiers par remontée
-#' @export
+#' @export analyse_fichiers_remontees
 #'
 #' @examples
 analyse_fichiers_remontees <- function( fichiers_genrsa ){
@@ -135,6 +135,15 @@ analyse_fichiers_remontees <- function( fichiers_genrsa ){
   
 }
 
+#' Title
+#'
+#' @param path chemin du dossier dans lequel se trouve les fichiers zipper de remontée
+#' @param ext extentinon à intégrer
+#'
+#' @return tibble, tableau de synthèse des remontées disponibles
+#' @export update_remontees_dispo
+#'
+#' @examples
 update_remontees_dispo<-function( path = getOption("dimRactivite.path"), ext = getOption("dimRactivite.extensions") ){
   
   #Liste des fichiers présents dans le dossier racine
@@ -150,6 +159,15 @@ update_remontees_dispo<-function( path = getOption("dimRactivite.path"), ext = g
 }
 
 
+#' Mise à jour de la variabla RData du tableau de synthèse des remontées disponibles pour la dernière remontée disponible
+#' force la variable RData à 0 pour que la dernière remontée disponible soit importée
+#' @param remontees tibble, tableau de synthèse des remontées disponibles 
+#' @param p un noyau pmeasyr
+#'
+#' @returntibble, tableau de synthèse des remontées disponibles mise à jour
+#' @export maj_variable_RData
+#'
+#' @examples
 maj_variable_RData<-function( remontees, p = NULL ){
   
   #Si pas de noyau la variable .RData mise à jour est celle des remontées les plus récentes
@@ -186,14 +204,14 @@ maj_variable_RData<-function( remontees, p = NULL ){
   return(remontees)
 }
 
-#' Généralisation de la fonction adip de pmeasyr pour l'ensemble d'une archive in et out
+#' Généralisation de la fonction adzip de pmeasyr pour l'ensemble d'une archive in et out
 #' avec contrôle du type de fichier et création des fichiers manquants
 #'
 #' @param zfichiers vecteur, nom des fichiers zippés
 #' @param ext_to_import vecteur, extention des fichiers a importer
 #'
 #' @return aucun, dézip des archives en fonction du type de fichier voulus et création de fichier vide pour les types de fichier manquant
-#' @export
+#' @export adzipComplet
 #'
 #' @examples
 adzipComplet<-function(zfichiers,ext_to_import){
@@ -260,7 +278,15 @@ adzipComplet<-function(zfichiers,ext_to_import){
 
 
 }
-
+#' Généralisation de la fonction adzip de pmeasyr pour l'ensemble d'une remontée (avec plusieurs sites)
+#'
+#' @param p nouyau pmeasyr 
+#' @param fichiers_genrsa liste des fichiers contenue dans le dossier archive
+#' @param ext_to_import extension des fichiers à lire et importer
+#' @return aucun, dézip des archives en fonction du type de fichier voulus et création de fichier vide pour les types de fichier manquant
+#' @export adzipComplet
+#'
+#' @examples
 adzipRemonteee<-function( p, fichiers_genrsa, ext_to_import = NULL ){
   
   imco_files_types = getOption("dimRactivite.fichiers_imco")%>%purrr::flatten_chr()
@@ -287,7 +313,7 @@ adzipRemonteee<-function( p, fichiers_genrsa, ext_to_import = NULL ){
 #' @param fichier_structure tibble, structure 
 #'
 #' @return
-#' @export message d'erreur
+#' @export verif_structure
 #'
 #' @examples
 verif_structure<-function(rum,fichier_structure){
@@ -320,7 +346,7 @@ verif_structure<-function(rum,fichier_structure){
 
 #'
 #' @return ecriture sur le disque d'1 .RData de sauvegarde pour chaque remontée
-#' @export
+#' @export save_remontees
 #'
 #' @examples
 save_remontees<-function(dossiers_remontees,fichiers_genrsa){
@@ -398,14 +424,15 @@ save_remontees<-function(dossiers_remontees,fichiers_genrsa){
   
 }
 
-#' Title
+#' charge en mémoire les objets définitifs rum,rum_v,rsa,rsa_v,diagnostics, actes, vano
 #'
 #' @param remontees_sel tibble de type analyse_remontee avec l'ensemble des année à charger
 #'
-#' @return
-#' @export écrit en mémoire les objets définitifs rum,rum_v,rsa,rsa_v,
+#' @return 
+#' @export load_all
+#' 
 #'
-#' @examples
+#' @examples 
 load_all<- function(remontees_sel){
   
 
@@ -460,7 +487,7 @@ load_all<- function(remontees_sel){
 #' @param persist si TRUE renvoie les données
 #'
 #' @return liste avec principaux fichiers de remontées, et enregistrement sur le disque si besoin
-#' @export
+#' @export imco
 #'
 #' @examples data2019 = ipmeasyr(p,tarifsante=TRUE,save=TRUE,persist=TRUE)
 #'

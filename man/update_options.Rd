@@ -4,7 +4,7 @@
 \alias{update_options}
 \title{Chargement des options du package dimRactivité}
 \usage{
-update_options(file = "demos/options.yaml")
+update_options(file = "options.yaml")
 }
 \arguments{
 \item{file}{fichier yaml d'options du package dimRactivité

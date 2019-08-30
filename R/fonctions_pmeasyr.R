@@ -4,6 +4,17 @@
 ###Fonction pmctmono : pmct mono urm calculé par année ou 12 mois glissant si mois < 12 / pour les REA: moyenne des couts de sejour complets (pas de repartition au temps)
 # A faire : changement nom pmctmono et pmctuma
 
+#' Title
+#'
+#' @param rsa 
+#' @param rum 
+#' @param annee 
+#' @param mois 
+#'
+#' @return
+#' @export pmct_mono_uma
+#'
+#' @examples
 pmct_mono_uma <- function (rsa, rum, annee, mois) {
 
   #Calcul : pmct mono-rum (pmctnosup_norea) + sommes recettes mono rum + nb sej monorum
@@ -71,6 +82,16 @@ pmct_mono_uma <- function (rsa, rum, annee, mois) {
 # PMCT MULTIRUMS [NB: ghm rehospitalisation repartit sur le temps ici] #
 ########################################################################
 ###Fonction pmctmono (on doit encore repartir les supplements RAP et ANTEPARTUM)
+#' Title
+#'
+#' @param rsa 
+#' @param rum 
+#' @param pmctmono 
+#'
+#' @return
+#' @export vvr_rum_repa
+#'
+#' @examples
 vvr_rum_repa <- function (rsa, rum, pmctmono) {
 
   #selection de la periode pertinente:

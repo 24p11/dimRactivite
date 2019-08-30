@@ -2,7 +2,7 @@
 % Please edit documentation in R/fonctions_automatisation_imports.R
 \name{load_all}
 \alias{load_all}
-\title{Title}
+\title{charge en mémoire les objets définitifs rum,rum_v,rsa,rsa_v,diagnostics, actes, vano}
 \usage{
 load_all(remontees_sel)
 }
@@ -10,5 +10,5 @@ load_all(remontees_sel)
 \item{remontees_sel}{tibble de type analyse_remontee avec l'ensemble des année à charger}
 }
 \description{
-Title
+charge en mémoire les objets définitifs rum,rum_v,rsa,rsa_v,diagnostics, actes, vano
 }

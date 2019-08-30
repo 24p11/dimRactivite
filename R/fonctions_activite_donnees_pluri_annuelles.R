@@ -8,7 +8,7 @@
 #' @param unit_pivot string, la variable pivot a utiliser dans df pour réaliser le tableau croisé
 #'
 #' @return tableau de bord
-#' @export
+#' @export get_tdb
 #'
 #' @examples
 get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
@@ -1538,7 +1538,7 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
 #' @param df un tableau de données de type séjours rum/rsa
 #'
 #' @return tableau de bord d'activité général en séjours
-#' @export
+#' @export get_activite_sejours
 #'
 #' @examples
 
@@ -1571,7 +1571,7 @@ get_activite_sejours<-function( df, structure ){
 #' @param df un tableau de données de type séjours rum/rsa
 #'
 #' @return tableau de bord d'activité général en recettes
-#' @export
+#' @export get_activite_recettes
 #'
 #' @examples
 
@@ -1595,6 +1595,18 @@ get_activite_recettes<-function( df, structure ){
 
 }
 
+#' Création des tableaux de bord
+#'
+#' @param val 
+#' @param niveau
+#' @param annee
+#' @param mois 
+#'
+#' @return 
+#' @export make_tdb
+#'
+#' @examples
+#' 
 make_tdb<-function(val,niveau,annee,mois){
   #Nom des tableaux de bord disponibles
   

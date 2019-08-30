@@ -14,7 +14,7 @@ is.date <- function(x) inherits(x, 'Date')
 #' @param regles logique, utilisation des règles locales T
 #'
 #' @return tibble, un tibble contenant la sélection selon les critères indiqués
-#' @export
+#' @export get_data
 #'
 #' @examples
 get_data<-function( DF, ref = 'ansor', m, a, val = NULL, niveau = NULL, opt = T ){
@@ -64,7 +64,7 @@ get_data<-function( DF, ref = 'ansor', m, a, val = NULL, niveau = NULL, opt = T 
 #' @param niveau chaine de caractères, variable géographique qui sera choisie pour la selection (ex : service, pole,...).
 #'
 #' @return tibble de type rum/rsa, le tibble local auquel a été ajoutée.
-#' @export
+#' @export options_locales
 #'
 #'
 #' @examples
@@ -113,7 +113,7 @@ options_locales<-function(DF,val=NULL,niveau=NULL){
 #' @param df tiblle de type paramètres des tableaux de bord
 #'
 #' @return vecteur de nom d'indicateurs
-#' @export
+#' @export get_indicateurs
 #'
 #' @examples
 #'
@@ -133,8 +133,8 @@ get_indicateurs<-function(nom,val,df= references){
 #'
 #' @param text chaine de caractères
 #'
-#' @return
-#' @export text
+#' @return 
+#' @export prep_string
 #'
 #' @examples
 #'  prep_string( 'rtzei zef ef $$$ eé)&')
@@ -157,7 +157,7 @@ prep_string<-function(string){
 #' @param x vecteur
 #'
 #' @return integer, nombre d'élément unique
-#' @export
+#' @export nb_unique
 #'
 #' @examples
 #'
@@ -188,7 +188,7 @@ prep_tb<-function(tab){
 #' @param t  tableau résultats de table/tapply un tableau de bord
 #'
 #' @return tableau modifié
-#' @export
+#' @export diff_tb
 #'
 #' @examples
 diff_tb<-function(t){
@@ -208,7 +208,7 @@ diff_tb<-function(t){
 #' @param df  objet de type séjours (rum/rsa)
 #'
 #' @return double, index de performance
-#' @export
+#' @export IP_SERVICE
 #'
 #' @examples
 IP_SERVICE<-function(df){
@@ -225,8 +225,8 @@ IP_SERVICE<-function(df){
 #'  Attention pas de dédoublonnage
 #' @param df
 #'
-#' @return
-#' @export
+#' @return 
+#' @export IP_SEJOUR
 #'
 #' @examples
 IP_SEJOUR<-function(df){
@@ -249,7 +249,7 @@ IP_SEJOUR<-function(df){
 #'        - C / P
 #'
 #' @return concaténation et restructuration des tableaux de données
-#' @export
+#' @export order_by_structure
 #'
 #' @examples
 order_by_structure<-function( tdb, structure ){
@@ -298,7 +298,7 @@ order_by_structure<-function( tdb, structure ){
 #' @param df
 #'
 #' @return
-#' @export
+#' @export get_diff
 #'
 #' @examples
 get_diff<-function(df){
@@ -337,7 +337,7 @@ selection_cancer_diag<-function( diagnostics ){
 #' @param df  un tibble de type diagnostic en sortie de \code{\link{selection_cancer_diag}}
 #'
 #' @return un tibble de type diagnostic comprenant une ligne par patient selectionne comme etant le diagnostic de cancer unique pour l'analyse de l'activite
-#' @export
+#' @export selection_cancer_pat
 #' @section Warning: utilise lae resultat de la fonction  \code{\link{selection_cancer_diag}}
 #' @examples
 #'
@@ -363,7 +363,7 @@ selection_cancer_pat<-function( df, df_ano ){
 #' @param df  un tibble de type rsa concaténé avec un tibble diagnostic en sortie de \code{\link{selection_cancer_pat}}
 #'
 #' @return un tibble de type rsa
-#' @export
+#' @export attribution_type_M4
 #'
 #' @examples
 #'
@@ -389,7 +389,7 @@ attribution_type_M4<-function(df){
 #' @param df  un tibble de type rsa concaténé avec un tibble diagnostic en sortie de \code{\link{selection_cancer_pat}}
 #'
 #' @return un tibble de type rsa
-#' @export
+#' @export attribution_statut_nx_patient
 #'
 #' @examples
 #'

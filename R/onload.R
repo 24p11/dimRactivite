@@ -6,7 +6,7 @@
 #' @param services_exclus : lise des services exclus (tels qu'il apparaissent dans le fichier structure) séparé par une virgule
 #' @param gestion_doublons_rum : pour certain niveau de structure ou certain libellé de regroupement
 #' @return NULL
-#' @export
+#' @export update_options
 #'
 #' @examples
 #' update_options()
