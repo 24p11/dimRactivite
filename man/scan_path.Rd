@@ -17,6 +17,5 @@ liste des fichiers d'archives disponibles
 Récupération de la liste de l'ensemble des fichiers de remontée contenu dans un dossier
 }
 \examples{
-fichiers_genrsa <- scan_path(getOption("dimRactivite.path"))
 
 }

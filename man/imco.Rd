@@ -23,6 +23,5 @@ liste avec principaux fichiers de remontées, et enregistrement sur le disque si
 Import des principaux fichiers de remontées et valorisation des séjours et résumés
 }
 \examples{
-data2019 = ipmeasyr(p,tarifsante=TRUE,save=TRUE,persist=TRUE)
 
 }

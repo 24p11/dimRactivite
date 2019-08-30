@@ -137,8 +137,8 @@ get_indicateurs<-function(nom,val,df= references){
 #' @export prep_string
 #'
 #' @examples
-#'  prep_string( 'rtzei zef ef $$$ eé)&')
-#'  [1] "rtzeizefefee"
+#'  
+#'  
 prep_string<-function(string){
 
   string <- gsub('[^[:alnum:]]','',string)
@@ -408,3 +408,15 @@ attribution_statut_nx_patient<-function(df){
   return(df)
 }
 
+#' Pipe
+#'
+#' Put description here
+#'
+#' @importFrom magrittr %>%
+#' @name %>%
+#' @rdname pipe
+#' @export
+#' @param lhs,rhs specify what lhs and rhs are
+#' @examples
+#' # some examples if you want to highlight the usage in the package
+NULL

@@ -13,6 +13,6 @@ prep_string(string)
 Suppression des caractères spéciaux et accentués
 }
 \examples{
- prep_string( 'rtzei zef ef $$$ eé)&')
- [1] "rtzeizefefee"
+ 
+ 
 }

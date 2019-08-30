@@ -5,7 +5,7 @@
 #' @return liste des fichiers d'archives disponibles
 #' @export scan_path
 #'
-#' @examples fichiers_genrsa <- scan_path(getOption("dimRactivite.path"))
+#' @examples 
 #'
 scan_path<-function( path = getOption("dimRactivite.path"), ext = getOption("dimRactivite.extensions") ){
 
@@ -489,7 +489,7 @@ load_all<- function(remontees_sel){
 #' @return liste avec principaux fichiers de remontées, et enregistrement sur le disque si besoin
 #' @export imco
 #'
-#' @examples data2019 = ipmeasyr(p,tarifsante=TRUE,save=TRUE,persist=TRUE)
+#' @examples 
 #'
 imco<-function(p, tarifsante = FALSE, save = TRUE, persist = FALSE, pathm12 = NULL){
 

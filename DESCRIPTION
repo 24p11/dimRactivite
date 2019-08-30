@@ -32,7 +32,8 @@ Imports:
     dplyr,
     stringr,
     yaml,
-    purrr
+    purrr,
+    referime
 Suggests: 
     pmeasyr,
     knitr,

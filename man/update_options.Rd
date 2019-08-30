@@ -18,6 +18,3 @@ Options à renseigner dans le fichier sont:}
 \description{
 Chargement des options du package dimRactivité
 }
-\examples{
-update_options()
-}

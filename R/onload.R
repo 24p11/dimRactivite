@@ -9,7 +9,7 @@
 #' @export update_options
 #'
 #' @examples
-#' update_options()
+
 update_options<-function(file = 'options.yaml'){
 
   dimRactivite_options_ = yaml::read_yaml(file)
