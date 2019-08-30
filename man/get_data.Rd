@@ -5,12 +5,10 @@
 \title{Selection de données en fonction de critère temporels et géographique (lieu d'hopsitalisation)
  Applicable sur des objets en sortie de pmeasyr}
 \usage{
-get_data(df, ref = "ansor", m, a, val = NULL, niveau = NULL,
+get_data(DF, ref = "ansor", m, a, val = NULL, niveau = NULL,
   opt = T)
 }
 \arguments{
-\item{df}{tibble, un tibble en sortie de pmeasyr}
-
 \item{ref}{chaine de caractères, la variable de référence qui sera utilisée pour la selection temporel
 - si ref = ansor : les variables pmeasyr ansor et moisor sont utilisé pour la sélection avec les paramètres m et a
 par exemple pour des objets de type rum ou rsa}
@@ -23,6 +21,8 @@ par exemple pour des objets de type rum ou rsa}
 Si NULL pas de critères géographiques pour la sélection}
 
 \item{niveau}{chaine de caractères, valeur de la variable géographique à sélectionner}
+
+\item{df}{tibble, un tibble en sortie de pmeasyr}
 
 \item{regles}{logique, utilisation des règles locales T}
 }

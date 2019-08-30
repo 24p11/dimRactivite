@@ -4,7 +4,7 @@
 \alias{get_activite_sejours}
 \title{Tableau de bord général d'activité avec un compte des séjours, et séparant HDJ/HC}
 \usage{
-get_activite_sejours(df)
+get_activite_sejours(df, structure)
 }
 \arguments{
 \item{df}{un tableau de données de type séjours rum/rsa}

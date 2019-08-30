@@ -25,8 +25,10 @@ update_options<-function(file = 'demos/options.yaml'){
     val_op <- dimRactivite_options_[[o]]
 
     if( typeof(val_op) == "character" ){
+      
+      print(val_op)
 
-      val_op <- stringr::str_trim( stringr::str_split(val_op,',') %>% purrr::flatten_chr())
+      val_op <- stringr::str_trim( stringr::str_split(val_op,',')  %>% purrr::flatten_chr() )
 
     }
     dimRactivite_options[[var_op]]<- val_op

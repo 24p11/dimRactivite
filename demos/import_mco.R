@@ -1,3 +1,8 @@
+library(tidyverse)
+library (RCurl)
+library(jsonlite)
+library(referentiels)
+library(referime)
 
 #####################################################################################################################
 ##Paramètre des imports

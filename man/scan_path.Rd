@@ -4,7 +4,8 @@
 \alias{scan_path}
 \title{Récupération de la liste de l'ensemble des fichiers de remontée contenu dans un dossier}
 \usage{
-scan_path(path = getOption("dimRactivite.path"))
+scan_path(path = getOption("dimRactivite.path"),
+  ext = getOption("dimRactivite.extensions"))
 }
 \arguments{
 \item{path}{racine du dossier contenant les archives}

@@ -6,7 +6,7 @@
 Reformatage d'objets en sortie de table/tapply selon l'ordonnancement décidé dans le fichier de structure
  Fusion des tableaux}
 \usage{
-order_by_structure(tdb)
+order_by_structure(tdb, structure)
 }
 \arguments{
 \item{tdb}{list d'objets en sortie de table/tapply avec 3 dimenssions

@@ -4,14 +4,17 @@
 \alias{get_tdb}
 \title{Création d'un tableau indicateurs x pivot, comprenant une liste d'inficateurs}
 \usage{
-get_tdb(df, indicateurs, pivot = "ansor")
+get_tdb(df, indicateurs, pivot = "pivot", unit_pivot = NULL)
 }
 \arguments{
 \item{df}{un tibble de type séjours}
 
 \item{indicateurs}{vecteur, liste des indicateurs à calculer}
 
-\item{pivot}{string, la variable pivot a utiliser dans df pour réaliser le tableau croisé}
+\item{pivot}{string, la variable pivot a utiliser dans df pour réaliser le tableau croisé, 
+peut être soit un facteur soit une date, si une date la variable unit_pivot doit être renseignée}
+
+\item{unit_pivot}{string, la variable pivot a utiliser dans df pour réaliser le tableau croisé}
 }
 \value{
 tableau de bord

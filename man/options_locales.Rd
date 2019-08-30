@@ -4,14 +4,14 @@
 \alias{options_locales}
 \title{Mise en oeuvre des options locales pour le décompte des séjours dans les données d'activité}
 \usage{
-options_locales(df, val = NULL, niveau = NULL)
+options_locales(DF, val = NULL, niveau = NULL)
 }
 \arguments{
-\item{df}{tibble de type rum/rsa, utilisé entre autres en entrée de \code{\link{get_data}}}
-
 \item{val}{chaine de caractères, variable géographique qui sera choisie pour la selection (ex : service, pole,...).}
 
 \item{niveau}{chaine de caractères, variable géographique qui sera choisie pour la selection (ex : service, pole,...).}
+
+\item{df}{tibble de type rum/rsa, utilisé entre autres en entrée de \code{\link{get_data}}}
 }
 \value{
 tibble de type rum/rsa, le tibble local auquel a été ajoutée.

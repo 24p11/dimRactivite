@@ -1,3 +1,9 @@
+library(tidyverse)
+library (RCurl)
+library(jsonlite)
+library(referentiels)
+library(referime)
+
 #Si fichier genrsatemporaire
 tmp = TRUE
 
