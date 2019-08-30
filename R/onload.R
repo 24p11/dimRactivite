@@ -5,7 +5,6 @@
 #' Options à renseigner dans le fichier sont:
 #' @param services_exclus : lise des services exclus (tels qu'il apparaissent dans le fichier structure) séparé par une virgule
 #' @param gestion_doublons_rum : pour certain niveau de structure ou certain libellé de regroupement
-#'
 #' @return NULL
 #' @export
 #'
@@ -25,8 +24,6 @@ update_options<-function(file = 'demos/options.yaml'){
     val_op <- dimRactivite_options_[[o]]
 
     if( typeof(val_op) == "character" ){
-      
-      print(val_op)
 
       val_op <- stringr::str_trim( stringr::str_split(val_op,',')  %>% purrr::flatten_chr() )
 
