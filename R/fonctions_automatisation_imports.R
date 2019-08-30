@@ -43,7 +43,7 @@ scan_path<-function( path = getOption("dimRactivite.path"), ext = getOption("dim
         
               for(final in finals){
         
-                det_final = unlist(str_split(final,'\\.'))
+                det_final = unlist(stringr::str_split(final,'\\.'))
         
                 if(any(det_final%in%ext)){
         
@@ -74,7 +74,7 @@ scan_path<-function( path = getOption("dimRactivite.path"), ext = getOption("dim
   
   for(rdata in fichiers_rdata){
     
-    refs = unlist(str_split(rdata,'\\.')) 
+    refs = unlist(stringr::str_split(rdata,'\\.')) 
     
     fichiers_genrsa<-fichiers_genrsa%>%mutate(RData = ifelse(finess == refs[1] & annee==refs[2] & mois ==refs[3],1,RData))
     
@@ -95,7 +95,7 @@ scan_path<-function( path = getOption("dimRactivite.path"), ext = getOption("dim
 #' @export analyse_fichiers_remontees
 #'
 #' @examples
-analyse_fichiers_remontees <- function( fichiers_genrsa ){
+analyse_fichiers_remontees <- function( fichiers_genrsa, maj_dernier_mois = TRUE ){
   
   imco_files_types = getOption("dimRactivite.fichiers_imco")%>%purrr::flatten_chr()
   
@@ -129,8 +129,9 @@ analyse_fichiers_remontees <- function( fichiers_genrsa ){
     #             mutate(annee = as.numeric(annee),mois = as.numeric(mois))
     #           )
   
-  remontees <- maj_variable_RData(remontees)
-  
+  if(maj_dernier_mois == TRUE){
+        remontees <- maj_variable_RData(remontees)
+  }
   return(remontees)
   
 }
@@ -150,7 +151,7 @@ update_remontees_dispo<-function( path = getOption("dimRactivite.path"), ext = g
   fichiers_genrsa <- scan_path( path, ext )
   
   #Analyse des fichiers et classement par remontée
-  remontees_dispo <- analyse_fichiers_remontees( fichiers_genrsa )
+  remontees_dispo <- analyse_fichiers_remontees( fichiers_genrsa, maj_dernier_mois = FALSE )
   
   
   return(remontees_dispo)
@@ -224,7 +225,7 @@ adzipComplet<-function(zfichiers,ext_to_import){
                                    file = zf,
                                    view = F)$Name
 
-    det_noms = unique(unlist(str_split(noms_fichiers,'\\.')))
+    det_noms = unique(unlist(stringr::str_split(noms_fichiers,'\\.')))
 
     #Choix des fichiers a importer dasn l'archive en fonction des extensions voulues
     if(grepl('OUT|out',zf)){
@@ -251,7 +252,7 @@ adzipComplet<-function(zfichiers,ext_to_import){
 
 
   #Vérification si tous les fichiers nécessaires sont présents
-  det_noms = unique(unlist(str_split(dz_fichiers,'\\.')))
+  det_noms = unique(unlist(stringr::str_split(dz_fichiers,'\\.')))
   exts_m<-setdiff(ext_to_import,det_noms)
 
   #Creation des fichiers manaquants si besoin
@@ -260,7 +261,7 @@ adzipComplet<-function(zfichiers,ext_to_import){
     dz_fichiers<-c(dz_fichiers,exts_m)
 
     #Récupératation nofiness,annee,mois avec le nom de fichier dans l'archive
-    refs<-unlist(str_split(dz_fichiers[1],'\\.'))[1:3]
+    refs<-unlist(stringr::str_split(dz_fichiers[1],'\\.'))[1:3]
 
     for (ext_m in exts_m){
       file.create(paste0(getOption("dimRactivite.path"),'/',paste(c(refs[1],refs[2],refs[3],ext_m),collapse = '.')))
@@ -422,6 +423,8 @@ save_remontees<-function(dossiers_remontees,fichiers_genrsa){
     
   }
   
+  remontees = update_remontees_dispo()
+  return(remontees)
 }
 
 #' charge en mémoire les objets définitifs rum,rum_v,rsa,rsa_v,diagnostics, actes, vano
