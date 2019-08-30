@@ -106,6 +106,9 @@ vvr_rum_repa <- function (rsa, rum, pmctmono) {
       #sommes pmct monorum
       # sumpmctnosup=ifelse(sum(pmctnosup, na.rm = TRUE)==0, 1, sum(pmctnosup, na.rm = TRUE)),
       sumpmctnosup=sum(pmctnosup, na.rm = TRUE),
+      #sommes pmct monorum sans na.rm=TRUE afin de verifier en aval si un des pmctmono du séjour est inexistant (on remplacera alors par la repartition selon le temps)
+      checksumpmctnosup=sum(pmctnosup),
+      #supplements de rea
       nsrea=first(nbsuprea),
       #soins intensifs issus de réa
       nssir=pmax(first(nbsupsi),0) ,
@@ -153,12 +156,11 @@ vvr_rum_repa <- function (rsa, rum, pmctmono) {
 
       # rec_time = recettes ghs repartition temps de passage
       rec_time = ((dureesejpart+1)/(duree+nbrum)) * rec_bee,
-      #rec_pmctmono = recettes ghs répartition pmct monorum
-      rec_pmctmono = ifelse(is.na(pmctnosup), rec_bee, (pmctnosup / sumpmctnosup) * rec_bee),
-      #rec_pmctmonotime1 = recettes ghs répartition temps + mono rum
-      rec_pmctmonotime1 = ifelse(is.na(pmctnosup), rec_bee, (pmctnosup*(dureesejpart+1)/sumpmctimenosup) * rec_bee),
-      #rec_pmctmonotime2 = recettes ghs avec moyenne 2 répartitions
-
+      #rec_pmctmono = recettes ghs répartition pmct monorum (NB: si un des pmctmono du séjour est inexistant alors on repartit selon le temps)
+      rec_pmctmono = ifelse(is.na(checksumpmctnosup), rec_time, (pmctnosup / sumpmctnosup) * rec_bee),
+      #rec_pmctmonotime1 = recettes ghs répartition temps + mono rum (NB: si un des pmctmono du séjour est inexistant alors on repartit selon le temps)
+      rec_pmctmonotime1 = ifelse(is.na(checksumpmctnosup), rec_time, (pmctnosup*(dureesejpart+1)/sumpmctimenosup) * rec_bee),
+      #rec_pmctmonotime2 = recettes ghs comme moyenne des 2 répartitions temps et pmctmono
       rec_pmctmonotime2 = (rec_time+rec_pmctmono)/2,
 
       #suppléments autorisation 01 (A+B) réanimation
@@ -315,11 +317,11 @@ vvr_rum_repa <- function (rsa, rum, pmctmono) {
       valopmctmonotime2 = rec_pmctmonotime2 + rec_sup_repa,
       #coeftime = coéfficients de répartition temporel
       coeftime=(dureesejpart+1)/(duree+nbrum),
-      #coefpmctmono = coéfficients de répartition pmct
-      coefpmctmono=ifelse(is.na(pmctnosup), 1, pmctnosup/sumpmctnosup),
-      #coefpmctmonotime1 = coéfficients de répartition pmctmonotime1
-      coefpmctmonotime1=ifelse(is.na(pmctnosup), 1, pmctnosup*(dureesejpart+1)/sumpmctimenosup),
-      #coefpmctmonotime2 = coéfficients de répartition pmctmonotime2
+      #coefpmctmono = coéfficients de répartition pmct  (NB: si un des pmctmono du séjour est inexistant alors on repartit selon le temps)
+      coefpmctmono=ifelse(is.na(checksumpmctnosup), coeftime, pmctnosup/sumpmctnosup),
+      #coefpmctmonotime1 = coéfficients de répartition pmctmonotime1  (NB: si un des pmctmono du séjour est inexistant alors on repartit selon le temps)
+      coefpmctmonotime1=ifelse(is.na(checksumpmctnosup), coeftime, pmctnosup*(dureesejpart+1)/sumpmctimenosup),
+      #coefpmctmonotime2 = coéfficients de répartition pmctmonotime2 (moyenne de temps et pmctmono)
       coefpmctmonotime2=(coeftime+coefpmctmono)/2 ) %>%
     dplyr::select(nofiness,cle_rsa,nas,norum,nbrum,
                   ansor,

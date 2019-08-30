@@ -628,7 +628,7 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
     tb[['rec_base_hp']]<-
       round(
         with(df%>%filter(typehosp=="P"),
-             tapply(valopmctmonotime1-rec_sup_repa,pivot,sum,na.rm=T))
+             tapply(rec_base,pivot,sum,na.rm=T))
 
       )
   }
