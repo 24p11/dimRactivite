@@ -479,6 +479,13 @@ load_all<- function(remontees_sel){
       
       
     }
+    
+    message(
+      "\n Importés dans l'espace de travail :",
+      "annees : ", toString(paste(unique(rsa$ansor),collapse = '/')) ,
+      "rsa, rsa_v  : ",  toString(nrow(rsa)) , " lignes \n",
+      "rum, rum_v :", toString(nrow(rum)), " lignes \n"
+    )
   
 }
 
