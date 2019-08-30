@@ -10,7 +10,7 @@
 #'
 #' @examples
 #' update_options()
-update_options<-function(file = 'demos/options.yaml'){
+update_options<-function(file = 'options.yaml'){
 
   dimRactivite_options_ = yaml::read_yaml(file)
 
@@ -40,7 +40,7 @@ update_options<-function(file = 'demos/options.yaml'){
 
 .onLoad <- function(libname, pkgname) {
 
-  update_options()
+  #update_options()
 
   invisible()
 }
