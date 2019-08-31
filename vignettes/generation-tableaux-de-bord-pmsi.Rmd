@@ -26,12 +26,13 @@ library (RCurl)
 library(jsonlite)
 library(referentiels)
 library(referime)
+library(readxl)
 ```
 
 # Import des données dans R
 
 ### Paramètre des imports
-Le paramètres nécessaires pour les imports se trouvent dans un le fichier options.yaml (cf exemple)
+Le paramètres nécessaires pour les imports se trouvent dans un le fichier options.yaml (cf exemple) en particulier la variable ``` path ``` qui donne le chemin du dossier racine dans le quel se trouve les archives PMSI en sortie de GENRSA.
 ```{r profondeur}
 dimRactivite:::update_options("options.yaml")
 
@@ -39,7 +40,7 @@ profondeur_imports = 2
 ```
 ### Création des fichiers .RData par remontée
 
-La première étape est de scanner le dossier contenant les archives afin de dresser la liste de remontées disponibles.
+La première étape consiste à scanner le dossier contenant les archives afin de dresser la liste de remontées disponibles ce qui produit un tableaux de données référençant l'ensemble des informations utiles sur les archives et leur contenu. Ce tableau appelé ``` fichiers_genrsa``` sera utilisé par les autres fonctions d'imports comme reférentiel pour décrire les données disponibles.
 
 #### Liste des fichiers présents dans le dossier racine
 ```{r scan_path}
@@ -48,7 +49,7 @@ fichiers_genrsa <- dimRactivite:::scan_path()
 
 #### Analyse des fichiers et vérification de la présence des fichiers en fonction de leur extentions (ext imco + .zip + .RData)
 
-Les fichiers sont ensuite analysés afin de préparer la création (ou non) des fichiers .RData. On vérifie la présence dans les fichiers zippés en sortie de GENRSA de l'ensemble des fichiers nécessaires à la facturation et à l'analyse de l'activité en lisant l'extension des fichiers de l'archive.
+Les fichiers sont ensuite analysés afin de préparer la création (ou non) des fichiers .RData. On vérifie la présence dans les fichiers zippés en entrée et en sortie de GENRSA de l'ensemble des fichiers nécessaires à la facturation et à l'analyse de l'activité en lisant l'extension des fichiers de l'archive. Ce second tableau de données plus synthétique servira également de base pour les autres fonctions.
 
 ```{r analyse_fichier_remontees}
 remontees_dispo <- dimRactivite:::analyse_fichiers_remontees(fichiers_genrsa)
@@ -58,9 +59,9 @@ remontees_dispo%>%arrange(annee,mois,finess)
 
 #### Création et sauvegarde des .RData de remontée (si manquant) et mise à jour de la liste des remontées disponibles
 
-La fonction ``` save_remontee``` prend comme argument le tableau de synthèse des fichiers diponibles dans le dossier racine et produit jun .RData par remontée qui est enregisté dans le dossier racine. Pour être importée, une remontée doit comprendre le in et le out de GENRSA. Les fichiers indispensables sont le .rss et le .rsa. S'ils ne sont pas présents dans l'archive les autres fichiers seront générés automatiquement (fichier vide).Les remontées pour lequelles un fichier .RData est disponible ne seront pas ré-importés.
+La fonction ``` save_remontee``` prend comme argument le tableau de synthèse des fichiers diponibles dans le dossier racine et produit un fichier .RData pour chaque remontée, qui est enregisté dans le dossier racine. Pour être importée, une remontée doit comprendre le in et le out de GENRSA. Les fichiers indispensables sont le .rss et le .rsa. S'ils ne sont pas présents dans l'archive les autres fichiers seront générés automatiquement (fichier vide). Les remontées pour lequelles un fichier .RData est disponible ne seront pas ré-importés.
 
-Par défaut, l'option ```option recent = TRUE ``` induit la création du .RData pour la dernière remontée disponible en forçant la variable .RData du df remontees_dispo à 0 (même si un fichier .RData est disponible pour cette remontée dans le dossier racine).
+Par défaut, l'option ```option recent = TRUE ``` induit la création du .RData pour la dernière remontée disponible en forçant la variable .RData du tableau de données ```remontees_dispo``` à 0 (même si un fichier .RData est disponible pour cette remontée dans le dossier racine).
 
 
 ```{r save_remontee}
@@ -86,7 +87,7 @@ table(rsa$nofiness,rsa$ansor)
 
 #### Ajout des données de struture
 
-Différentes données complémentaires peuvent ensuite est ajoutées aux données PMSI standardisées. Problement la plus importante d'entre elles, est l'ajout d'élements descriptifs des uma : leur libellé, services et pôles de rattachement. L'ajout des structures se fait grâce à un fichier de paramètre ``` structure.xls``` (cf exemple).
+Différentes données complémentaires peuvent ensuite est ajoutées aux données PMSI standardisées. L'ajout d'élements descriptifs des uma (leur libellé, services et pôles de rattachement) sera probablement la plus important d'entre elles. L'ajout des structures se fait grâce à un fichier de paramètre ``` structure.xls``` (cf exemple).
 
 La fonction ```verif_structure()``` permet de s'assurer que l'ensemble des uma présentes dans les fichiers GENRSA sont bien renseignées dans le fichier structure.
 
@@ -112,9 +113,9 @@ On pourrait à cet endroit, vouloir également ajouter d'autres informations sur
 
 # Génération des tableaux de bord
 
-Deux types de tableaux de bord peuvent être générés :
-- des tableaux synthétiques permettant une vue de l'évolution temporelle d'un indicateur pour l'ensmeble de l'établissement ou du groupe hospitalier
-- des tableaux détaillés pour chaque niveau du fichier structure permettant de suivre l'évolution temporalle pour ce niveau d'un ensemble d'indicateurs prédéfinis
+Deux types de tableaux de bord peuvent être générés (les exemples donnés ici ne sont accéssibles que sur l'intranet de l'APHP) :
+- des tableaux synthétiques permettant une vue de l'évolution temporelle d'un indicateur pour l'ensmeble de l'établissement ou du groupe hospitalier  (ex : [intranet aphp](http://msi.sls.aphp.fr/tdb/index.php?_tbl=TableauDeBordGeneral&_mois=07&_annee=2019&_type=mens) ), des recettes avec une répartition par service (ex : [intranet aphp]http://msi.sls.aphp.fr/tdb/index.php?_tbl=TableauDeBordValorisation&_mois=07&_annee=2019&_type=mens)
+- des tableaux détaillés pour chaque niveau du fichier structure permettant de suivre l'évolution temporalle pour ce niveau d'un ensemble d'indicateurs prédéfinis (ex [intranet aphp](http://msi.sls.aphp.fr/tdb/index.php?_tbl=TableauDeBordActivite&_service=Lariboisiere&_mois=07&_annee=2019&_type=mens)).
 
 Pour l'ensemble de ces tableaux on produit une version mensuelle et une version cumulée. La fonction ``` get_data() ``` permet de préparer les données.
 
