@@ -5,12 +5,12 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Génération de tableaux de bord PMSI avec pmeasyr • dimRactivite</title>
+<title>Import des archives GENSRA et génération de tableaux de bord • dimRactivite</title>
 <!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script><!-- Bootstrap --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha256-916EbMg70RQy9LHiGkXzG8hSg9EdNy97GazNG/aiY1w=" crossorigin="anonymous">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/all.min.css" integrity="sha256-nAmazAk6vS34Xqo0BSrTb+abbtFlgsFK7NKSi6o7Y78=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/v4-shims.min.css" integrity="sha256-6qHlizsOWFskGlwVOKuns+D1nB6ssZrHQrNj1wGplHc=" crossorigin="anonymous">
 <!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" integrity="sha256-FiZwavyI2V6+EXO1U+xzLG3IKldpiTFf3153ea9zikQ=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/headroom.min.js" integrity="sha256-DJFC1kqIhelURkuza0AvYal5RxMtpzLjFhsnVIeuk+U=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- pkgdown --><link href="../pkgdown.css" rel="stylesheet">
-<script src="../pkgdown.js"></script><meta property="og:title" content="Génération de tableaux de bord PMSI avec pmeasyr">
+<script src="../pkgdown.js"></script><meta property="og:title" content="Import des archives GENSRA et génération de tableaux de bord">
 <meta property="og:description" content="">
 <meta name="twitter:card" content="summary">
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
@@ -54,7 +54,7 @@
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
-      <a href="../articles/generation-tableaux-de-bord-pmsi.html">Génération de tableaux de bord PMSI avec pmeasyr</a>
+      <a href="../articles/generation-tableaux-de-bord-pmsi.html">Import des archives GENSRA et génération de tableaux de bord</a>
     </li>
   </ul>
 </li>
@@ -72,7 +72,7 @@
       </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
-      <h1>Génération de tableaux de bord PMSI avec pmeasyr</h1>
+      <h1>Import des archives GENSRA et génération de tableaux de bord</h1>
             
       
       
@@ -85,12 +85,12 @@
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(dimRactivite)
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(pmeasyr)
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(tidyverse)
-<span class="co">#&gt; ── Attaching packages ─────────────────────────────────────────────── tidyverse 1.2.1 ──</span>
+<span class="co">#&gt; ── Attaching packages ───────────────────────────────────────────────────────────────────────────────── tidyverse 1.2.1 ──</span>
 <span class="co">#&gt; ✔ ggplot2 3.2.1.9000     ✔ purrr   0.3.2     </span>
 <span class="co">#&gt; ✔ tibble  2.1.3          ✔ dplyr   0.8.3     </span>
 <span class="co">#&gt; ✔ tidyr   0.8.3          ✔ stringr 1.4.0     </span>
 <span class="co">#&gt; ✔ readr   1.3.1          ✔ forcats 0.4.0</span>
-<span class="co">#&gt; ── Conflicts ────────────────────────────────────────────────── tidyverse_conflicts() ──</span>
+<span class="co">#&gt; ── Conflicts ──────────────────────────────────────────────────────────────────────────────────── tidyverse_conflicts() ──</span>
 <span class="co">#&gt; ✖ dplyr::filter() masks stats::filter()</span>
 <span class="co">#&gt; ✖ dplyr::lag()    masks stats::lag()</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span> (RCurl)
@@ -109,6 +109,7 @@
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(referentiels)
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(referime)
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(readxl)</code></pre></div>
+<p>Les fonctions d’imports et d’analyses sont construites sur le principe que chaque établissement produit tous les mois des fichiers de données de facturation mis en entrée du logiciel ATIH GENRSA utilisé pour transmettre les données PMSI aux tutelles. L’analyse de ces fichiers par GENRSA produit 2 types d’archives (.zip) le in (les fichiers d’entrée) et le out (fichiers préparés pour être envoyés). Le package généralise l’import des fichiers zippés en sortie de GENRSA (in et out) dans un environnement de travail R permettant l’analyse des données et la production de tableaux de bord automatiques.</p>
 <div id="import-des-donnees-dans-r" class="section level1">
 <h1 class="hasAnchor">
 <a href="#import-des-donnees-dans-r" class="anchor"></a>Import des données dans R</h1>
@@ -129,10 +130,10 @@ profondeur_imports =<span class="st"> </span><span class="dv">2</span></code></p
 <a href="#liste-des-fichiers-presents-dans-le-dossier-racine" class="anchor"></a>Liste des fichiers présents dans le dossier racine</h4>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">fichiers_genrsa &lt;-<span class="st"> </span>dimRactivite<span class="op">:::</span><span class="kw"><a href="../reference/scan_path.html">scan_path</a></span>()</code></pre></div>
 </div>
-<div id="analyse-des-fichiers-et-verification-de-la-presence-des-fichiers-en-fonction-de-leur-extentions-ext-imco--zip--rdata" class="section level4">
+<div id="analyse-des-fichiers-en-fonction-de-leur-extentions-ext-imco--zip-et-verification-de-la-presence-des--rdata" class="section level4">
 <h4 class="hasAnchor">
-<a href="#analyse-des-fichiers-et-verification-de-la-presence-des-fichiers-en-fonction-de-leur-extentions-ext-imco--zip--rdata" class="anchor"></a>Analyse des fichiers et vérification de la présence des fichiers en fonction de leur extentions (ext imco + .zip + .RData)</h4>
-<p>Les fichiers sont ensuite analysés afin de préparer la création (ou non) des fichiers .RData. On vérifie la présence dans les fichiers zippés en entrée et en sortie de GENRSA de l’ensemble des fichiers nécessaires à la facturation et à l’analyse de l’activité en lisant l’extension des fichiers de l’archive. Ce second tableau de données plus synthétique servira également de base pour les autres fonctions.</p>
+<a href="#analyse-des-fichiers-en-fonction-de-leur-extentions-ext-imco--zip-et-verification-de-la-presence-des--rdata" class="anchor"></a>Analyse des fichiers en fonction de leur extentions (ext imco + .zip) et vérification de la présence des .RData</h4>
+<p>Les fichiers sont ensuite analysés afin de préparer la création (ou non) des fichiers .RData. On vérifie la présence dans les fichiers zippés en entrée et en sortie de GENRSA de l’ensemble des fichiers nécessaires à la facturation et à l’analyse de l’activité en lisant l’extension des fichiers de l’archive. La fonction <code>analyse_fichiers_remontees</code> produit un dataframe <code>remontees_dispo</code> de synthèse où pour chaque remontée on liste l’absence (0) ou la présence (1) des fichiers qui seront utilisés. Ce dataframe sera également utilisé pour les autres fonctions.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">remontees_dispo &lt;-<span class="st"> </span>dimRactivite<span class="op">:::</span><span class="kw"><a href="../reference/analyse_fichiers_remontees.html">analyse_fichiers_remontees</a></span>(fichiers_genrsa)
 
 remontees_dispo<span class="op">%&gt;%</span><span class="kw">arrange</span>(annee,mois,finess)
@@ -154,7 +155,7 @@ remontees_dispo<span class="op">%&gt;%</span><span class="kw">arrange</span>(ann
 <div id="creation-et-sauvegarde-des--rdata-de-remontee-si-manquant-et-mise-a-jour-de-la-liste-des-remontees-disponibles" class="section level4">
 <h4 class="hasAnchor">
 <a href="#creation-et-sauvegarde-des--rdata-de-remontee-si-manquant-et-mise-a-jour-de-la-liste-des-remontees-disponibles" class="anchor"></a>Création et sauvegarde des .RData de remontée (si manquant) et mise à jour de la liste des remontées disponibles</h4>
-<p>La fonction <code>save_remontee</code> prend comme argument le tableau de synthèse des fichiers diponibles dans le dossier racine et produit un fichier .RData pour chaque remontée, qui est enregisté dans le dossier racine. Pour être importée, une remontée doit comprendre le in et le out de GENRSA. Les fichiers indispensables sont le .rss et le .rsa. S’ils ne sont pas présents dans l’archive les autres fichiers seront générés automatiquement (fichier vide). Les remontées pour lequelles un fichier .RData est disponible ne seront pas ré-importés.</p>
+<p>La fonction <code>save_remontee</code> prend comme argument le tableau de synthèse des fichiers diponibles dans le dossier racine (<code>remontees_dispo</code>) et produit un fichier .RData pour chaque remontée, qui est enregisté dans le dossier racine. Pour être importée, une remontée doit comprendre le in et le out de GENRSA. Les fichiers indispensables sont le .rss et le .rsa. S’ils ne sont pas présents dans l’archive les autres fichiers servant à la facturation seront générés automatiquement (fichier vide). Les remontées pour lequelles un fichier .RData est disponible ne seront pas ré-importés.</p>
 <p>Par défaut, l’option <code>option recent = TRUE</code> induit la création du .RData pour la dernière remontée disponible en forçant la variable .RData du tableau de données <code>remontees_dispo</code> à 0 (même si un fichier .RData est disponible pour cette remontée dans le dossier racine).</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#remontees_dispo &lt;- dimRactivite:::save_remontees( remontees_dispo, fichiers_genrsa )</span></code></pre></div>
 </div>
@@ -188,7 +189,7 @@ sel_remontees_import
 <div id="ajout-des-donnees-de-struture" class="section level4">
 <h4 class="hasAnchor">
 <a href="#ajout-des-donnees-de-struture" class="anchor"></a>Ajout des données de struture</h4>
-<p>Différentes données complémentaires peuvent ensuite est ajoutées aux données PMSI standardisées. L’ajout d’élements descriptifs des uma (leur libellé, services et pôles de rattachement) sera probablement la plus important d’entre elles. L’ajout des structures se fait grâce à un fichier de paramètre <code>structure.xls</code> (cf exemple).</p>
+<p>Différentes données complémentaires peuvent ensuite être ajoutées aux données PMSI standardisées. L’ajout d’élements descriptifs des uma (leur libellé, services et pôles de rattachement) sera probablement le plus important d’entre eux. L’ajout des structures se fait grâce à un fichier de paramètres <code>structure.xls</code> (cf exemple).</p>
 <p>La fonction <code><a href="../reference/verif_structure.html">verif_structure()</a></code> permet de s’assurer que l’ensemble des uma présentes dans les fichiers GENRSA sont bien renseignées dans le fichier structure.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">
 fichier_structure &lt;-<span class="st"> </span>readxl<span class="op">::</span><span class="kw"><a href="https://readxl.tidyverse.org/reference/read_excel.html">read_excel</a></span>(<span class="st">"structures.xlsx"</span>,
@@ -214,13 +215,13 @@ rum &lt;-<span class="st"> </span>rum <span class="op">%&gt;%</span><span class=
 <div id="generation-des-tableaux-de-bord" class="section level1">
 <h1 class="hasAnchor">
 <a href="#generation-des-tableaux-de-bord" class="anchor"></a>Génération des tableaux de bord</h1>
-<p>Deux types de tableaux de bord peuvent être générés (les exemples donnés ici ne sont accéssibles que sur l’intranet de l’APHP) : - des tableaux synthétiques permettant une vue de l’évolution temporelle d’un indicateur pour l’ensmeble de l’établissement ou du groupe hospitalier (ex : <a href="http://msi.sls.aphp.fr/tdb/index.php?_tbl=TableauDeBordGeneral&amp;_mois=07&amp;_annee=2019&amp;_type=mens">intranet aphp</a> ), des recettes avec une répartition par service (ex : [intranet aphp]<a href="http://msi.sls.aphp.fr/tdb/index.php?_tbl=TableauDeBordValorisation&amp;_mois=07&amp;_annee=2019&amp;_type=mens" class="uri">http://msi.sls.aphp.fr/tdb/index.php?_tbl=TableauDeBordValorisation&amp;_mois=07&amp;_annee=2019&amp;_type=mens</a>) - des tableaux détaillés pour chaque niveau du fichier structure permettant de suivre l’évolution temporalle pour ce niveau d’un ensemble d’indicateurs prédéfinis (ex <a href="http://msi.sls.aphp.fr/tdb/index.php?_tbl=TableauDeBordActivite&amp;_service=Lariboisiere&amp;_mois=07&amp;_annee=2019&amp;_type=mens">intranet aphp</a>).</p>
+<p>Deux types de tableaux de bord peuvent être générés (les exemples donnés ici ne sont accéssibles que sur l’intranet de l’APHP) : - des tableaux synthétiques permettant une vue de l’évolution temporelle d’un indicateur pour l’ensemble de l’établissement ou du groupe hospitalier (ex : <a href="http://msi.sls.aphp.fr/tdb/index.php?_tbl=TableauDeBordGeneral&amp;_mois=07&amp;_annee=2019&amp;_type=mens">intranet aphp</a> ), des recettes avec une répartition par service (ex : [intranet aphp]<a href="http://msi.sls.aphp.fr/tdb/index.php?_tbl=TableauDeBordValorisation&amp;_mois=07&amp;_annee=2019&amp;_type=mens" class="uri">http://msi.sls.aphp.fr/tdb/index.php?_tbl=TableauDeBordValorisation&amp;_mois=07&amp;_annee=2019&amp;_type=mens</a>) - des tableaux détaillés pour chaque niveau du fichier structure permettant de suivre l’évolution temporelle pour ce niveau d’un ensemble d’indicateurs prédéfinis (ex <a href="http://msi.sls.aphp.fr/tdb/index.php?_tbl=TableauDeBordActivite&amp;_service=Lariboisiere&amp;_mois=07&amp;_annee=2019&amp;_type=mens">intranet aphp</a>).</p>
 <p>Pour l’ensemble de ces tableaux on produit une version mensuelle et une version cumulée. La fonction <code><a href="../reference/get_data.html">get_data()</a></code> permet de préparer les données.</p>
 <div id="parametres-des-tableaux-de-bord" class="section level3">
 <h3 class="hasAnchor">
 <a href="#parametres-des-tableaux-de-bord" class="anchor"></a>Paramètres des tableaux de bord</h3>
-<p>Pour les tableaux détaillés, un fichier de paramétrage permet de définir quels indicateurs calculer pour chaque élément du fichier structure (par ex. le suivi de l’activité des services de réanimation nécessitera le suivi d’indicateurs différents que ceux des services de médecine). Sachant que le nombre d’indicateurs calculés aujourd’hui est important (de l’ordre de 200) nous avons également laisser la possibilité de découper les résultats en différents tableaux.</p>
-<p>L’option <code>profondeur_tdb</code> permet de définir la profondeur temporelle, en année, du suivi des tableaux de bord. D’autres données de références sont également utiles commes les dms de référence dans la base nationale pmsi ou des liste de disgnostics. Elles sont chargées grâce aux package <code>referime```` et</code>referentiel```.</p>
+<p>Pour les tableaux détaillés, un fichier de paramétrage permet de définir quels indicateurs calculés pour chaque élément du fichier structure (par ex. le suivi de l’activité des services de réanimation nécessitera le suivi d’indicateurs différents que ceux des services de médecine). Sachant que le nombre d’indicateurs calculés aujourd’hui est important (de l’ordre de 200) nous avons également laisser la possibilité de découper les résultats en différents tableaux.</p>
+<p>L’option <code>profondeur_tdb</code> permet de définir la profondeur temporelle, en année, du suivi des tableaux de bord. D’autres données de références sont également utiles commes les dms de référence dans la base nationale pmsi ou des listes de disgnostics. Elles sont chargées grâce aux package <code>referime</code> et <code>referentiel</code>.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">
 <span class="co">#Chemins pour les sorties écriture des fichiers de sortie</span>
 path_res =<span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/getwd.html">getwd</a></span>()
