@@ -31,14 +31,14 @@ Un scénario complet d'import et de génération peut être trouver dans la vign
 
 Organisation du file system
 ---------------------------
-Comme préconisé par G.Pressiat dans la documentation du package pmeasyr [les archives PMSI](https://guillaumepressiat.github.io/pmeasyr/archives.html), dimRactivite utilisera un dossier unique comprenant l'ensemble des fichiers zippés en entrée et en sortie de GENRSA. Les fichiers contenus dans ce dossier seront anylisés, les fichiers .RData seront crées s'ils n'existent pas encore, puis les données seront automatiquement intégrées dans R (par défaut la remontée la plus récente est prise en compte).
+Comme préconisé par G.Pressiat dans la documentation du package pmeasyr [les archives PMSI](https://guillaumepressiat.github.io/pmeasyr/archives.html), dimRactivite utilisera un dossier unique comprenant l'ensemble des fichiers zippés en entrée et en sortie de GENRSA. Les fichiers contenus dans ce dossier seront analysés, un fichier .RData par remontée sera crée s'il n'existe pas encore, puis les données seront automatiquement chargées dans R à partir des fichiers .RData (par défaut la remontée la plus récente est prise en compte).
 
 L'adresse de ce dossier est renseigné dans l'option du fichier de configuration ```path```  .
 
 Import des données PMSI
 -----------------------
 
-Cette procédure, qui procède par plusieurs étapes, utilise les fichiers GENRSA avec les fonction d'imports pmeasyr (cf [doc irsa](https://guillaumepressiat.github.io/pmeasyr/import-des-donnees.html#rsa)):
+Cette procédure, qui procède par plusieurs étapes, utilise les fichiers GENRSA avec les fonctions d'imports pmeasyr (cf [doc irsa](https://guillaumepressiat.github.io/pmeasyr/import-des-donnees.html#rsa)):
 
 - in
     * rss (pmeasyr::irum type 4, transposition des diagnostics, intégration du tra avec pmeasyr::inner_tra)
@@ -72,7 +72,7 @@ NB : les exemples donnés ici ne sont accéssibles que sur l'intranet de l'APHP.
 
 Ces tableaux permettent de suivre précisément les données d'activité pour chaque niveau de la structure du groupe ou de l'établissement. Il reposent donc beaucoup sur le fichier stucture qui est intégré à la fin des imports et qui permet de décrire selon plusieurs niveaux de regroupements les uma.
 
-On distingue un permier ensemble de tableaux de bord permettant de suivre l'évolution anuelle d'un seul indicateur sur l'ensemble des niveaux de structure, en prenant toujours le principe de distinguer hopsitalisation complète et hospitalisation partielle. On dispose de tableaux de suivi de l'activité (ex : [intranet aphp](http://msi.sls.aphp.fr/tdb/index.php?_tbl=TableauDeBordGeneral&_mois=07&_annee=2019&_type=mens) ), des recettes avec une répartition par service (ex : [intranet aphp]http://msi.sls.aphp.fr/tdb/index.php?_tbl=TableauDeBordValorisation&_mois=07&_annee=2019&_type=mens).
+On distingue un permier ensemble de tableaux de bord permettant de suivre l'évolution anuelle d'un seul indicateur sur l'ensemble des niveaux de structure, en prenant toujours le principe de distinguer hopsitalisation complète et hospitalisation partielle. On dispose de tableaux de suivi de l'activité (ex : [intranet aphp](http://msi.sls.aphp.fr/tdb/index.php?_tbl=TableauDeBordGeneral&_mois=07&_annee=2019&_type=mens) ), des recettes avec une répartition par service (ex : [intranet aphp](http://msi.sls.aphp.fr/tdb/index.php?_tbl=TableauDeBordValorisation&_mois=07&_annee=2019&_type=mens).
 
 Un autre ensemble de tableaux permet de suivre l'évolution annuelle pour chaque niveau (groupe hospitalier, établissement, pole, service,...) d'un ensemble d'indicateurs. Le package permet de le calcul d'environ 200 indicateurs répartis dans tableaux de bord thématiques (activité, DIM, médical) (ex [intranet aphp](http://msi.sls.aphp.fr/tdb/index.php?_tbl=TableauDeBordActivite&_service=Lariboisiere&_mois=07&_annee=2019&_type=mens))
 

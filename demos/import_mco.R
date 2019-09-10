@@ -1,5 +1,5 @@
 library(tidyverse)
-library (RCurl)
+library(RCurl)
 library(jsonlite)
 library(referentiels)
 library(referime)

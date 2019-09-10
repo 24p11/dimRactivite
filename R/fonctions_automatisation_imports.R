@@ -99,7 +99,7 @@ analyse_fichiers_remontees <- function( fichiers_genrsa, maj_dernier_mois = TRUE
   
   imco_files_types = getOption("dimRactivite.fichiers_imco")%>%purrr::flatten_chr()
   
-  df<-fichiers_genrsa%>%filter(annee>2012,type%in%imco_files_types)%>%
+  df<-fichiers_genrsa%>%filter(as.numeric(annee)>2012,type%in%imco_files_types)%>%
                                       mutate(annee = as.numeric(annee),
                                             mois = as.numeric(mois),
                                             RData = factor(RData,levels=c('0','1')),
