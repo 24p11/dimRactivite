@@ -4,7 +4,7 @@
 \alias{analyse_fichiers_remontees}
 \title{Lecture des fichiers en sortie de scan_path pour vérification de leur contenu et préparation aux imports}
 \usage{
-analyse_fichiers_remontees(fichiers_genrsa)
+analyse_fichiers_remontees(fichiers_genrsa, maj_dernier_mois = TRUE)
 }
 \arguments{
 \item{fichiers_genrsa}{tibble en sortie de scan_path}

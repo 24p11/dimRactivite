@@ -3,11 +3,12 @@ Type: Package
 Title: Exploitation des données PMSI au format pmeasyr
 Version: 0.1.0
 Author: c(
+    person("DIM", "APHP.Nord", email = "dim.nord@aphp.fr", role = c("aut", "cre")),
   person("Rémi", "Flicoteaux", email = "remi.flicoteaux@aphp.fr", role = c("aut", "cre")),
   person("Fabrice", "Danjou", email = "fabrice.danjou@aphp.fr", role = c("aut", "cre")),
-  person("Bernard", "Nouby", email = "bernard.noubiyoumbi@aphp.fr", role = c("aut", "cre"))
+  person("Bernard", "Noubi Youmbi", email = "bernard.noubiyoumbi@aphp.fr", role = c("aut", "cre"))
   )
-Maintainer: Rémi Flicoteaux <remi.flicoteaux@aphp.fr>
+Maintainer: DIM APHP.Nord <dim.nord@aphp.fr>
 Description: dimRactivite permet la production standirdisée de tableaux de bord et d'indicateurs
   utilisés pour le suivi de l'activité des établissements. Le package utilise les données en entrée et sortie
   de genrsa chargées dans R avec le package pmeasyr.
@@ -33,7 +34,8 @@ Imports:
     stringr,
     yaml,
     purrr,
-    referime
+    referime,
+    readxl
 Suggests: 
     pmeasyr,
     knitr,

@@ -37,6 +37,12 @@ update_options<-function(file = 'options.yaml'){
 
 }
 
+set_option<-function(opt,val){
+
+  opt = paste0('dimRactivite.',opt)
+  
+  options(setNames(list(val),opt) )
+}
 
 .onLoad <- function(libname, pkgname) {
 

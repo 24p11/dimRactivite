@@ -99,7 +99,7 @@ analyse_fichiers_remontees <- function( fichiers_genrsa, maj_dernier_mois = TRUE
   
   imco_files_types = getOption("dimRactivite.fichiers_imco")%>%purrr::flatten_chr()
   
-  df<-fichiers_genrsa%>%filter(annee>2012,type%in%imco_files_types)%>%
+  df<-fichiers_genrsa%>%filter(as.numeric(annee)>2012,type%in%imco_files_types)%>%
                                       mutate(annee = as.numeric(annee),
                                             mois = as.numeric(mois),
                                             RData = factor(RData,levels=c('0','1')),
@@ -480,6 +480,13 @@ load_all<- function(remontees_sel){
       
       
     }
+    
+    message(
+      "\n Importés dans l'espace de travail :",
+      "annees : ", toString(paste(unique(rsa$ansor),collapse = '/')) ,
+      "rsa, rsa_v  : ",  toString(nrow(rsa)) , " lignes \n",
+      "rum, rum_v :", toString(nrow(rum)), " lignes \n"
+    )
   
 }
 

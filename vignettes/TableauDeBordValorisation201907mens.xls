@@ -1,0 +1,100 @@
+""	"2017"	"2018"	"2019"	"diff"	"p_diff"	""	"2017"	"2018"	"2019"	"diff"	"p_diff"
+""											
+"Groupe Hospitalier"											
+"Lariboisière"		10709594						932946			
+"Saint Louis"		10822751						3151601			
+"Total GH"		21532345						4084546			
+""											
+"B2P"											
+"Biologie cellulaire & cinétique"								14871			
+"Physiologie EF"								33425			
+"Total pole"								48297			
+""											
+"Centre de Traitement des Brûlés"											
+"Réanimation Centre des brûlés"		531020									
+"SC Centre des brûlés"		152759									
+"HC Centre des brûlés"		86292									
+"Total pole"		770071									
+""											
+"DOREM"											
+"Chirurgie plastique & brûlés"		896701						146883			
+"CMF stomatologie"		81723						25608			
+"Dermatologie"		502931						169778			
+"Total pole"		1481354						342269			
+""											
+"DUNEGO"											
+"Chirurgie digestive"		471380						36813			
+"Chirurgie générale SLS"		813509						87623			
+"Chirurgie mammaire"		155214						77705			
+"CRN LRB"								0			
+"CRN SLS"								608			
+"Gastro-entérologie SLS"		193507						255783			
+"Hépato-Gastro-Entérologie"								4706			
+"Néphrologie"		345031						244386			
+"Urologie"		452480						88761			
+"Gynécologie"		265303						91417			
+"Obstétrique"		758592									
+"Néonatalogie"		180047									
+"Total pole"		3635063						887801			
+""											
+"HI-3RO"											
+"Centre des maladies du sein"								244272			
+"Hématologie greffe"		874961						170155			
+"AJA - hématologie"		416647						52614			
+"Hématologie adultes"		713076						109215			
+"Hématologie sénior"		477355						132644			
+"Hémato-oncologie"		341707						164992			
+"Immuno-hématologie"		540511						109826			
+"Immuno-pathologie clinique"		274761						61433			
+"Oncologie médicale"		269897						158892			
+"Neuro-oncologie"		149572						25760			
+"Onco-radiothérapie"		244672						523098			
+"Pneumologie"		304141						38047			
+"Réanimation médicale SLS"		497881									
+"Aphérèse Thérapeutique"								134885			
+"Total pole"		5105180						1925833			
+""											
+"IMAGINE"											
+"Diabétologie et endocrinologie"		419745						135807			
+"Gériatrie"		245147									
+"Maladies infectieuses SLS"		371499						37985			
+"Médecine interne aval urgences et thérap"		342335									
+"Médecine interne et immuno-clinique"		313882									
+"Médecine interne et maladies infectieuses"		277360						35598			
+"Médecine interne maladies auto imm et patho vasc"		126910						8563			
+"Médecine interne maladies systémiques"		314002									
+"Réanimation médicale & toxicologie"		623290									
+"SC médicale et toxicologie"		124824									
+"Total pole"		3158994						217953			
+""											
+"Locomoteur"											
+"Chirurgie Orthopédique"		1109603						177020			
+"Rhumatologie"		506484						72809			
+"Total pole"		1616087						249829			
+""											
+"NTC"											
+"Céphalées"								5692			
+"Douleur"		10677						10707			
+"Maladies rares"		26637						19034			
+"Médecine addictologique"		571419						49014			
+"MPR"								8560			
+"Neuro-vasculaire"		147586									
+"Neuro-vasculaire USI"		267557									
+"Neurochirurgie"		828119									
+"Neurologie"		165519						37643			
+"ORL"		565853						101295			
+"Total pole"		2583367						231944			
+""											
+"Urgences"											
+"Cardiologie"		379960						108497			
+"Cardiologie USI"		363301									
+"Réanimation chirurgicale & HDJ KT"		548908						67214			
+"Réanimation chirurgicale LRB"		921663									
+"USC LRB"		301635									
+"Urgences UHCD LRB"		521676									
+"Urgences UHCD SLS"		145086									
+"Total pole"		3182229						175711			
+""											
+"Imagerie"											
+"UCA Radio interventionnelle"								4909			
+"Total pole"								4909			

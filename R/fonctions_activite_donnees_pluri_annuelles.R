@@ -635,7 +635,12 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
   
   if('rmct_hc'%in%indicateurs){
     
-    tb[['rmct_hc']] <- round( tb[['rec_totale_hc']] / sum(df$doublon[df$typehosp=="C"]) )
+    tb[['rec_totale_hc']]<- round(
+      with(df%>%filter(typehosp=='C')%>%distinct(nofiness,ansor,cle_rsa,.keep_all = T),
+           tapply(rec_totale,pivot,sum,na.rm=T))
+    )
+    
+    tb[['rmct_hc']] <- round( tb[['rec_totale_hc']] / sum( df$doublon[ df$typehosp=="C" ] ) )
     
   }
   
@@ -1108,13 +1113,18 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
   ########################################################################################
   # Infectieux
   ########################################################################################
-  # if('Infectieux'%in%Indicateurs){
-  #
-  #   tb[['NbSejoursInfectieux']]<-table(Data$A[!duplicated(Data$NIP)&Data$NOS%in%InDiagnostics(ListesCIM$InfectionsOtoctones$CODE)&Data$NDA%in%NDA_HC])
-  #    tb[['NbSejoursInfectieuxU2I']]<-table(Data$A[!duplicated(Data$NDA)&Data$NDA%in%u2i$NDA&Data$NDA%in%NDA_HC])
-  #    tb[['NbSejoursInfectionBMR']]<-table(Data$A[!duplicated(Data$NIP)&Data$NOS%in%InDiagnostics(ListesCIM$ResistanceAtb$CODE)&Data$NDA%in%NDA_HC])
-  #    tb[['NbSejoursPortageBMR']]<-rep(NA,length(levels(Data$A)))
-  #  }
+   if('Infectieux'%in%indicateurs){
+     tmp<-df%>%filter(dp%in%infections_otoctones$code|dr%in%infections_otoctones$code|
+                        grepl(paste(infections_otoctones$code,collapse = '|'),das))
+     
+     tb[['NbSejoursInfectieux']]<-table( tmp%>% filter(doublon ==1) %>% select(pivot))
+     
+     tmp<-df%>%filter(dp%in%resistance_atb$code|dr%in%resistance_atb$code|
+                        grepl(paste(resistance_atb$code,collapse = '|'),das))
+     
+      tb[['NbPateintsBMR']]<-with( tmp,tapply(noanon,pivot,nb_unique) )
+      tb[['NbSejoursBMR']]<-table( tmp%>% filter(doublon ==1) %>% select(pivot))
+    }
 
   ########################################################################################
   # Douleur
@@ -1247,8 +1257,8 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
 
     ###Pourcentage de patients dialyses
     l_actes = paste(c(actes_dialyse_ira_discontinue$acte,
-                      actes_dialyseirc_discontinue,
-                      actes_dialyse_ira_continue),
+                      actes_dialyseirc_discontinue$acte,
+                      actes_dialyse_ira_continue$acte),
                     collapse = '|')
 
     tb[['NbSejoursPatientsDialyses']]<-table(df %>% filter( grepl( l_actes, actes ) )
@@ -1258,16 +1268,16 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
     tb[['pPatientsDialyses']]<-round( tb[['NbSejoursPatientsDialyses']]*100 / tb[['HCtotAutRea']] )
 
     ###Nb patients EER  + EER continue
-    l_actes = paste( c(actes_dialyse_ira_discontinue$acte,
-                       actes_dialyseirc_discontinue),
-                     collapse = '|')
+    l_actes = paste( actes_dialyse_continue$acte ,
+                     collapse = '|' )
 
     tb[['NbjourneesEERcontinue']]<-with( tmp_rea %>% mutate(nb_actes = stringr::str_count(actes, l_actes)),
                                          tapply(nb_actes,pivot,sum,na.rm=T))
 
     ##Nb seance EER discontinue (seances de dialyse)
-    l_actes = paste( actes_dialyse_continue$acte,
-                     collapse = '|')
+    l_actes = paste( c(actes_dialyse_ira_discontinue$acte,
+                       actes_dialyseirc_discontinue$acte),
+                     collapse = '|' )
 
     tb[['NbSeancesDialyses']]<- with( tmp_rea %>% mutate(nb_actes = stringr::str_count(actes, l_actes)),
                                       tapply(nb_actes,pivot,sum,na.rm=T))
@@ -1324,24 +1334,25 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
 
   if('nb_sej_bh'%in%indicateurs){
 
-    tmp = df%>%filter(nbjrbs>0)
+   
 
-    tb[['nb_sej_bh']]<-table( tmp %>% filter(doublon == 1) %>% select(pivot) )
+    tb[['nb_sej_bh']]<-table( df %>% filter(nbjrbs>0) %>% filter(doublon == 1) %>% select(pivot) )
   }
 
-  if('pSejBH'%in%indicateurs){
-    tb[['p_sej_bh']]<-round(tb[['nb_sej_bh']] * 100 / tb[['HCtot']]
+  if('p_sej_bh'%in%indicateurs){
+    tb[['p_sej_bh']]<-round(tb[['nb_sej_bh']] * 100 / 
+                              table( df %>% dplyr::filter( typehosp=="C", doublon==1 ) %>% dplyr::select(pivot) )
                           ,digit=1)
   }
 
-  if('nb_j_bh'%in%indicateurs){
+  if('nb_jour_bh'%in%indicateurs){
 
-    tb[['nb_j_bh']] <- with( df , tapply(nbjrbs,pivot,sum,na.rm=T) )
+    tb[['nb_jour_bh']] <- with( df , tapply(nbjrbs,pivot,sum,na.rm=T) )
   }
 
-  if('nb_j_bh_repa'%in%indicateurs){
+  if('nb_jour_bh_repa'%in%indicateurs){
 
-    tb[['nb_j_bh_repa']] <- round( with( df %>% mutate(nbjsup = nbjrbs*coeftime), tapply(nbjsup,pivot,sum,na.rm=T) ) )
+    tb[['nb_jour_bh_repa']] <- round( with( df %>% mutate(nbjsup = nbjrbs*coeftime), tapply(nbjsup,pivot,sum,na.rm=T) ) )
   }
 
   #if('pSejBHrevus'%in%indicateurs){
@@ -1524,8 +1535,8 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
     }
   }
   t<-diff_tb(t)
-  lignesexclusionPdiff<-which(t$LIBELLE%in%exclusionPdiff)
-  if(length(lignesexclusionPdiff))t[lignesexclusionPdiff,'P.Diff']<-'-'
+  #lignesexclusionPdiff<-which(t$LIBELLE%in%exclusionPdiff)
+  #if(length(lignesexclusionPdiff))t[lignesexclusionPdiff,'P.Diff']<-'-'
 
   #t$Cus['IP']<-GetCumIP(format(max(Data$DateSortieSejour,'%m%Y')))
   return(t[-1,])
@@ -1608,6 +1619,7 @@ get_activite_recettes<-function( df, structure ){
 #' @examples
 #' 
 make_tdb<-function(val,niveau,annee,mois){
+  
   #Nom des tableaux de bord disponibles
   
   if (!prep_string(val)%in%names(references)) {
@@ -1618,13 +1630,18 @@ make_tdb<-function(val,niveau,annee,mois){
     return(NA)
   }
   
+  #Vérifer que la variable de profondeur des tableaux de bord est bien disponible
+  if(is.null(getOption('dimRactivite.profondeur_tdb'))){
+    set_option(profondeur_tdb,5)
+  }
+  
   noms_tableaux = references%>%filter(!!sym(prep_string(val)) == 'o', !is.na(tdb))%>%mutate(tdb = str_split(tdb,','))%>%select(tdb)
   noms_tableaux =  unique(unlist(noms_tableaux))
   
   tdb<-list()
   #Données cumulées
-  df<-get_data(rum, ref = "ansor", m = 1:mois, a = (annee-5):annee, val, niveau, opt = T )%>%
-    mutate(pivot = factor(ansor,levels = (annee-5):annee))
+  df<-get_data(rum, ref = "ansor", m = 1:mois, a = (annee-getOption('dimRactivite.profondeur_tdb')):annee, val, niveau, opt = T )%>%
+    mutate(pivot = factor(ansor,levels = (annee-getOption('dimRactivite.profondeur_tdb')):annee))
   
   if (nrow(df)==0) {
     message(

@@ -13,6 +13,10 @@ library(referentiels)
 library(referime)
 
 
+#Règler la profondeur des tableaux de bord
+set_option("profondeur_tdb",5)
+
+
 #Année et mois en cours
 mois=as.numeric(format(Sys.Date()-50,'%m'));Mois=format(Sys.Date()-50,'%m')
 annee=as.numeric(format(Sys.Date()-55,'%Y'));
@@ -50,9 +54,6 @@ prep_string(str)[!prep_string(str)%in%names(references)]
 #Présents référentiels, absents fichier structure
 names(references)[!names(references)%in%c(prep_string(str),'tdb','niv','libelle','var','variable','dataframe','referentiel')]
 
-
-
-exclusionPdiff<-c('Taux de re-admissions precoces','IGS moyen')
 
 #####################################################################################################################
 #Prération des DMS base nationale
@@ -116,6 +117,9 @@ tdb<-list()
 #######################################################################################################################
 #Tableaux de bords thématiques
 #######################################################################################################################
+val = "GH"
+tdb[[val]]<-make_tdb( val , niveau = NULL, annee, mois )
+
 niveau = "hopital"
 vals = fichier_structure%>%select(!!niveau)%>%unique()%>%flatten_chr()
 
@@ -146,7 +150,3 @@ for ( val in vals ){
 }
 
 
-
-
-df<-get_data(inner_join(rum,rum_v), a =(annee-5):annee, m = 1:mois )
-tdb_v[['hopitaux']] <- round( with( df, tapply( valopmctmonotime1, list(hopital,ansor,typehosp), sum, na.rm=T ) ) )
