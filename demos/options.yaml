@@ -57,4 +57,5 @@ gestion_doublons_rum:
     pole: service
     Centre de Traitement des Brûlés: pole
 
+profondeur_tdb: 5
 

@@ -72,7 +72,7 @@ get_data<-function( DF, ref = 'ansor', m, a, val = NULL, niveau = NULL, opt = T 
 #'
 options_locales<-function(DF,val=NULL,niveau=NULL){
 
-  if( !is.null( getOption("dimRactivite.services_exclus") ) & "service" %in% names(df) ){
+  if( !is.null( getOption("dimRactivite.services_exclus") ) & "service" %in% names(DF) ){
 
     DF <- DF %>% dplyr::filter( !service %in% getOption("dimRactivite.services_exclus") )
   }

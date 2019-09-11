@@ -1113,7 +1113,7 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
   ########################################################################################
   # Infectieux
   ########################################################################################
-   if('Infectieux'%in%Indicateurs){
+   if('Infectieux'%in%indicateurs){
      tmp<-df%>%filter(dp%in%infections_otoctones$code|dr%in%infections_otoctones$code|
                         grepl(paste(infections_otoctones$code,collapse = '|'),das))
      
@@ -1334,24 +1334,25 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
 
   if('nb_sej_bh'%in%indicateurs){
 
-    tmp = df%>%filter(nbjrbs>0)
+   
 
-    tb[['nb_sej_bh']]<-table( tmp %>% filter(doublon == 1) %>% select(pivot) )
+    tb[['nb_sej_bh']]<-table( df %>% filter(nbjrbs>0) %>% filter(doublon == 1) %>% select(pivot) )
   }
 
-  if('pSejBH'%in%indicateurs){
-    tb[['p_sej_bh']]<-round(tb[['nb_sej_bh']] * 100 / tb[['HCtot']]
+  if('p_sej_bh'%in%indicateurs){
+    tb[['p_sej_bh']]<-round(tb[['nb_sej_bh']] * 100 / 
+                              table( df %>% dplyr::filter( typehosp=="C", doublon==1 ) %>% dplyr::select(pivot) )
                           ,digit=1)
   }
 
-  if('nb_j_bh'%in%indicateurs){
+  if('nb_jour_bh'%in%indicateurs){
 
-    tb[['nb_j_bh']] <- with( df , tapply(nbjrbs,pivot,sum,na.rm=T) )
+    tb[['nb_jour_bh']] <- with( df , tapply(nbjrbs,pivot,sum,na.rm=T) )
   }
 
-  if('nb_j_bh_repa'%in%indicateurs){
+  if('nb_jour_bh_repa'%in%indicateurs){
 
-    tb[['nb_j_bh_repa']] <- round( with( df %>% mutate(nbjsup = nbjrbs*coeftime), tapply(nbjsup,pivot,sum,na.rm=T) ) )
+    tb[['nb_jour_bh_repa']] <- round( with( df %>% mutate(nbjsup = nbjrbs*coeftime), tapply(nbjsup,pivot,sum,na.rm=T) ) )
   }
 
   #if('pSejBHrevus'%in%indicateurs){
@@ -1618,6 +1619,7 @@ get_activite_recettes<-function( df, structure ){
 #' @examples
 #' 
 make_tdb<-function(val,niveau,annee,mois){
+  
   #Nom des tableaux de bord disponibles
   
   if (!prep_string(val)%in%names(references)) {
@@ -1628,13 +1630,18 @@ make_tdb<-function(val,niveau,annee,mois){
     return(NA)
   }
   
+  #Vérifer que la variable de profondeur des tableaux de bord est bien disponible
+  if(is.null(getOption('dimRactivite.profondeur_tdb'))){
+    set_option(profondeur_tdb,5)
+  }
+  
   noms_tableaux = references%>%filter(!!sym(prep_string(val)) == 'o', !is.na(tdb))%>%mutate(tdb = str_split(tdb,','))%>%select(tdb)
   noms_tableaux =  unique(unlist(noms_tableaux))
   
   tdb<-list()
   #Données cumulées
-  df<-get_data(rum, ref = "ansor", m = 1:mois, a = (annee-5):annee, val, niveau, opt = T )%>%
-    mutate(pivot = factor(ansor,levels = (annee-5):annee))
+  df<-get_data(rum, ref = "ansor", m = 1:mois, a = (annee-getOption('dimRactivite.profondeur_tdb')):annee, val, niveau, opt = T )%>%
+    mutate(pivot = factor(ansor,levels = (annee-getOption('dimRactivite.profondeur_tdb')):annee))
   
   if (nrow(df)==0) {
     message(

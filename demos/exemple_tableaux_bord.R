@@ -54,7 +54,7 @@ df<-get_data(rum, ref = "ansor", m = 1:mois, a = (annee-3):annee, val = "Lariboi
   #Création d'un pivot qui correspond aux colonnes du tableau
   mutate(pivot = factor(ansor,levels = (annee-5):annee))
 
-#Ajout des donnéds complémentaires nécessaires aux tableaux de bord
+#Ajout des données complémentaires nécessaires aux tableaux de bord
 df<-left_join(inner_join(df,rum_v),
               inner_join(rsa,rsa_v)%>%mutate(anseqta = as.numeric(anseqta))%>%select(nofiness,cle_rsa,ansor,noghs,
                                                                                      anseqta,duree,rec_base,nbrum,noseqrum,
@@ -64,7 +64,7 @@ df<-left_join(inner_join(df,rum_v),
   left_join(.,vano%>%inner_join(., df%>%select(nofiness,cle_rsa,ansor,nas)) %>% select( nas, noanon )%>% distinct(nas,noanon))
 
 #Liste des indicateurs à calculer
-inds=get_indicateurs(nom="TableauDeBordActivite",val="Lariboisiere")
+inds=get_indicateurs(nom="TableauDeBordDIM",val="Lariboisiere")
 
 
 

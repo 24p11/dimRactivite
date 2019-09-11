@@ -5,7 +5,7 @@ library(referentiels)
 library(referime)
 
 #Si fichier genrsatemporaire
-tmp = TRUE
+tmp = FALSE
 
 #Année et mois en cours
 mois=as.numeric(format(Sys.Date()-50,'%m'));Mois=format(Sys.Date()-50,'%m')
@@ -85,15 +85,17 @@ rum<-dplyr::right_join(identites,rum)
 
 rum_save <- rum
 rsa_save <- rsa
-
+vano_save<- vano
 rum<-inner_join(rum,rum_v)
 rsa<-inner_join(rsa,rsa_v)
 #Sauvegarde de l'objet final disponible dans le working directory
+vano <- vano%>%  inner_join(rsa%>%select(ansor,nofiness,cle_rsa,nip, ipp, nas, nom, prenom, date_naissance),.)
 save(rsa, rum, diagnostics, actes, vano,  file = '~/GH_PMSI/DATA/WD/Rpmsi_pmeasyr_dispose.RData')
 
 rum<-rum_save
 rsa<-rsa_save
+vano<- vano_save
 save( rsa, rsa_v, rum, rum_v, diagnostics, actes, vano, file = '~/GH_PMSI/DATA/WD/Rpmsi_pmeasyr.RData')
-rm(rum_save,rsa_save);gc()
+rm(rum_save,rsa_save,vano_save);gc()
 
 
