@@ -177,7 +177,8 @@ maj_variable_RData<-function( remontees, p = NULL ){
     if( 1 %in% unique(remontees$RData) ){
       
       recents<-remontees %>% filter( RData==1 , annee == max( as.numeric(annee) ) )%>% 
-        group_by( finess, annee )%>%summarise( mois = max( as.numeric(mois) ) )
+        mutate(mois  =  as.numeric(mois) )%>%
+        group_by( finess, annee )%>% filter(mois == max(mois) )
    
       for(i in 1:nrow(recents)){
         
