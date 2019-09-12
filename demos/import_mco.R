@@ -3,6 +3,7 @@ library(RCurl)
 library(jsonlite)
 library(referentiels)
 library(referime)
+library(dimRactivite)
 
 #####################################################################################################################
 ##Paramètre des imports
@@ -15,7 +16,7 @@ profondeur_imports = 6
 #####################################################################################################################
 
 #Liste des fichiers présents dans le dossier racine
-fichiers_genrsa <- scan_path()
+fichiers_genrsa <- dimRactivite::scan_path()
 
 #Analyse des fichiers et vérification de la présence des fichiers en fonction de leur extentions (ext imco + .zip + .RData)
 #Par défaut (option recent =TRUE) les fichiers .RData de la remontée la plus récente est considéré comme manquant
@@ -46,4 +47,4 @@ sel_remontees_import<-remontees_dispo%>%filter(as.numeric(annee)> max(as.numeric
   group_by(finess,annee)%>%summarise(mois = max(as.numeric(mois)))
 
 #Selection des remontées
-load_all(sel_remontees_import)
+load_RData(sel_remontees_import)

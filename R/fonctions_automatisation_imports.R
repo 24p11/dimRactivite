@@ -432,11 +432,11 @@ save_remontees<-function(dossiers_remontees,fichiers_genrsa){
 #' @param remontees_sel tibble de type analyse_remontee avec l'ensemble des année à charger
 #'
 #' @return 
-#' @export load_all
+#' @export load_RData
 #' 
 #'
 #' @examples 
-load_all<- function(remontees_sel){
+load_RData<- function(remontees_sel){
   
 
   
@@ -480,6 +480,9 @@ load_all<- function(remontees_sel){
       
     }
     
+    
+    
+    
     message(
       "\n Importés dans l'espace de travail :",
       "annees : ", toString(paste(unique(rsa$ansor),collapse = '/')) ,
@@ -487,6 +490,25 @@ load_all<- function(remontees_sel){
       "rum, rum_v :", toString(nrow(rum)), " lignes \n"
     )
   
+}
+
+load_med<- function(remontees_sel){
+  
+  
+  
+  med<-NULL
+  
+  
+  for(i in 1:nrow(remontees_sel)){
+    
+    p= pmeasyr::noyau_pmeasyr(finess =remontees_sel$finess[i] ,
+                              annee = remontees_sel$annee[i],
+                              mois = remontees_sel$mois[i],
+                              path   = getOption("dimRactivite.path")
+    )
+    
+    
+  }
 }
 
 #' Import des principaux fichiers de remontées et valorisation des séjours et résumés
