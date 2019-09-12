@@ -44,7 +44,9 @@ remontees_dispo <- save_remontees(dossiers_remontees,fichiers_genrsa)
 #####################################################################################################################
 
 sel_remontees_import<-remontees_dispo%>%filter(as.numeric(annee)> max(as.numeric(remontees_dispo$annee))-profondeur_imports, RData==1)%>%
-  group_by(finess,annee)%>%summarise(mois = max(as.numeric(mois)))
+  mutate(mois  =  as.numeric(mois) )%>%
+  group_by( finess, annee )%>% filter(mois == max(mois) )
+
 
 #Selection des remontées
 load_RData(sel_remontees_import)
