@@ -52,10 +52,10 @@ scan_path<-function( path = getOption("dimRactivite.path"), ext = getOption("dim
                                                                    "mois" = det_final[3],
                                                                    "type" = det_final[4],
                                                                    "ext" = det_final[length(det_final)],
-                                                                   "archive"=zfile,
-                                                                   "file"=file,
-                                                                   "filepath"=folder,
-                                                                   "RData" =0,
+                                                                   "archive"= zfile,
+                                                                   "file"= file,
+                                                                   "filepath"= folder,
+                                                                   "RData" = 0,
                                                                    stringsAsFactors = F)
                   )
                 }
@@ -95,15 +95,22 @@ scan_path<-function( path = getOption("dimRactivite.path"), ext = getOption("dim
 #' @export analyse_fichiers_remontees
 #'
 #' @examples
-analyse_fichiers_remontees <- function( fichiers_genrsa, maj_dernier_mois = TRUE ){
+analyse_fichiers_remontees <- function( maj_dernier_mois = TRUE ){
   
   imco_files_types = getOption("dimRactivite.fichiers_imco")%>%purrr::flatten_chr()
   
-  df<-fichiers_genrsa%>%filter(as.numeric(annee)>2012,type%in%imco_files_types)%>%
+  if(is.null(getOption("dimRactivite.fichiers_genrsa"))){
+    
+    fichiers_genrsa <- scan_path()
+    set_option( "fichiers_genrsa", fichiers_genrsa )
+    
+  }
+  
+  df<-getOption("dimRactivite.fichiers_genrsa")%>%filter(as.numeric(annee)>2012,type%in%imco_files_types)%>%
                                       mutate(annee = as.numeric(annee),
-                                            mois = as.numeric(mois),
-                                            RData = factor(RData,levels=c('0','1')),
-                                            type = factor(type,levels = imco_files_types))
+                                             mois = as.numeric(mois),
+                                             RData = factor(RData,levels=c('0','1')),
+                                             type = factor(type,levels = imco_files_types))
   
 
   #dossiers<-table(fichiers_genrsa$filepath[o],fichiers_genrsa$type[o])
@@ -142,16 +149,18 @@ analyse_fichiers_remontees <- function( fichiers_genrsa, maj_dernier_mois = TRUE
 #' @param ext extentinon à intégrer
 #'
 #' @return tibble, tableau de synthèse des remontées disponibles
-#' @export update_remontees_dispo
+#' @export analyse_dossier_remontees
 #'
 #' @examples
-update_remontees_dispo<-function( path = getOption("dimRactivite.path"), ext = getOption("dimRactivite.extensions") ){
+analyse_dossier_remontees<-function( path = getOption("dimRactivite.path"), ext = getOption("dimRactivite.extensions"), maj_dernier_mois = TRUE ){
   
   #Liste des fichiers présents dans le dossier racine
   fichiers_genrsa <- scan_path( path, ext )
   
+  set_option("fichiers_genrsa",fichiers_genrsa)
+  
   #Analyse des fichiers et classement par remontée
-  remontees_dispo <- analyse_fichiers_remontees( fichiers_genrsa, maj_dernier_mois = FALSE )
+  remontees_dispo <- analyse_fichiers_remontees( maj_dernier_mois )
   
   
   return(remontees_dispo)
@@ -216,7 +225,7 @@ maj_variable_RData<-function( remontees, p = NULL ){
 #' @export adzipComplet
 #'
 #' @examples
-adzipComplet<-function(zfichiers,ext_to_import){
+adzipComplet<-function(zfichiers, ext_to_import = NULL ){
 
   dz_fichiers<-NULL
 
@@ -228,54 +237,69 @@ adzipComplet<-function(zfichiers,ext_to_import){
 
     det_noms = unique(unlist(stringr::str_split(noms_fichiers,'\\.')))
     
+    
     if(is.null(ext_to_import)){
+      
         #Choix des fichiers a importer dasn l'archive en fonction des extensions voulues
         if(grepl('OUT|out',zf)){
+          
           t = 'out'
           types = intersect ( getOption("dimRactivite.fichiers_imco")$`out` , det_noms )
+          
         }
         if(grepl('IN|in',zf)){
+          
           t = 'in'
           types = intersect ( getOption("dimRactivite.fichiers_imco")$`in` , det_noms )
+          
         }
     }else{
-        types =  ext_to_import   
+      
+        types =  intersect ( ext_to_import , det_noms )   
     }
 
 
-    noms<-noms_fichiers[sapply(noms_fichiers,function(n)grepl(paste(types,collapse = '|'),n))]
+    noms<-noms_fichiers[ sapply( noms_fichiers, function(n)grepl(paste(types,collapse = '|'), n ) ) ]
 
-    dz_fichiers<-c(dz_fichiers,noms)
+    dz_fichiers<-c( dz_fichiers, noms )
 
     pmeasyr::adezip2(path = getOption("dimRactivite.path"),
                      file = zf,
                      liste = types,
-                     pathto = getOption("dimRactivite.path"))
+                     pathto = getOption("dimRactivite.path") )
 
 
   }
 
-
   #Vérification si tous les fichiers nécessaires sont présents
   det_noms = unique(unlist(stringr::str_split(dz_fichiers,'\\.')))
-  exts_m<-setdiff(ext_to_import,det_noms)
-
-  #Creation des fichiers manaquants si besoin
-  if(length(exts_m)>0){
+  
+  if(is.null(ext_to_import)){
     
-    dz_fichiers<-c(dz_fichiers,exts_m)
+    exts_m <- setdiff( getOption("dimRactivite.fichiers_imco")%>%purrr::flatten_chr(), det_noms )
+    
+  }else{
+    
+    exts_m <- setdiff( ext_to_import, det_noms )
+    
+  }
+  
+  #Creation des fichiers manaquants si besoin
+  if( length(exts_m) > 0 ){
+    
+    dz_fichiers<-c( dz_fichiers, exts_m )
 
     #Récupératation nofiness,annee,mois avec le nom de fichier dans l'archive
-    refs<-unlist(stringr::str_split(dz_fichiers[1],'\\.'))[1:3]
+    refs<-unlist( stringr::str_split( dz_fichiers[1], '\\.' ) )[1:3]
 
     for (ext_m in exts_m){
-      file.create(paste0(getOption("dimRactivite.path"),'/',paste(c(refs[1],refs[2],refs[3],ext_m),collapse = '.')))
+      file.create( paste0(getOption("dimRactivite.path"), '/', paste( c(refs[1],refs[2],refs[3],ext_m), collapse = '.' ) ) )
 
       
     }
     message(
       "\n",
-      'Fichiers créés : ',toString(exts_m)
+      'Fichiers créés : ', toString( exts_m )
     )
 
   }
@@ -290,10 +314,10 @@ adzipComplet<-function(zfichiers,ext_to_import){
 #' @param fichiers_genrsa liste des fichiers contenue dans le dossier archive
 #' @param ext_to_import extension des fichiers à lire et importer
 #' @return aucun, dézip des archives en fonction du type de fichier voulus et création de fichier vide pour les types de fichier manquant
-#' @export adzipComplet
+#' @export adzipRemonteee
 #'
 #' @examples
-adzipRemonteee<-function( p, fichiers_genrsa, ext_to_import = NULL ){
+adzipRemonteee<-function( p, ext_to_import = NULL ){
   
 
  # if(is.null(ext_to_import)){
@@ -302,14 +326,25 @@ adzipRemonteee<-function( p, fichiers_genrsa, ext_to_import = NULL ){
  # }
   
   #Fichiers zip (in et out) de la remontée en cours
-  files<-fichiers_genrsa%>%dplyr::filter(finess == p$finess,
-                                         annee ==  as.numeric(p$annee),
-                                         mois == as.numeric(p$mois),
-                                         substr(file,nchar(file)-2,nchar(file))=="zip")%>%
+  
+  if(is.null(getOption("dimRactivite.fichiers_genrsa"))){
+    
+    fichiers_genrsa <- scan_path()
+    set_option( "fichiers_genrsa", fichiers_genrsa )
+    
+  }
+  
+  files<- getOption("dimRactivite.fichiers_genrsa")%>%dplyr::filter(finess == p$finess,
+                                                                    annee ==  as.numeric(p$annee),
+                                                                    mois == as.numeric(p$mois),
+                                                                    substr(file,nchar(file)-2,nchar(file))=="zip")%>%
     dplyr::group_by(file)%>%dplyr::summarise(types =paste0(type, collapse = ","))
   
+  
   #Dezippage des fichiers archive en fonction de la sélection des types de fichiers (et création d'un fichier vide si manquant)
-  dz_files <- adzipComplet(files$file,ext_to_import)
+  dz_files <- adzipComplet( files$file, ext_to_import )
+  
+  
 }
 
 #' Vérification de l'exhaustivité du fichier structure
@@ -354,71 +389,78 @@ verif_structure<-function(rum,fichier_structure){
 #' @export save_remontees
 #'
 #' @examples
-save_remontees<-function(dossiers_remontees,fichiers_genrsa){
+save_remontees<-function(remontees){
   
-  imco_files_types = getOption("dimRactivite.fichiers_imco")%>%purrr::flatten_chr()
-  
-  for(i in 1:nrow(dossiers_remontees)){
+ for(i in 1:nrow(remontees)){
     
-    if(dossiers_remontees$RData[i]==0){
+    if(remontees$RData[i]==0){
       
       #Noyau
-      p= pmeasyr::noyau_pmeasyr(finess =dossiers_remontees$finess[i] ,
-                                annee = as.numeric(dossiers_remontees$annee[i]),
-                                mois = as.numeric(dossiers_remontees$mois[i]),
+      p= pmeasyr::noyau_pmeasyr(finess = remontees$finess[i] ,
+                                annee = as.numeric(remontees$annee[i]),
+                                mois = as.numeric(remontees$mois[i]),
                                 path   = getOption("dimRactivite.path")
       )
       
+      
+      if(is.null(getOption("dimRactivite.fichiers_genrsa"))){
+        
+        fichiers_genrsa <- scan_path()
+        set_option( "fichiers_genrsa", fichiers_genrsa )
+        
+      }
+      
       #Fichiers zip (in et out) de la remontée en cours
-      files<-fichiers_genrsa%>%dplyr::filter(finess == p$finess,
-                                             annee ==  as.numeric(p$annee),
-                                             mois == as.numeric(p$mois),
-                                             substr(file,nchar(file)-2,nchar(file))=="zip")%>%
-        dplyr::group_by(file)%>%dplyr::summarise(types =paste0(type, collapse = ","))
+      files<-getOption("dimRactivite.fichiers_genrsa")%>%dplyr::filter(finess == p$finess,
+                                                                        annee ==  as.numeric(p$annee),
+                                                                        mois == as.numeric(p$mois),
+                                                                        substr(file,nchar(file)-2,nchar(file)) == "zip" )%>%
+        dplyr::group_by(file)%>%dplyr::summarise(types = paste0( type, collapse = "," ) )
       
       #Dezippage des fichiers archive en fonction de la sélection des types de fichiers (et création d'un fichier vide si manquant)
-      dz_files<-adzipComplet(files$file,imco_files_types)
+      dz_files<-adzipComplet(files$file)
       
       #Pour les années incomplètes on décompresse également l'année antérieure si disponible pour calcul des pmct mono uma
-      if(as.numeric(dossiers_remontees$mois[i])<12){
+      remontree_ant = nrow(remontees%>%filter(annee == as.numeric(remontees$annee[i])-1,mois == 12))
+      if(as.numeric(remontees$mois[i])<12 & remontree_ant > 0){
         
-        pN1= pmeasyr::noyau_pmeasyr(finess =dossiers_remontees$finess[i] ,
-                                    annee = as.numeric(dossiers_remontees$annee[i])-1,
+        pN1= pmeasyr::noyau_pmeasyr(finess = remontees$finess[i] ,
+                                    annee = as.numeric(remontees$annee[i])-1,
                                     mois = 12,
-                                    path   = paste0(getOption("dimRactivite.path"))
+                                    path   = paste0(getOption("dimRactivite.path") )
         )
         
-        filesN1<-fichiers_genrsa%>%dplyr::filter(finess == pN1$finess,
+        filesN1<-getOption("dimRactivite.fichiers_genrsa")%>%dplyr::filter(finess == pN1$finess,
                                                  annee ==  pN1$annee,
-                                                 mois ==pN1$mois)%>%
-          dplyr::group_by(file)%>%dplyr::summarise(types =paste0(type, collapse = ","))
+                                                 mois == pN1$mois)%>%
+          dplyr::group_by(file)%>%dplyr::summarise( types = paste0(type, collapse = ",") )
         
         if(nrow(filesN1)>0){
-          dz_filesN1<-adzipComplet(filesN1$file,imco_files_types)
+          dz_filesN1<-adzipComplet(filesN1$file)
         }
       }
       
-      dt<-imco(p,persist = T)
-      dt<-imco(p,tarifsante = T)      
+      dt<-imco( p, persist = T )
+      dt<-imco( p, tarifsante = T )      
       
       ###Suppression des fichiers
       pmeasyr::adelete( p, 
                         liste = getOption("dimRactivite.fichiers_imco")[['in']], 
-                        type = "in")
+                        type = "in" )
       
       pmeasyr::adelete( p, 
                         liste = getOption("dimRactivite.fichiers_imco")[['out']], 
-                        type = "out")
+                        type = "out" )
       
       
-      if(as.numeric(dossiers_remontees$mois[i])<12){
+      if( as.numeric( remontees$mois[i] )< 12 & remontree_ant > 0){
         pmeasyr::adelete( pN1, 
                           liste = getOption("dimRactivite.fichiers_imco")[['in']], 
-                          type = "in")
+                          type = "in" )
         
         pmeasyr::adelete( pN1, 
                           liste = getOption("dimRactivite.fichiers_imco")[['out']], 
-                          type = "out")
+                          type = "out" )
       }
       
       
@@ -427,8 +469,10 @@ save_remontees<-function(dossiers_remontees,fichiers_genrsa){
     
   }
   
-  remontees = update_remontees_dispo()
-  return(remontees)
+  remontees_dispo = analyse_fichiers_remontees( maj_dernier_mois = FALSE )
+  
+  return(remontees_dispo)
+  
 }
 
 #' charge en mémoire les objets définitifs rum,rum_v,rsa,rsa_v,diagnostics, actes, vano
@@ -496,7 +540,7 @@ load_RData<- function(remontees_sel){
   
 }
 
-load_med<- function( remontees_sel, fichiers_genrsa ){
+load_med<- function( remontees_sel ){
   
   
   
@@ -511,7 +555,15 @@ load_med<- function( remontees_sel, fichiers_genrsa ){
                               path   = getOption("dimRactivite.path")
     )
     
-    adzipRemonteee( p, fichiers_genrsa, ext_to_import = c("med","medatu") )
+    if(is.null(getOption("dimRactivite.fichiers_genrsa"))){
+      
+      fichiers_genrsa <- scan_path()
+      set_option( "fichiers_genrsa", fichiers_genrsa )
+      
+    }
+    
+    
+    adzipRemonteee( p, ext_to_import = c("med","medatu") )
     
     med_t2a<<-dplyr::bind_rows(med, pmeasyr::imed_mco(p))
     
@@ -529,7 +581,7 @@ load_med<- function( remontees_sel, fichiers_genrsa ){
 }
 
 
-load_dmi<- function( remontees_sel, fichiers_genrsa ){
+load_dmi<- function( remontees_sel ){
   
   
   
@@ -544,7 +596,14 @@ load_dmi<- function( remontees_sel, fichiers_genrsa ){
                               path   = getOption("dimRactivite.path")
     )
     
-    adzipRemonteee( p, fichiers_genrsa, ext_to_import = c("dmip","dmi") )
+    if(is.null(getOption("dimRactivite.fichiers_genrsa"))){
+      
+      fichiers_genrsa <- scan_path()
+      set_option( "fichiers_genrsa", fichiers_genrsa )
+      
+    }
+    
+    adzipRemonteee( p, ext_to_import = c("dmip","dmi") )
     
     dmi_t2a<<-dplyr::bind_rows(med, pmeasyr::idmi_mco(p))
     
@@ -673,8 +732,8 @@ imco<-function(p, tarifsante = FALSE, save = TRUE, persist = FALSE, pathm12 = NU
              dplyr::mutate( ansor = as.character(a) )
 
     #Objets temporaires à valoriser pour rum et rsa avec année antérieure
-    rsa_en_cours = dplyr::bind_rows(rsa_v2, rsa_en_cours)
-    rum_en_cours = dplyr::bind_rows(rum$rum, rum_en_cours)
+    rsa_en_cours = dplyr::bind_rows( rsa_v2, rsa_en_cours )
+    rum_en_cours = dplyr::bind_rows( rum$rum, rum_en_cours )
 
   }
 
