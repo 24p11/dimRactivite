@@ -90,12 +90,12 @@ rum<-inner_join(rum,rum_v)
 rsa<-inner_join(rsa,rsa_v)
 #Sauvegarde de l'objet final disponible dans le working directory
 vano <- vano%>%  inner_join(rsa%>%select(ansor,nofiness,cle_rsa,nip, ipp, nas, nom, prenom, date_naissance),.)
-save(rsa, rum, diagnostics, actes, vano,  file = '~/GH_PMSI/DATA/WD/Rpmsi_pmeasyr_dispose.RData')
+save(rsa, rum, diagnostics, actes, vano, med_t2a, dmi_t2a, file = '~/GH_PMSI/DATA/WD/Rpmsi_pmeasyr_dispose.RData')
 
 rum<-rum_save
 rsa<-rsa_save
 vano<- vano_save
-save( rsa, rsa_v, rum, rum_v, diagnostics, actes, vano, file = '~/GH_PMSI/DATA/WD/Rpmsi_pmeasyr.RData')
+save( rsa, rsa_v, rum, rum_v, diagnostics, actes, vano, med_t2a, dmi_t2a, file = '~/GH_PMSI/DATA/WD/Rpmsi_pmeasyr.RData')
 rm(rum_save,rsa_save,vano_save);gc()
 
 

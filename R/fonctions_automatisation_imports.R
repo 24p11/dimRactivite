@@ -227,15 +227,19 @@ adzipComplet<-function(zfichiers,ext_to_import){
                                    view = F)$Name
 
     det_noms = unique(unlist(stringr::str_split(noms_fichiers,'\\.')))
-
-    #Choix des fichiers a importer dasn l'archive en fonction des extensions voulues
-    if(grepl('OUT|out',zf)){
-      t = 'out'
-      types = intersect ( getOption("dimRactivite.fichiers_imco")$`out` , det_noms )
-    }
-    if(grepl('IN|in',zf)){
-      t = 'in'
-      types = intersect ( getOption("dimRactivite.fichiers_imco")$`in` , det_noms )
+    
+    if(is.null(ext_to_import)){
+        #Choix des fichiers a importer dasn l'archive en fonction des extensions voulues
+        if(grepl('OUT|out',zf)){
+          t = 'out'
+          types = intersect ( getOption("dimRactivite.fichiers_imco")$`out` , det_noms )
+        }
+        if(grepl('IN|in',zf)){
+          t = 'in'
+          types = intersect ( getOption("dimRactivite.fichiers_imco")$`in` , det_noms )
+        }
+    }else{
+        types =  ext_to_import   
     }
 
 
@@ -291,12 +295,11 @@ adzipComplet<-function(zfichiers,ext_to_import){
 #' @examples
 adzipRemonteee<-function( p, fichiers_genrsa, ext_to_import = NULL ){
   
-  imco_files_types = getOption("dimRactivite.fichiers_imco")%>%purrr::flatten_chr()
-  
-  if(is.null(ext_to_import)){
-    
-    ext_to_import = getOption("dimRactivite.fichiers_imco")%>%purrr::flatten_chr()
-  }
+
+ # if(is.null(ext_to_import)){
+ #   
+ #  ext_to_import = getOption("dimRactivite.fichiers_imco")%>%purrr::flatten_chr()
+ # }
   
   #Fichiers zip (in et out) de la remontée en cours
   files<-fichiers_genrsa%>%dplyr::filter(finess == p$finess,
@@ -306,7 +309,7 @@ adzipRemonteee<-function( p, fichiers_genrsa, ext_to_import = NULL ){
     dplyr::group_by(file)%>%dplyr::summarise(types =paste0(type, collapse = ","))
   
   #Dezippage des fichiers archive en fonction de la sélection des types de fichiers (et création d'un fichier vide si manquant)
-  dz_files <- adzipComplet(files$file,imco_files_types)
+  dz_files <- adzipComplet(files$file,ext_to_import)
 }
 
 #' Vérification de l'exhaustivité du fichier structure
@@ -452,7 +455,7 @@ load_RData<- function(remontees_sel){
   
     for(i in 1:nrow(remontees_sel)){
       
-      p= pmeasyr::noyau_pmeasyr(finess =remontees_sel$finess[i] ,
+      p= pmeasyr::noyau_pmeasyr(finess = remontees_sel$finess[i] ,
                                 annee = remontees_sel$annee[i],
                                 mois = remontees_sel$mois[i],
                                 path   = getOption("dimRactivite.path")
@@ -493,11 +496,11 @@ load_RData<- function(remontees_sel){
   
 }
 
-load_med<- function(remontees_sel){
+load_med<- function( remontees_sel, fichiers_genrsa ){
   
   
   
-  med<-NULL
+  med_t2a<<-NULL
   
   
   for(i in 1:nrow(remontees_sel)){
@@ -508,9 +511,56 @@ load_med<- function(remontees_sel){
                               path   = getOption("dimRactivite.path")
     )
     
+    adzipRemonteee( p, fichiers_genrsa, ext_to_import = c("med","medatu") )
+    
+    med_t2a<<-dplyr::bind_rows(med, pmeasyr::imed_mco(p))
+    
+    pmeasyr::adelete( p, 
+                      liste = c("med","medatu"), 
+                      type = "in")
+    
+    pmeasyr::adelete( p, 
+                      liste = c("med","medatu"), 
+                      type = "out") 
     
   }
+  
+
 }
+
+
+load_dmi<- function( remontees_sel, fichiers_genrsa ){
+  
+  
+  
+  dmi_t2a<<-NULL
+  
+  
+  for(i in 1:nrow(remontees_sel)){
+    
+    p= pmeasyr::noyau_pmeasyr(finess =remontees_sel$finess[i] ,
+                              annee = remontees_sel$annee[i],
+                              mois = remontees_sel$mois[i],
+                              path   = getOption("dimRactivite.path")
+    )
+    
+    adzipRemonteee( p, fichiers_genrsa, ext_to_import = c("dmip","dmi") )
+    
+    dmi_t2a<<-dplyr::bind_rows(med, pmeasyr::idmi_mco(p))
+    
+    pmeasyr::adelete( p, 
+                      liste = c("dmip","dmi"), 
+                      type = "in")
+    
+    pmeasyr::adelete( p, 
+                      liste = c("dmip","dmi"), 
+                      type = "out") 
+    
+  }
+  
+  
+}
+
 
 #' Import des principaux fichiers de remontées et valorisation des séjours et résumés
 #'
