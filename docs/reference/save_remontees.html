@@ -121,18 +121,14 @@
     <p>Création des fichiers .RData contenant l'ensemble des données d'une remontée à partir du tableau d'analyse des fichiers de remontée (analyse_remontee)</p>
     </div>
 
-    <pre class="usage"><span class='fu'>save_remontees</span>(<span class='no'>dossiers_remontees</span>, <span class='no'>fichiers_genrsa</span>)</pre>
+    <pre class="usage"><span class='fu'>save_remontees</span>( <span class='no'>remontees</span> )</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>dossiers_remontees</th>
+      <th>remontees</th>
       <td><p>tibble en sortie de  analyse_remontee</p></td>
-    </tr>
-    <tr>
-      <th>fichiers_genrsa</th>
-      <td><p>tibble en sortie de  scan_path avec analyse de l'ensemble des fichiers du dossier racine</p></td>
     </tr>
     </table>
 
@@ -140,12 +136,19 @@
 
     <p>ecriture sur le disque d'1 .RData de sauvegarde pour chaque remontée</p>
 
+    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
+    <pre class="examples"><div class='input'><span class='kw'>if</span> (<span class='fl'>FALSE</span>) {
+
+   <span class='fu'>save_remontees</span>( <span class='no'>remontees</span> )
+
+}</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
       <li><a href="#arguments">Arguments</a></li>
       <li><a href="#value">Value</a></li>
+      <li><a href="#examples">Examples</a></li>
     </ul>
 
   </div>

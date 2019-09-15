@@ -98,13 +98,13 @@ devtools<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/
 <div id="organisation-du-file-system" class="section level2">
 <h2 class="hasAnchor">
 <a href="#organisation-du-file-system" class="anchor"></a>Organisation du file system</h2>
-<p>Comme préconisé par G.Pressiat dans la documentation du package pmeasyr <a href="https://guillaumepressiat.github.io/pmeasyr/archives.html">les archives PMSI</a>, dimRactivite utilisera un dossier unique comprenant l’ensemble des fichiers zippés en entrée et en sortie de GENRSA. Les fichiers contenus dans ce dossier seront anylisés, les fichiers .RData seront crées s’ils n’existent pas encore, puis les données seront automatiquement intégrées dans R (par défaut la remontée la plus récente est prise en compte).</p>
+<p>Comme préconisé par G.Pressiat dans la documentation du package pmeasyr <a href="https://guillaumepressiat.github.io/pmeasyr/archives.html">les archives PMSI</a>, dimRactivite utilisera un dossier unique comprenant l’ensemble des fichiers zippés en entrée et en sortie de GENRSA. Les fichiers contenus dans ce dossier seront analysés, un fichier .RData par remontée sera crée s’il n’existe pas encore, puis les données seront automatiquement chargées dans R à partir des fichiers .RData (par défaut la remontée la plus récente est prise en compte).</p>
 <p>L’adresse de ce dossier est renseigné dans l’option du fichier de configuration <code>path</code> .</p>
 </div>
 <div id="import-des-donnees-pmsi" class="section level2">
 <h2 class="hasAnchor">
 <a href="#import-des-donnees-pmsi" class="anchor"></a>Import des données PMSI</h2>
-<p>Cette procédure, qui procède par plusieurs étapes, utilise les fichiers GENRSA avec les fonction d’imports pmeasyr (cf <a href="https://guillaumepressiat.github.io/pmeasyr/import-des-donnees.html#rsa">doc irsa</a>):</p>
+<p>Cette procédure, qui procède par plusieurs étapes, utilise les fichiers GENRSA avec les fonctions d’imports pmeasyr (cf <a href="https://guillaumepressiat.github.io/pmeasyr/import-des-donnees.html#rsa">doc irsa</a>):</p>
 <ul>
 <li>in
 <ul>
@@ -143,7 +143,7 @@ devtools<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/
 <a href="#generation-des-tableaux-de-bord" class="anchor"></a>Génération des tableaux de bord</h2>
 <p>NB : les exemples donnés ici ne sont accéssibles que sur l’intranet de l’APHP.</p>
 <p>Ces tableaux permettent de suivre précisément les données d’activité pour chaque niveau de la structure du groupe ou de l’établissement. Il reposent donc beaucoup sur le fichier stucture qui est intégré à la fin des imports et qui permet de décrire selon plusieurs niveaux de regroupements les uma.</p>
-<p>On distingue un permier ensemble de tableaux de bord permettant de suivre l’évolution anuelle d’un seul indicateur sur l’ensemble des niveaux de structure, en prenant toujours le principe de distinguer hopsitalisation complète et hospitalisation partielle. On dispose de tableaux de suivi de l’activité (ex : <a href="http://msi.sls.aphp.fr/tdb/index.php?_tbl=TableauDeBordGeneral&amp;_mois=07&amp;_annee=2019&amp;_type=mens">intranet aphp</a> ), des recettes avec une répartition par service (ex : [intranet aphp]<a href="http://msi.sls.aphp.fr/tdb/index.php?_tbl=TableauDeBordValorisation&amp;_mois=07&amp;_annee=2019&amp;_type=mens" class="uri">http://msi.sls.aphp.fr/tdb/index.php?_tbl=TableauDeBordValorisation&amp;_mois=07&amp;_annee=2019&amp;_type=mens</a>).</p>
+<p>On distingue un permier ensemble de tableaux de bord permettant de suivre l’évolution anuelle d’un seul indicateur sur l’ensemble des niveaux de structure, en prenant toujours le principe de distinguer hopsitalisation complète et hospitalisation partielle. On dispose de tableaux de suivi de l’activité (ex : <a href="http://msi.sls.aphp.fr/tdb/index.php?_tbl=TableauDeBordGeneral&amp;_mois=07&amp;_annee=2019&amp;_type=mens">intranet aphp</a> ), des recettes avec une répartition par service (ex : <a href="http://msi.sls.aphp.fr/tdb/index.php?_tbl=TableauDeBordValorisation&amp;_mois=07&amp;_annee=2019&amp;_type=mens">intranet aphp</a>.</p>
 <p>Un autre ensemble de tableaux permet de suivre l’évolution annuelle pour chaque niveau (groupe hospitalier, établissement, pole, service,…) d’un ensemble d’indicateurs. Le package permet de le calcul d’environ 200 indicateurs répartis dans tableaux de bord thématiques (activité, DIM, médical) (ex <a href="http://msi.sls.aphp.fr/tdb/index.php?_tbl=TableauDeBordActivite&amp;_service=Lariboisiere&amp;_mois=07&amp;_annee=2019&amp;_type=mens">intranet aphp</a>)</p>
 </div>
 <div id="parametres" class="section level2">

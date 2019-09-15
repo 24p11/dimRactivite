@@ -6,7 +6,14 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Title — pmct_mono_uma • dimRactivite</title>
+<title>Calcul des PMCT mono UMA (moyenne du tarifs GHS des séjours pris en charge dans une seule UMA)
+Cet indicateur est calculé à partir des recettes ghs (sans la valorisation des extrêmes ni des suppléments) 
+pour les séjours dont la variable nbrum = 1 sauf pour les réanimations (autorisations PMSI 01A et 01B) 
+où cette restriction n'a pas été faite.
+Le périmètre du calcul est le suivant :
+- pour les remontées en année pleine, à M12, les pmct monorum sont calculés sur les 12 mois de l'année,
+- pour les remontées infra-annuelle, les pmct monorum sont calculés sur 12 mois glissants
+(attention les fichiers de la remontée M12 de l'année antérieure dezippés doit être présente ) — pmct_mono_uma • dimRactivite</title>
 
 
 <!-- jquery -->
@@ -35,8 +42,22 @@
 
 
 
-<meta property="og:title" content="Title — pmct_mono_uma" />
-<meta property="og:description" content="Title" />
+<meta property="og:title" content="Calcul des PMCT mono UMA (moyenne du tarifs GHS des séjours pris en charge dans une seule UMA)
+Cet indicateur est calculé à partir des recettes ghs (sans la valorisation des extrêmes ni des suppléments) 
+pour les séjours dont la variable nbrum = 1 sauf pour les réanimations (autorisations PMSI 01A et 01B) 
+où cette restriction n'a pas été faite.
+Le périmètre du calcul est le suivant :
+- pour les remontées en année pleine, à M12, les pmct monorum sont calculés sur les 12 mois de l'année,
+- pour les remontées infra-annuelle, les pmct monorum sont calculés sur 12 mois glissants
+(attention les fichiers de la remontée M12 de l'année antérieure dezippés doit être présente ) — pmct_mono_uma" />
+<meta property="og:description" content="Calcul des PMCT mono UMA (moyenne du tarifs GHS des séjours pris en charge dans une seule UMA)
+Cet indicateur est calculé à partir des recettes ghs (sans la valorisation des extrêmes ni des suppléments) 
+pour les séjours dont la variable nbrum = 1 sauf pour les réanimations (autorisations PMSI 01A et 01B) 
+où cette restriction n'a pas été faite.
+Le périmètre du calcul est le suivant :
+- pour les remontées en année pleine, à M12, les pmct monorum sont calculés sur les 12 mois de l'année,
+- pour les remontées infra-annuelle, les pmct monorum sont calculés sur 12 mois glissants
+(attention les fichiers de la remontée M12 de l'année antérieure dezippés doit être présente )" />
 <meta name="twitter:card" content="summary" />
 
 
@@ -112,13 +133,27 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Title</h1>
+    <h1>Calcul des PMCT mono UMA (moyenne du tarifs GHS des séjours pris en charge dans une seule UMA)
+Cet indicateur est calculé à partir des recettes ghs (sans la valorisation des extrêmes ni des suppléments) 
+pour les séjours dont la variable nbrum = 1 sauf pour les réanimations (autorisations PMSI 01A et 01B) 
+où cette restriction n'a pas été faite.
+Le périmètre du calcul est le suivant :
+- pour les remontées en année pleine, à M12, les pmct monorum sont calculés sur les 12 mois de l'année,
+- pour les remontées infra-annuelle, les pmct monorum sont calculés sur 12 mois glissants
+(attention les fichiers de la remontée M12 de l'année antérieure dezippés doit être présente )</h1>
     
     <div class="hidden name"><code>pmct_mono_uma.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Title</p>
+    <p>Calcul des PMCT mono UMA (moyenne du tarifs GHS des séjours pris en charge dans une seule UMA)
+Cet indicateur est calculé à partir des recettes ghs (sans la valorisation des extrêmes ni des suppléments) 
+pour les séjours dont la variable nbrum = 1 sauf pour les réanimations (autorisations PMSI 01A et 01B) 
+où cette restriction n'a pas été faite.
+Le périmètre du calcul est le suivant :
+- pour les remontées en année pleine, à M12, les pmct monorum sont calculés sur les 12 mois de l'année,
+- pour les remontées infra-annuelle, les pmct monorum sont calculés sur 12 mois glissants
+(attention les fichiers de la remontée M12 de l'année antérieure dezippés doit être présente )</p>
     </div>
 
     <pre class="usage"><span class='fu'>pmct_mono_uma</span>(<span class='no'>rsa</span>, <span class='no'>rum</span>, <span class='no'>annee</span>, <span class='no'>mois</span>)</pre>
@@ -145,11 +180,16 @@
     </table>
 
 
+    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
+    <pre class="examples"><div class='input'><span class='kw'>if</span> (<span class='fl'>FALSE</span>) {
+   <span class='fu'>pmct_mono_uma</span>(<span class='no'>rsa</span>, <span class='no'>rum</span>, <span class='no'>annee</span>, <span class='no'>mois</span>) <span class='kw'>-&gt;</span> <span class='no'>pmcto_mono</span>
+}</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
       <li><a href="#arguments">Arguments</a></li>
+      <li><a href="#examples">Examples</a></li>
     </ul>
 
   </div>

@@ -126,7 +126,7 @@ force la variable RData à 0 pour que la dernière remontée disponible soit imp
 force la variable RData à 0 pour que la dernière remontée disponible soit importée</p>
     </div>
 
-    <pre class="usage"><span class='fu'>maj_variable_RData</span>(<span class='no'>remontees</span>, <span class='kw'>p</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)</pre>
+    <pre class="usage"><span class='fu'>maj_variable_RData</span>( <span class='no'>remontees</span> )</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -141,12 +141,23 @@ force la variable RData à 0 pour que la dernière remontée disponible soit imp
     </tr>
     </table>
 
+    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
+    <p>tibble, tableau de synthèse des remontées disponibles mise à jour</p>
+
+    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
+    <pre class="examples"><div class='input'><span class='kw'>if</span> (<span class='fl'>FALSE</span>) {
+
+   <span class='fu'>maj_variable_RData</span>( <span class='no'>remontees</span> )
+
+}</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
       <li><a href="#arguments">Arguments</a></li>
+      <li><a href="#value">Value</a></li>
+      <li><a href="#examples">Examples</a></li>
     </ul>
 
   </div>

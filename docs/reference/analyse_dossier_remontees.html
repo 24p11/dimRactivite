@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Lecture des fichiers en sortie de scan_path pour vérification de leur contenu et préparation aux imports — analyse_fichiers_remontees • dimRactivite</title>
+<title>Scan le dossier de sauvegarde des fichiers en sortie de GENRSA, les analyse et prépare un tableau de synthèse des remontées disponibles — analyse_dossier_remontees • dimRactivite</title>
 
 
 <!-- jquery -->
@@ -35,8 +35,8 @@
 
 
 
-<meta property="og:title" content="Lecture des fichiers en sortie de scan_path pour vérification de leur contenu et préparation aux imports — analyse_fichiers_remontees" />
-<meta property="og:description" content="Lecture des fichiers en sortie de scan_path pour vérification de leur contenu et préparation aux imports" />
+<meta property="og:title" content="Scan le dossier de sauvegarde des fichiers en sortie de GENRSA, les analyse et prépare un tableau de synthèse des remontées disponibles — analyse_dossier_remontees" />
+<meta property="og:description" content="Scan le dossier de sauvegarde des fichiers en sortie de GENRSA, les analyse et prépare un tableau de synthèse des remontées disponibles" />
 <meta name="twitter:card" content="summary" />
 
 
@@ -112,34 +112,38 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Lecture des fichiers en sortie de scan_path pour vérification de leur contenu et préparation aux imports</h1>
+    <h1>Scan le dossier de sauvegarde des fichiers en sortie de GENRSA, les analyse et prépare un tableau de synthèse des remontées disponibles</h1>
     
-    <div class="hidden name"><code>analyse_fichiers_remontees.Rd</code></div>
+    <div class="hidden name"><code>analyse_dossier_remontees.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Lecture des fichiers en sortie de scan_path pour vérification de leur contenu et préparation aux imports</p>
+    <p>Scan le dossier de sauvegarde des fichiers en sortie de GENRSA, les analyse et prépare un tableau de synthèse des remontées disponibles</p>
     </div>
 
-    <pre class="usage"><span class='fu'>analyse_fichiers_remontees</span>( )</pre>
+    <pre class="usage"><span class='fu'>analyse_dossier_remontees</span>( )</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>maj_dernier_mois</th>
-      <td><p>logical, si TRUE considère par défaut que le .RData du dernier mois est manquant</p></td>
+      <th>path</th>
+      <td><p>chemin du dossier dans lequel se trouve les fichiers zipper de remontée</p></td>
+    </tr>
+    <tr>
+      <th>ext</th>
+      <td><p>extentinon à intégrer</p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>tibble avec liste des fichiers par remontée</p>
+    <p>tibble, tableau de synthèse des remontées disponibles</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='kw'>if</span> (<span class='fl'>FALSE</span>) {
 
-   <span class='fu'>analyse_fichiers_remontees</span>( )
+   <span class='fu'>analyse_dossier_remontees</span>( )
 
 }</div></pre>
   </div>

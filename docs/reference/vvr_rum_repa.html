@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Title — vvr_rum_repa • dimRactivite</title>
+<title>Fonction pmctmono (on doit encore repartir les supplements RAP et ANTEPARTUM) — vvr_rum_repa • dimRactivite</title>
 
 
 <!-- jquery -->
@@ -35,8 +35,30 @@
 
 
 
-<meta property="og:title" content="Title — vvr_rum_repa" />
-<meta property="og:description" content="Title" />
+<meta property="og:title" content="Fonction pmctmono (on doit encore repartir les supplements RAP et ANTEPARTUM) — vvr_rum_repa" />
+<meta property="og:description" content="Détails du nom des variables pmeasyr en entrée (rsa valorisés)
+rec_totale :Valorisation 100
+rec_base: Valorisation des GHS de base
+rec_bee: Valorisation base + exb + exh
+rec_exb: Valorisation extrême bas (à déduire)
+rec_rehosp_ghm: Valorisation séjours avec rehosp dans même GHM
+rec_mino_sus: Valorisation séjours avec minoration forfaitaire liste en sus
+rec_exh: Valorisation journées extrême haut
+rec_aph: Valorisation actes GHS 9615 en Hospit.
+rec_rap: Valorisation suppléments radiothérapie pédiatrique,
+rec_ant: Valorisation suppléments antepartum,
+rec_rdt_tot: Valorisation actes RDTH en Hospit.,
+rec_rea: Valorisation suppléments de réanimation
+rec_rep: Valorisation suppléments de réa pédiatrique
+rec_nn1: Valorisation suppléments de néonat sans SI
+rec_nn2: Valorisation suppléments de néonat avec SI
+rec_nn3: Valorisation suppléments de réanimation néonat
+rec_po_tot: Valorisation prélévements d organe
+rec_caishyp: Valorisation des actes de caissons hyperbares en sus
+rec_dialhosp: Valorisation suppléments de dialyse
+rec_src: Valorisation suppléments de surveillance continue
+rec_stf: Valorisation suppléments de soins intensifs
+rec_sdc: Valorisation supplément défibrilateur cardiaque" />
 <meta name="twitter:card" content="summary" />
 
 
@@ -112,40 +134,80 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Title</h1>
+    <h1>Fonction pmctmono (on doit encore repartir les supplements RAP et ANTEPARTUM)</h1>
     
     <div class="hidden name"><code>vvr_rum_repa.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Title</p>
+    <p>Détails du nom des variables pmeasyr en entrée (rsa valorisés)
+<code>rec_totale</code> :Valorisation 100<!-- % T2A globale -->
+<code>rec_base</code>: Valorisation des GHS de base
+<code>rec_bee</code>: Valorisation base + exb + exh
+<code>rec_exb</code>: Valorisation extrême bas (à déduire)
+<code>rec_rehosp_ghm</code>: Valorisation séjours avec rehosp dans même GHM
+<code>rec_mino_sus</code>: Valorisation séjours avec minoration forfaitaire liste en sus
+<code>rec_exh</code>: Valorisation journées extrême haut
+<code>rec_aph</code>: Valorisation actes GHS 9615 en Hospit.
+<code>rec_rap</code>: Valorisation suppléments radiothérapie pédiatrique,
+<code>rec_ant</code>: Valorisation suppléments antepartum,
+<code>rec_rdt_tot</code>: Valorisation actes RDTH en Hospit.,
+<code>rec_rea</code>: Valorisation suppléments de réanimation
+<code>rec_rep</code>: Valorisation suppléments de réa pédiatrique
+<code>rec_nn1</code>: Valorisation suppléments de néonat sans SI
+<code>rec_nn2</code>: Valorisation suppléments de néonat avec SI
+<code>rec_nn3</code>: Valorisation suppléments de réanimation néonat
+<code>rec_po_tot</code>: Valorisation prélévements d organe
+<code>rec_caishyp</code>: Valorisation des actes de caissons hyperbares en sus
+<code>rec_dialhosp</code>: Valorisation suppléments de dialyse
+<code>rec_src</code>: Valorisation suppléments de surveillance continue
+<code>rec_stf</code>: Valorisation suppléments de soins intensifs
+<code>rec_sdc</code>: Valorisation supplément défibrilateur cardiaque</p>
     </div>
 
-    <pre class="usage"><span class='fu'>vvr_rum_repa</span>(<span class='no'>rsa</span>, <span class='no'>rum</span>, <span class='no'>pmctmono</span>)</pre>
+    <pre class="usage"><span class='fu'><a href='pmct_mono_uma.html'>pmct_mono_uma</a></span>(<span class='no'>rsa</span>, <span class='no'>rum</span>, <span class='no'>annee</span>, <span class='no'>mois</span>)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>rsa</th>
-      <td></td>
+      <td><p>rsa valorisés = tibble <code>vrsa$rsa</code> en sortie de <code><a href='https://im-aphp.github.io/pmeasyr//reference/vvr_ghs_supp.html'>pmeasyr::vvr_ghs_supp</a></code></p></td>
     </tr>
     <tr>
       <th>rum</th>
-      <td></td>
+      <td><p>rum non valorisés = tibble <code>rum$rum</code> en sortie de <code><a href='https://im-aphp.github.io/pmeasyr//reference/irum.html'>pmeasyr::irum</a></code></p></td>
     </tr>
     <tr>
       <th>pmctmono</th>
-      <td></td>
+      <td><p>pmct mono uma = tibble en sortie <code><a href='pmct_mono_uma.html'>dimRactivite::pmct_mono_uma</a></code></p></td>
     </tr>
     </table>
 
+    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
+    <p>rum_v = rum valorisés</p>
+    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
+
+    <p>La répartition des recettes par RUM est réalisée par la fonction <code>vvr_rum_repa</code>. 
+Plusieurs clés ont été proposées pour cette répartition. 
+Le package en implémente 4 qui sont disponibles dans l'objet <code>rum_v</code> (les valeur et les coefficients sont disponibles) : 
+- répartition selon la durée du RUM (<code>coeftime</code>,<code>valotime</code>)
+- répartition selon le pmct moyen dans l'unité pour les mono RUM  (<code>coefpmctmono</code>,<code>valopmctmono</code>)
+- répartition selon un coefficient composite obtenu par multiplication des deux précédents (<code>coefpmctmonotime1</code>,<code>valopmctmonotime1</code>)
+- répartition selon un coefficient composite obtenu par la moyenne des deux précédents (<code>coefpmctmonotime2</code>,<code>valopmctmonotime2</code>)
+L'ensemble des suppléments individuels sont présents en sortie avec le suffixes _repa</p>
+
+    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
+    <pre class="examples"></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
       <li><a href="#arguments">Arguments</a></li>
+      <li><a href="#value">Value</a></li>
+      <li><a href="#details">Details</a></li>
+      <li><a href="#examples">Examples</a></li>
     </ul>
 
   </div>

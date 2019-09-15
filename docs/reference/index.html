@@ -158,6 +158,12 @@ avec contrôle du type de fichier et création des fichiers manquants</p></td>
       </tr><tr>
         
         <td>
+          <p><code><a href="analyse_dossier_remontees.html">analyse_dossier_remontees()</a></code> </p>
+        </td>
+        <td><p>Scan le dossier de sauvegarde des fichiers en sortie de GENRSA, les analyse et prépare un tableau de synthèse des remontées disponibles</p></td>
+      </tr><tr>
+        
+        <td>
           <p><code><a href="analyse_fichiers_remontees.html">analyse_fichiers_remontees()</a></code> </p>
         </td>
         <td><p>Lecture des fichiers en sortie de scan_path pour vérification de leur contenu et préparation aux imports</p></td>
@@ -188,13 +194,13 @@ la fonction pour attribution du type M4 de cancer</p></td>
       </tr><tr>
         
         <td>
-          <p><code><a href="get_activite_recettes.html">get_activite_recettes()</a></code> </p>
+          <p><code><a href="get_activite_recettes.html">make_tdb()</a></code> </p>
         </td>
         <td><p>Tableau de bord général d'activité en recettes, et séparant HDJ/HC</p></td>
       </tr><tr>
         
         <td>
-          <p><code><a href="get_activite_sejours.html">get_activite_sejours()</a></code> </p>
+          <p><code><a href="get_activite_sejours.html">make_tdb()</a></code> </p>
         </td>
         <td><p>Tableau de bord général d'activité avec un compte des séjours, et séparant HDJ/HC</p></td>
       </tr><tr>
@@ -222,19 +228,31 @@ des deux dernières colonnes d'un tableau de bord</p></td>
         <td>
           <p><code><a href="get_tdb.html">get_tdb()</a></code> </p>
         </td>
-        <td><p>Création d'un tableau indicateurs x pivot, comprenant une liste d'inficateurs</p></td>
+        <td><p>Création d'un tableau indicateurs x pivot, comprenant une liste d'indicateurs</p></td>
       </tr><tr>
         
         <td>
           <p><code><a href="imco.html">imco()</a></code> </p>
         </td>
-        <td><p>Import des principaux fichiers de remontées et valorisation des séjours et résumés</p></td>
+        <td><p>Import des principaux fichiers de remontées éavec pmeasyr et valorisation des séjours et résumés</p></td>
       </tr><tr>
         
         <td>
-          <p><code><a href="load_all.html">load_all()</a></code> </p>
+          <p><code><a href="load_RData.html">load_RData()</a></code> </p>
         </td>
-        <td><p>charge en mémoire les objets définitifs rum,rum_v,rsa,rsa_v,diagnostics, actes, vano</p></td>
+        <td><p>charge en mémoire les objets définitifs rum,rum_v,rsa,rsa_v,diagnostics, actes, vano préparé dans le RData</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="load_dmi.html">load_dmi()</a></code> </p>
+        </td>
+        <td><p>Chargement des fichiers de DMI en entrée et sortie de GENRSA avec pmeasyr</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="load_med.html">load_med()</a></code> </p>
+        </td>
+        <td><p>Chargement des fichiers de médicaments en entrée et sortie de GENRSA avec pmeasyr</p></td>
       </tr><tr>
         
         <td>
@@ -279,7 +297,14 @@ Reformatage d'objets en sortie de table/tapply selon l'ordonnancement décidé d
         <td>
           <p><code><a href="pmct_mono_uma.html">pmct_mono_uma()</a></code> </p>
         </td>
-        <td><p>Title</p></td>
+        <td><p>Calcul des PMCT mono UMA (moyenne du tarifs GHS des séjours pris en charge dans une seule UMA)
+Cet indicateur est calculé à partir des recettes ghs (sans la valorisation des extrêmes ni des suppléments) 
+pour les séjours dont la variable nbrum = 1 sauf pour les réanimations (autorisations PMSI 01A et 01B) 
+où cette restriction n'a pas été faite.
+Le périmètre du calcul est le suivant :
+- pour les remontées en année pleine, à M12, les pmct monorum sont calculés sur les 12 mois de l'année,
+- pour les remontées infra-annuelle, les pmct monorum sont calculés sur 12 mois glissants
+(attention les fichiers de la remontée M12 de l'année antérieure dezippés doit être présente )</p></td>
       </tr><tr>
         
         <td>
@@ -327,21 +352,15 @@ de transformation et de sélection des séjours</p></td>
       </tr><tr>
         
         <td>
-          <p><code><a href="update_remontees_dispo.html">update_remontees_dispo()</a></code> </p>
-        </td>
-        <td><p>Title</p></td>
-      </tr><tr>
-        
-        <td>
           <p><code><a href="verif_structure.html">verif_structure()</a></code> </p>
         </td>
         <td><p>Vérification de l'exhaustivité du fichier structure</p></td>
       </tr><tr>
         
         <td>
-          <p><code><a href="vvr_rum_repa.html">vvr_rum_repa()</a></code> </p>
+          <p><code><a href="vvr_rum_repa.html">pmct_mono_uma()</a></code> </p>
         </td>
-        <td><p>Title</p></td>
+        <td><p>Fonction pmctmono (on doit encore repartir les supplements RAP et ANTEPARTUM)</p></td>
       </tr>
     </tbody>
     </table>
