@@ -1,7 +1,7 @@
 Package: dimRactivite
 Type: Package
 Title: Exploitation des données PMSI au format pmeasyr
-Version: 0.1.0
+Version: 0.2.0
 Author: c(
     person("DIM", "APHP.Nord", email = "dim.nord@aphp.fr", role = c("aut", "cre")),
   person("Rémi", "Flicoteaux", email = "remi.flicoteaux@aphp.fr", role = c("aut", "cre")),
@@ -35,5 +35,6 @@ Imports:
 Suggests: 
     pmeasyr,
     knitr,
-    rmarkdown
+    rmarkdown,
+    testthat
 VignetteBuilder: knitr
