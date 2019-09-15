@@ -4,16 +4,22 @@
 \alias{save_remontees}
 \title{Création des fichiers .RData contenant l'ensemble des données d'une remontée à partir du tableau d'analyse des fichiers de remontée (analyse_remontee)}
 \usage{
-save_remontees(dossiers_remontees, fichiers_genrsa)
+save_remontees( remontees )
 }
 \arguments{
-\item{dossiers_remontees}{tibble en sortie de  analyse_remontee}
-
-\item{fichiers_genrsa}{tibble en sortie de  scan_path avec analyse de l'ensemble des fichiers du dossier racine}
+\item{remontees}{tibble en sortie de  analyse_remontee}
 }
 \value{
 ecriture sur le disque d'1 .RData de sauvegarde pour chaque remontée
 }
 \description{
 Création des fichiers .RData contenant l'ensemble des données d'une remontée à partir du tableau d'analyse des fichiers de remontée (analyse_remontee)
+}
+\examples{
+\dontrun{
+
+   save_remontees( remontees )
+   
+}
+
 }

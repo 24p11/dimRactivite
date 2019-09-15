@@ -2,9 +2,9 @@
 % Please edit documentation in R/fonctions_activite_donnees_pluri_annuelles.R
 \name{get_tdb}
 \alias{get_tdb}
-\title{Création d'un tableau indicateurs x pivot, comprenant une liste d'inficateurs}
+\title{Création d'un tableau indicateurs x pivot, comprenant une liste d'indicateurs}
 \usage{
-get_tdb(df, indicateurs, pivot = "pivot", unit_pivot = NULL)
+get_tdb(df, indicateurs)
 }
 \arguments{
 \item{df}{un tibble de type séjours}
@@ -17,8 +17,16 @@ peut être soit un facteur soit une date, si une date la variable unit_pivot doi
 \item{unit_pivot}{string, la variable pivot a utiliser dans df pour réaliser le tableau croisé}
 }
 \value{
-tableau de bord
+dataframe contenant les statistiques demandées dans indicateurs mise en forme
 }
 \description{
-Création d'un tableau indicateurs x pivot, comprenant une liste d'inficateurs
+Création d'un tableau indicateurs x pivot, comprenant une liste d'indicateurs
+}
+\examples{
+\dontrun{
+
+   get_tdb(df, indicateurs) -> tdb
+   
+}
+
 }

@@ -5,14 +5,25 @@
 \title{Mise à jour de la variabla RData du tableau de synthèse des remontées disponibles pour la dernière remontée disponible
 force la variable RData à 0 pour que la dernière remontée disponible soit importée}
 \usage{
-maj_variable_RData(remontees, p = NULL)
+maj_variable_RData( remontees )
 }
 \arguments{
 \item{remontees}{tibble, tableau de synthèse des remontées disponibles}
 
 \item{p}{un noyau pmeasyr}
 }
+\value{
+tibble, tableau de synthèse des remontées disponibles mise à jour
+}
 \description{
 Mise à jour de la variabla RData du tableau de synthèse des remontées disponibles pour la dernière remontée disponible
 force la variable RData à 0 pour que la dernière remontée disponible soit importée
+}
+\examples{
+\dontrun{
+
+   maj_variable_RData( remontees )
+   
+}
+
 }

@@ -2,10 +2,9 @@
 % Please edit documentation in R/fonctions_automatisation_imports.R
 \name{imco}
 \alias{imco}
-\title{Import des principaux fichiers de remontées et valorisation des séjours et résumés}
+\title{Import des principaux fichiers de remontées éavec pmeasyr et valorisation des séjours et résumés}
 \usage{
-imco(p, tarifsante = FALSE, save = TRUE, persist = FALSE,
-  pathm12 = NULL)
+imco( p )
 }
 \arguments{
 \item{p}{un noyau pmeasyr}
@@ -20,8 +19,12 @@ imco(p, tarifsante = FALSE, save = TRUE, persist = FALSE,
 liste avec principaux fichiers de remontées, et enregistrement sur le disque si besoin
 }
 \description{
-Import des principaux fichiers de remontées et valorisation des séjours et résumés
+Import des principaux fichiers de remontées éavec pmeasyr et valorisation des séjours et résumés
 }
 \examples{
+\dontrun{
+
+   imco( p ) -> data_mco
+}
 
 }

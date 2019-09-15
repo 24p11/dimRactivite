@@ -2,17 +2,60 @@
 % Please edit documentation in R/fonctions_pmeasyr.R
 \name{vvr_rum_repa}
 \alias{vvr_rum_repa}
-\title{Title}
+\title{Fonction pmctmono (on doit encore repartir les supplements RAP et ANTEPARTUM)}
 \usage{
-vvr_rum_repa(rsa, rum, pmctmono)
+pmct_mono_uma(rsa, rum, annee, mois)
 }
 \arguments{
-\item{rsa}{}
+\item{rsa}{rsa valorisés = tibble \code{vrsa$rsa} en sortie de \code{pmeasyr::vvr_ghs_supp}}
 
-\item{rum}{}
+\item{rum}{rum non valorisés = tibble \code{rum$rum} en sortie de \code{pmeasyr::irum}}
 
-\item{pmctmono}{}
+\item{pmctmono}{pmct mono uma = tibble en sortie \code{dimRactivite::pmct_mono_uma}}
+}
+\value{
+rum_v = rum valorisés
 }
 \description{
-Title
+Détails du nom des variables pmeasyr en entrée (rsa valorisés)
+\code{rec_totale} :Valorisation 100% T2A globale
+\code{rec_base}: Valorisation des GHS de base
+\code{rec_bee}: Valorisation base + exb + exh
+\code{rec_exb}: Valorisation extrême bas (à déduire)
+\code{rec_rehosp_ghm}: Valorisation séjours avec rehosp dans même GHM
+\code{rec_mino_sus}: Valorisation séjours avec minoration forfaitaire liste en sus
+\code{rec_exh}: Valorisation journées extrême haut
+\code{rec_aph}: Valorisation actes GHS 9615 en Hospit.
+\code{rec_rap}: Valorisation suppléments radiothérapie pédiatrique,
+\code{rec_ant}: Valorisation suppléments antepartum,
+\code{rec_rdt_tot}: Valorisation actes RDTH en Hospit.,
+\code{rec_rea}: Valorisation suppléments de réanimation
+\code{rec_rep}: Valorisation suppléments de réa pédiatrique
+\code{rec_nn1}: Valorisation suppléments de néonat sans SI
+\code{rec_nn2}: Valorisation suppléments de néonat avec SI
+\code{rec_nn3}: Valorisation suppléments de réanimation néonat
+\code{rec_po_tot}: Valorisation prélévements d organe
+\code{rec_caishyp}: Valorisation des actes de caissons hyperbares en sus
+\code{rec_dialhosp}: Valorisation suppléments de dialyse
+\code{rec_src}: Valorisation suppléments de surveillance continue
+\code{rec_stf}: Valorisation suppléments de soins intensifs
+\code{rec_sdc}: Valorisation supplément défibrilateur cardiaque
+}
+\details{
+La répartition des recettes par RUM est réalisée par la fonction \code{vvr_rum_repa}. 
+Plusieurs clés ont été proposées pour cette répartition. 
+Le package en implémente 4 qui sont disponibles dans l'objet \code{rum_v} (les valeur et les coefficients sont disponibles) : 
+- répartition selon la durée du RUM (\code{coeftime},\code{valotime})
+- répartition selon le pmct moyen dans l'unité pour les mono RUM  (\code{coefpmctmono},\code{valopmctmono})
+- répartition selon un coefficient composite obtenu par multiplication des deux précédents (\code{coefpmctmonotime1},\code{valopmctmonotime1})
+- répartition selon un coefficient composite obtenu par la moyenne des deux précédents (\code{coefpmctmonotime2},\code{valopmctmonotime2})
+L'ensemble des suppléments individuels sont présents en sortie avec le suffixes _repa
+}
+\examples{
+\dontrun{
+   cf fonction imco de dimRactivite sur le détail de la préparation 
+   des données détail sur la tableaux de données en entrée de la fonction
+   
+   vvr_rum_repa(rsa, rum, pmctmono) -> rum_v
+}
 }

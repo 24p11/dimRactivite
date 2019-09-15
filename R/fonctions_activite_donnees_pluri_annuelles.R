@@ -1,5 +1,5 @@
 
-#' Création d'un tableau indicateurs x pivot, comprenant une liste d'inficateurs
+#' Création d'un tableau indicateurs x pivot, comprenant une liste d'indicateurs
 #'
 #' @param df un tibble de type séjours
 #' @param indicateurs vecteur, liste des indicateurs à calculer
@@ -7,10 +7,19 @@
 #'peut être soit un facteur soit une date, si une date la variable unit_pivot doit être renseignée
 #' @param unit_pivot string, la variable pivot a utiliser dans df pour réaliser le tableau croisé
 #'
-#' @return tableau de bord
-#' @export get_tdb
-#'
+#' @return dataframe contenant les statistiques demandées dans indicateurs mise en forme
+#' 
 #' @examples
+#' \dontrun{
+#' 
+#'    get_tdb(df, indicateurs) -> tdb
+#'    
+#' }
+#' 
+#' @export vvr_rum_repa
+#' @usage get_tdb(df, indicateurs)
+#' @export
+#' 
 get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
 
   if(pivot == 'pivot'){
@@ -37,21 +46,21 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
   if( 'd8eeue' %in% names(df) ){
     df<-df%>%mutate(d8eeue2 = as.Date(ifelse(date_min_pivot < d8eeue,d8eeue,date_min_pivot),origin = '1970-01-01'),
                     d8soue2 = as.Date(ifelse(date_max_pivot > d8soue,d8soue,date_max_pivot),origin = '1970-01-01' ),
-                    dureesejpart2 = ifelse(d8soue2 > d8eeue2,d8soue2 - d8eeue2,0 ))
+                    dureesejpart2 = ifelse(d8soue2 > d8eeue2, d8soue2 - d8eeue2, 0 ) )
 
 
   }else{
-    df<-df%>%mutate(dtent2 = as.Date(ifelse(date_min_pivot < dtent,dtent,date_min_pivot),origin = '1970-01-01'),
-                    dtsort2 = as.Date(ifelse(date_max_pivot > dtsort,dtsort,date_max_pivot),origin = '1970-01-01' ),
-                    dureesejpart2 = ifelse(dtsort2 > dtent2,dtsort2 - dtent2,0 ))
+    df<-df%>%mutate(dtent2 = as.Date(ifelse(date_min_pivot < dtent, dtent, date_min_pivot ),origin = '1970-01-01'),
+                    dtsort2 = as.Date(ifelse(date_max_pivot > dtsort, dtsort, date_max_pivot ),origin = '1970-01-01' ),
+                    dureesejpart2 = ifelse(dtsort2 > dtent2,dtsort2 - dtent2,0 ) )
 
 
   }
   #Les nouvelles dates entrée/sortie du résumé à l'intérieur des bornes pour chaque niveau de pivot, + nouvelle durée du résumé
 
   #Données utiles pour la valorisation
-  df<-left_join(df%>%mutate(noghs = as.numeric(noghs), anseqta = as.numeric(anseqta)),
-                referentiel_ghm_tarfis%>%rename(noghs = ghs, dms_n = dms)%>%select(anseqta,ghm,noghs,dms_n,bb,bh))
+  df<-dplyr::left_join( df %>% mutate( noghs = as.numeric(noghs), anseqta = as.numeric(anseqta) ),
+                referentiel_ghm_tarfis%>%rename( noghs = ghs, dms_n = dms )%>%select( anseqta, ghm, noghs, dms_n, bb,bh ) )
 
   tb<-list()
 
@@ -1549,9 +1558,15 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
 #' @param df un tableau de données de type séjours rum/rsa
 #'
 #' @return tableau de bord d'activité général en séjours
-#' @export get_activite_sejours
-#'
 #' @examples
+#' \dontrun{
+#' 
+#'    get_activite_sejours( df, structure ) -> tdb
+#' }
+#' 
+#' @export get_activite_sejours
+#' @usage make_tdb(val, niveau, annee, mois )
+#' @export 
 
 get_activite_sejours<-function( df, structure ){
   
@@ -1582,9 +1597,14 @@ get_activite_sejours<-function( df, structure ){
 #' @param df un tableau de données de type séjours rum/rsa
 #'
 #' @return tableau de bord d'activité général en recettes
-#' @export get_activite_recettes
-#'
 #' @examples
+#' \dontrun{
+#' 
+#'    get_activite_recettes( df, structure ) -> tdb
+#' }
+#' @export get_activite_recettes
+#' @usage make_tdb(val, niveau, annee, mois )
+#' @export 
 
 get_activite_recettes<-function( df, structure ){
   
@@ -1613,12 +1633,16 @@ get_activite_recettes<-function( df, structure ){
 #' @param annee
 #' @param mois 
 #'
-#' @return 
-#' @export make_tdb
-#'
+#' @return tableau de bord d'activité
 #' @examples
+#' \dontrun{
 #' 
-make_tdb<-function(val,niveau,annee,mois){
+#'    get_tdb(df, indicateurs) -> tdb
+#' }
+#' @export make_tdb
+#' @usage make_tdb(val, niveau, annee, mois )
+#' @export 
+make_tdb <- function( val, niveau, annee, mois ){
   
   #Nom des tableaux de bord disponibles
   
@@ -1652,13 +1676,13 @@ make_tdb<-function(val,niveau,annee,mois){
   }
   
   
-  df<-left_join(inner_join(df,rum_v),
+  df<-dplyr::left_join(inner_join(df,rum_v),
                 inner_join(rsa,rsa_v)%>%mutate(anseqta = as.numeric(anseqta))%>%select(nofiness,cle_rsa,ansor,noghs,
                                                                                        anseqta,duree,rec_base,nbrum,noseqrum,
                                                                                        ghm,duree,nbjrbs,sejinfbi,rec_totale,rec_base,
                                                                                        rec_exh,rec_exb))%>%
-    left_join(.,rsa_dms)%>%
-    left_join(.,vano%>%inner_join(., df%>%select(nofiness,cle_rsa,ansor,nas)) %>% select( nas, noanon )%>% distinct(nas,noanon))
+    dplyr::left_join(.,rsa_dms)%>%
+    dplyr::left_join(.,vano%>%inner_join(., df%>%select(nofiness,cle_rsa,ansor,nas)) %>% select( nas, noanon )%>% distinct(nas,noanon))
   
   
   

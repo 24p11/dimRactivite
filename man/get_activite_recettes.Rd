@@ -4,7 +4,7 @@
 \alias{get_activite_recettes}
 \title{Tableau de bord général d'activité en recettes, et séparant HDJ/HC}
 \usage{
-get_activite_recettes(df, structure)
+make_tdb(val, niveau, annee, mois )
 }
 \arguments{
 \item{df}{un tableau de données de type séjours rum/rsa}
@@ -14,4 +14,10 @@ tableau de bord d'activité général en recettes
 }
 \description{
 Tableau de bord général d'activité en recettes, et séparant HDJ/HC
+}
+\examples{
+\dontrun{
+
+   get_activite_recettes( df, structure ) -> tdb
+}
 }

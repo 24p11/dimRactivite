@@ -4,16 +4,22 @@
 \alias{analyse_fichiers_remontees}
 \title{Lecture des fichiers en sortie de scan_path pour vérification de leur contenu et préparation aux imports}
 \usage{
-analyse_fichiers_remontees(fichiers_genrsa, maj_dernier_mois = TRUE)
+analyse_fichiers_remontees( )
 }
 \arguments{
-\item{fichiers_genrsa}{tibble en sortie de scan_path}
-
-\item{recent}{logical, si TRUE considère par défaut que le .RData du dernier mois est manquant}
+\item{maj_dernier_mois}{logical, si TRUE considère par défaut que le .RData du dernier mois est manquant}
 }
 \value{
 tibble avec liste des fichiers par remontée
 }
 \description{
 Lecture des fichiers en sortie de scan_path pour vérification de leur contenu et préparation aux imports
+}
+\examples{
+\dontrun{
+
+   analyse_fichiers_remontees( )
+   
+}
+
 }

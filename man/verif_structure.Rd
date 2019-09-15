@@ -4,7 +4,7 @@
 \alias{verif_structure}
 \title{Vérification de l'exhaustivité du fichier structure}
 \usage{
-verif_structure(rum, fichier_structure)
+verif_structure( rum, fichier_structure )
 }
 \arguments{
 \item{rum}{tiblle de type rum}
@@ -13,4 +13,12 @@ verif_structure(rum, fichier_structure)
 }
 \description{
 Vérification de l'exhaustivité du fichier structure
+}
+\examples{
+\dontrun{
+
+   verif_structure( rum, fichier_structure )
+   
+}
+
 }

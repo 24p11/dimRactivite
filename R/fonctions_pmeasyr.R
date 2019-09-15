@@ -1,11 +1,17 @@
-#################
-# PMCT MONORUMS #
-#################
-###Fonction pmctmono : pmct mono urm calculé par année ou 12 mois glissant si mois < 12 / pour les REA: moyenne des couts de sejour complets (pas de repartition au temps)
+######################################################################################################
+# Fonction de répartition des recettes par RUM qui pourraient être intégrées au package pmeasyr
+######################################################################################################
+
 # A faire : changement nom pmctmono et pmctuma
 
-#' Title
-#'
+#' Calcul des PMCT mono UMA (moyenne du tarifs GHS des séjours pris en charge dans une seule UMA)
+#' Cet indicateur est calculé à partir des recettes ghs (sans la valorisation des extrêmes ni des suppléments) 
+#' pour les séjours dont la variable nbrum = 1 sauf pour les réanimations (autorisations PMSI 01A et 01B) 
+#' où cette restriction n'a pas été faite.
+#' Le périmètre du calcul est le suivant :
+#' - pour les remontées en année pleine, à M12, les pmct monorum sont calculés sur les 12 mois de l'année,
+#' - pour les remontées infra-annuelle, les pmct monorum sont calculés sur 12 mois glissants
+#' (attention les fichiers de la remontée M12 de l'année antérieure dezippés doit être présente )
 #' @param rsa 
 #' @param rum 
 #' @param annee 
@@ -15,6 +21,12 @@
 #' @export pmct_mono_uma
 #'
 #' @examples
+#' \dontrun{
+#'    pmct_mono_uma(rsa, rum, annee, mois) -> pmcto_mono
+#' }
+#' @export pmct_mono_uma
+#' @usage pmct_mono_uma(rsa, rum, annee, mois)
+#' @export
 pmct_mono_uma <- function (rsa, rum, annee, mois) {
 
   #Calcul : pmct mono-rum (pmctnosup_norea) + sommes recettes mono rum + nb sej monorum
@@ -56,55 +68,80 @@ pmct_mono_uma <- function (rsa, rum, annee, mois) {
 
 
 
-# rec_totale :Valorisation 100% T2A globale
-# rec_base: Valorisation des GHS de base
-# rec_bee: Valorisation base + exb + exh
-# rec_exb: Valorisation extrême bas (à déduire)
-# rec_rehosp_ghm: Valorisation séjours avec rehosp dans même GHM
-# rec_mino_sus: Valorisation séjours avec minoration forfaitaire liste en sus
-# rec_exh: Valorisation journées extrême haut
-# rec_aph: Valorisation actes GHS 9615 en Hospit.
-# rec_rap: Valorisation suppléments radiothérapie pédiatrique,
-# rec_ant: Valorisation suppléments antepartum,
-# rec_rdt_tot: Valorisation actes RDTH en Hospit.,
-# rec_rea: Valorisation suppléments de réanimation
-# rec_rep: Valorisation suppléments de réa pédiatrique
-# rec_nn1: Valorisation suppléments de néonat sans SI
-# rec_nn2: Valorisation suppléments de néonat avec SI
-# rec_nn3: Valorisation suppléments de réanimation néonat
-# rec_po_tot: Valorisation prélévements d organe
-# rec_caishyp:Valorisation des actes de caissons hyperbares en sus
-# rec_dialhosp: Valorisation suppléments de dialyse
-# rec_src: Valorisation suppléments de surveillance continue
-# rec_stf: Valorisation suppléments de soins intensifs
-# rec_sdc: Valorisation supplément défibrilateur cardiaque
+
 ########################################################################
 # PMCT MULTIRUMS [NB: ghm rehospitalisation repartit sur le temps ici] #
 ########################################################################
-###Fonction pmctmono (on doit encore repartir les supplements RAP et ANTEPARTUM)
-#' Title
-#'
-#' @param rsa 
-#' @param rum 
-#' @param pmctmono 
-#'
-#' @return
-#' @export vvr_rum_repa
-#'
+#' Fonction pmctmono (on doit encore repartir les supplements RAP et ANTEPARTUM)
+#' 
+#' Détails du nom des variables pmeasyr en entrée (rsa valorisés)
+#' \code{rec_totale} :Valorisation 100% T2A globale
+#' \code{rec_base}: Valorisation des GHS de base
+#' \code{rec_bee}: Valorisation base + exb + exh
+#' \code{rec_exb}: Valorisation extrême bas (à déduire)
+#' \code{rec_rehosp_ghm}: Valorisation séjours avec rehosp dans même GHM
+#' \code{rec_mino_sus}: Valorisation séjours avec minoration forfaitaire liste en sus
+#' \code{rec_exh}: Valorisation journées extrême haut
+#' \code{rec_aph}: Valorisation actes GHS 9615 en Hospit.
+#' \code{rec_rap}: Valorisation suppléments radiothérapie pédiatrique,
+#' \code{rec_ant}: Valorisation suppléments antepartum,
+#' \code{rec_rdt_tot}: Valorisation actes RDTH en Hospit.,
+#' \code{rec_rea}: Valorisation suppléments de réanimation
+#' \code{rec_rep}: Valorisation suppléments de réa pédiatrique
+#' \code{rec_nn1}: Valorisation suppléments de néonat sans SI
+#' \code{rec_nn2}: Valorisation suppléments de néonat avec SI
+#' \code{rec_nn3}: Valorisation suppléments de réanimation néonat
+#' \code{rec_po_tot}: Valorisation prélévements d organe
+#' \code{rec_caishyp}: Valorisation des actes de caissons hyperbares en sus
+#' \code{rec_dialhosp}: Valorisation suppléments de dialyse
+#' \code{rec_src}: Valorisation suppléments de surveillance continue
+#' \code{rec_stf}: Valorisation suppléments de soins intensifs
+#' \code{rec_sdc}: Valorisation supplément défibrilateur cardiaque
+#' 
+#' 
+#' La répartition des recettes par RUM est réalisée par la fonction \code{vvr_rum_repa}. 
+#' Plusieurs clés ont été proposées pour cette répartition. 
+#' Le package en implémente 4 qui sont disponibles dans l'objet \code{rum_v} (les valeur et les coefficients sont disponibles) : 
+#'- répartition selon la durée du RUM (\code{coeftime},\code{valotime})
+#'- répartition selon le pmct moyen dans l'unité pour les mono RUM  (\code{coefpmctmono},\code{valopmctmono})
+#'- répartition selon un coefficient composite obtenu par multiplication des deux précédents (\code{coefpmctmonotime1},\code{valopmctmonotime1})
+#' - répartition selon un coefficient composite obtenu par la moyenne des deux précédents (\code{coefpmctmonotime2},\code{valopmctmonotime2})
+#' L'ensemble des suppléments individuels sont présents en sortie avec le suffixes _repa
+#' @param rsa rsa valorisés = tibble \code{vrsa$rsa} en sortie de \code{pmeasyr::vvr_ghs_supp} 
+#' @param rum rum non valorisés = tibble \code{rum$rum} en sortie de \code{pmeasyr::irum}
+#' @param pmctmono pmct mono uma = tibble en sortie \code{dimRactivite::pmct_mono_uma}
+
+#' @return rum_v = rum valorisés
+#' 
 #' @examples
+#' \dontrun{
+#'    cf fonction imco de dimRactivite sur le détail de la préparation 
+#'    des données détail sur la tableaux de données en entrée de la fonction
+#'    
+#'    vvr_rum_repa(rsa, rum, pmctmono) -> rum_v
+#' }
+#' @export vvr_rum_repa
+#' @usage pmct_mono_uma(rsa, rum, annee, mois)
+#' @export
 vvr_rum_repa <- function (rsa, rum, pmctmono) {
 
   #selection de la periode pertinente:
   #rsa %>% dplyr::filter((as.numeric(ansor)==annee & as.numeric(moissor)<=mois)) %>% dplyr::select(norss) -> norss
 
   #Actes de radiothérapie donnant lieu à facturation d'un supplément
-  actesradio <- "AZNL001|QZNL001|ZZNL045|ZZNL046|ZZNL047|ZZNL048|ZZNL050|ZZNL051|ZZNL052|ZZNL053|ZZNL054|ZZNL058|ZZNL059|ZZNL060|ZZNL061|ZZNL062|ZZNL063|ZZNL064|ZZNL065|ZZNL066"
+  
+  #tools::assertCondition(is.null(getOption("dimRactivite.actesradio")), "error", "Veuillez renseigner l'option actesradio") 
+  #tools::assertCondition(is.null(getOption("dimRactivite.actesdialyse")), "error", "Veuillez renseigner l'option actesdialyse") 
+  #tools::assertCondition(is.null(getOption("dimRactivite.actessdc")), "error", "Veuillez renseigner l'option actessdc") 
+  #tools::assertCondition(is.null(getOption("dimRactivite.actesapherese")), "error", "Veuillez renseigner l'option actesapherese") 
+  
+  actesradio <- getOption("dimRactivite.actesradio")
   #Actes de dialyse donnant lieu à facturation d'un supplément
-  actesdialyse <- "JVJF003|JVJF004|JVJF008|JVRP004|JVRP007|JVRP008"
+  actesdialyse <- getOption("dimRactivite.actesdialyse")
   #Actes pose défibrilateur cardiaque
-  actessdc <- "DEKA002|DELA004|DELA007|DELF013|DELF014|DELF016|DELF020|DELF900"
+  actessdc <-  getOption("dimRactivite.actessdc")
   #Actes d'aphérère donnant lieu à facturation d'un supplément
-  actesapherese <- "FEFF001|FEFF002|FEJF001|FEJF002|FEJF004|FEJF005|FEJF007|FEJF009|FEPF001|FEPF002|FEPF003|FEPF004|FEPF005|FERP001"
+  actesapherese <- getOption("dimRactivite.actesapherese")
 
   #creation fichier intermediaire des valorisations:
   rsa %>% dplyr::select(nas,duree,nbrum,ansor,moissor,dplyr::starts_with("rec_"),
@@ -118,49 +155,49 @@ vvr_rum_repa <- function (rsa, rum, pmctmono) {
     dplyr::mutate(adial = stringr::str_count(actes, actesdialyse),
                   ardt = stringr::str_count(actes, actesradio),
                   aaph = stringr::str_count(actes, actesapherese),
-                  asdc = stringr::str_count(actes, actessdc)) ->fullrsatemp2
+                  asdc = stringr::str_count(actes, actessdc)) -> fullrsatemp2
 
   fullrsatemp2%>%dplyr::group_by(nas) %>%
     dplyr::summarise( # sommes des coefficients de répartition mixtes durée rum + pmctmono
       # sumpmctimenosup=ifelse(sum(pmctnosup*(dureesejpart+1), na.rm = TRUE)==0, 1, sum(pmctnosup*(dureesejpart+1), na.rm = TRUE)),
-      sumpmctimenosup= sum(pmctnosup*(dureesejpart+1), na.rm = TRUE),
+      sumpmctimenosup = sum( pmctnosup*(dureesejpart+1), na.rm = TRUE ),
       #sommes pmct monorum
       # sumpmctnosup=ifelse(sum(pmctnosup, na.rm = TRUE)==0, 1, sum(pmctnosup, na.rm = TRUE)),
-      sumpmctnosup=sum(pmctnosup, na.rm = TRUE),
+      sumpmctnosup = sum( pmctnosup, na.rm = TRUE ),
       #sommes pmct monorum sans na.rm=TRUE afin de verifier en aval si un des pmctmono du séjour est inexistant (on remplacera alors par la repartition selon le temps)
-      checksumpmctnosup=sum(pmctnosup),
+      checksumpmctnosup = sum( pmctnosup ),
       #supplements de rea
-      nsrea=first(nbsuprea),
+      nsrea = first( nbsuprea ),
       #soins intensifs issus de réa
-      nssir=pmax(first(nbsupsi),0) ,
+      nssir = pmax( first(nbsupsi), 0 ) ,
       #somme des journées des rum avec autorisation réanimation
-      jrea=sum(dureesejpart[substr(typeaut,1,2)=="01"]+1),
+      jrea = sum( dureesejpart[ substr(typeaut,1,2)=="01"]+1 ),
       #calcul des suppléments soins intensifs
-      nsstf= pmax(first(nbsupstf),0) ,
+      nsstf = pmax( first(nbsupstf), 0 ) ,
       #calcul des suppléments soins intensifs hors réa
-      nsstf_hr=pmax(first(nbsupstf)-first(nbsupsi),0),
+      nsstf_hr = pmax( first(nbsupstf) - first(nbsupsi), 0 ),
       #somme des journées des rum avec autorisation soins intensifs (sans les réa)
-      jstf=sum(dureesejpart[substr(typeaut,1,2) %in% c("02","16","18")]+1),
+      jstf = sum( dureesejpart[substr(typeaut,1,2) %in% c("02","16","18")]+1 ),
       #somme des journées des rum avec autorisation réanimation pédiatrique
-      jrep=sum(dureesejpart[substr(typeaut,1,2)=="13"]+1),
+      jrep = sum( dureesejpart[substr(typeaut,1,2)=="13"]+1 ),
       #somme des journées surveillance continue
-      jsrc=sum(dureesejpart[substr(typeaut,1,2) %in% c("03","14")]+1),
+      jsrc = sum( dureesejpart[substr(typeaut,1,2) %in% c("03","14")]+1 ),
       #somme des journées éligibles sup NN1
-      jnn1=sum(dureesejpart[substr(typeaut,1,2)=="04"]+1),
+      jnn1 = sum( dureesejpart[substr(typeaut,1,2)=="04"]+1 ),
       #somme des journées éligibles sup NN2
-      jnn2=sum(dureesejpart[substr(typeaut,1,2) %in% c("05","06","13")]+1),
+      jnn2 = sum( dureesejpart[substr(typeaut,1,2) %in% c("05","06","13")]+1 ),
       #somme des journées éligibles sup NN3
-      jnn3=sum(dureesejpart[substr(typeaut,1,2) %in% c("06","13")]+1),
+      jnn3 = sum( dureesejpart[substr(typeaut,1,2) %in% c("06","13")]+1 ),
       #somme des journées éligibles sup hyp1
-      jcaishyp1=sum(dureesejpart[substr(typeaut,1,2) %in% c("01","13")]+1),
+      jcaishyp1 = sum( dureesejpart[substr(typeaut,1,2) %in% c("01","13")]+1 ),
       #somme des journées éligibles sup hyp2
-      jcaishyp2=sum(dureesejpart[substr(typeaut,1,2) %in% c("02","16","18")]+1),
+      jcaishyp2 = sum( dureesejpart[substr(typeaut,1,2) %in% c("02","16","18")]+1 ),
       #somme des journées éligibles sup antépartum
-      jant=sum(dureesejpart[substr(typeaut,1,2) %in% c("70","71","73")]+1),
-      sdial = sum(adial, na.rm = TRUE),#Varaible déjà existante dans le rsa; vérifier concordance
-      srdt = sum(ardt, na.rm = TRUE),
-      saph = sum(aaph, na.rm = TRUE),
-      ssdc = sum(asdc, na.rm = TRUE) ) -> tempmct1
+      jant = sum( dureesejpart[substr(typeaut,1,2) %in% c("70","71","73")]+1 ),
+      sdial = sum( adial, na.rm = TRUE ),#Varaible déjà existante dans le rsa; vérifier concordance
+      srdt = sum( ardt, na.rm = TRUE ),
+      saph = sum( aaph, na.rm = TRUE ),
+      ssdc = sum( asdc, na.rm = TRUE ) ) -> tempmct1
 
   #bind des rum d'interet avec les prix/duree des rsa correspondant, les pmctmono et leur somme, puis ventilation supplements et clef de repartition:
   dplyr::left_join(rum, fullrsatemp1) %>% dplyr::left_join(.,pmctmono) %>%

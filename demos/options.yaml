@@ -1,10 +1,5 @@
-path: "~/GH_PMSI/DATA/GENRSA"
-path_tdb_files: "~/GH_PMSI/ACTIVITE_MSI/ANALYSES/TABLEAUX_DE_BORD/"
-
-arborescence:
-  - {finess}
-  - {annee}
-  - M{mois}
+path: "path"
+path_tdb_files: "path"
 
 extensions:
   - rum
@@ -55,7 +50,14 @@ fichier_strucure:
 gestion_doublons_rum:
     service: service
     pole: service
-    Centre de Traitement des Brûlés: pole
 
 profondeur_tdb: 5
 
+#Actes donnant lieu à un supplément de raduithérapie
+actesradio : "AZNL001|QZNL001|ZZNL045|ZZNL046|ZZNL047|ZZNL048|ZZNL050|ZZNL051|ZZNL052|ZZNL053|ZZNL054|ZZNL058|ZZNL059|ZZNL060|ZZNL061|ZZNL062|ZZNL063|ZZNL064|ZZNL065|ZZNL066"
+#Actes de dialyse donnant lieu à facturation d'un supplément
+actesdialyse : "JVJF003|JVJF004|JVJF008|JVRP004|JVRP007|JVRP008"
+#Actes pose défibrilateur cardiaque
+actessdc : "DEKA002|DELA004|DELA007|DELF013|DELF014|DELF016|DELF020|DELF900"
+#Actes d'aphérère donnant lieu à facturation d'un supplément
+actesapherese : "FEFF001|FEFF002|FEJF001|FEJF002|FEJF004|FEJF005|FEJF007|FEJF009|FEPF001|FEPF002|FEPF003|FEPF004|FEPF005|FERP001"

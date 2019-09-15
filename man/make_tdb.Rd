@@ -4,16 +4,22 @@
 \alias{make_tdb}
 \title{Création des tableaux de bord}
 \usage{
-make_tdb(val, niveau, annee, mois)
+make_tdb(val, niveau, annee, mois )
 }
 \arguments{
 \item{val}{}
 
 \item{mois}{}
 }
+\value{
+tableau de bord d'activité
+}
 \description{
 Création des tableaux de bord
 }
 \examples{
+\dontrun{
 
+   get_tdb(df, indicateurs) -> tdb
+}
 }

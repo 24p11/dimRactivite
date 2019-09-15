@@ -22,20 +22,16 @@ Imports:
     stringr,
     tidyr,
     dplyr,
-    tibble,
-    lubridate,
     magrittr,
-    forcats,
-    purrr,
     RCurl,
     jsonlite,
     referentiels,
     dplyr,
     stringr,
     yaml,
-    purrr,
     referime,
-    readxl
+    readxl,
+    tools
 Suggests: 
     pmeasyr,
     knitr,

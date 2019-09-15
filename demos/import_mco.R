@@ -45,3 +45,18 @@ load_RData( sel_remontees_import )
 load_med( sel_remontees_import, fichiers_genrsa )
 load_dmi( sel_remontees_import, fichiers_genrsa )
 
+
+# ajout des structures dans les rum
+fichier_structure <- readxl::read_excel(getOption("dimRactivite.structures")$fichier,
+                                        col_types = c( "text" , "text" , "text" , "text" ,"text" ,
+                                                       "text" , "text" , "text" , "text" ),
+                                        col_names = getOption("dimRactivite.structures")$colonnes,
+                                        skip = 1
+)
+
+#vérification que toutes les UMA sont bien renseignées dans le fichier structure
+verif_structure(rum,fichier_structure)
+
+rum <- rum %>% left_join( ., fichier_structure ) %>%
+          mutate( pole = ifelse(is.na(pole), 'Erreurs', pole ),
+                  service = ifelse(is.na(service), 'Erreur service non renseigné', service ) )

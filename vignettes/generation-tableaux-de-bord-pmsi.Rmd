@@ -19,7 +19,6 @@ knitr::opts_chunk$set(
 ```
 
 ```{r setup}
-library(dimRactivite)
 library(pmeasyr)
 library(tidyverse)
 library (RCurl)
@@ -27,6 +26,7 @@ library(jsonlite)
 library(referentiels)
 library(referime)
 library(readxl)
+devtools::load_all()
 ```
 
 Les fonctions d'imports et d'analyses sont construites sur le principe que chaque établissement produit tous les mois des fichiers de données de facturation mis en entrée du logiciel ATIH GENRSA utilisé pour transmettre les données PMSI aux tutelles.  L’analyse de ces fichiers par GENRSA produit 2 types d’archives (.zip) le in (les fichiers d’entrée) et le out (fichiers préparés pour être envoyés). Le package généralise l’import des fichiers zippés en sortie de GENRSA (in et out) dans un environnement de travail R permettant l’analyse des données et la production de tableaux de bord automatiques.
@@ -36,27 +36,25 @@ Les fonctions d'imports et d'analyses sont construites sur le principe que chaqu
 ### Paramètre des imports
 Le paramètres nécessaires pour les imports se trouvent dans un le fichier options.yaml (cf exemple) en particulier la variable ```path``` qui donne le chemin du dossier racine dans le quel se trouve les archives PMSI en sortie de GENRSA.
 ```{r profondeur}
-dimRactivite:::update_options("options.yaml")
+
+dimRactivite:::update_options('~/GH_PMSI/INFORMATIQUE/GIT/remi/tableaux_de_bord/options.yaml')
 
 profondeur_imports = 2
 ```
 ### Création des fichiers .RData par remontée
 
-La première étape consiste à scanner le dossier contenant les archives afin de dresser la liste de remontées disponibles ce qui produit un tableaux de données référençant l'ensemble des informations utiles sur les archives et leur contenu. Ce tableau appelé ```fichiers_genrsa``` sera utilisé par les autres fonctions d'imports comme reférentiel pour décrire les données disponibles.
-
-#### Liste des fichiers présents dans le dossier racine
-```{r scan_path}
-fichiers_genrsa <- dimRactivite:::scan_path()
-```
-
 #### Analyse des fichiers en fonction de leur extentions (ext imco + .zip) et vérification de la présence des .RData
 
-Les fichiers sont ensuite analysés afin de préparer la création (ou non) des fichiers .RData. On vérifie la présence dans les fichiers zippés en entrée et en sortie de GENRSA de l'ensemble des fichiers nécessaires à la facturation et à l'analyse de l'activité en lisant l'extension des fichiers de l'archive. La fonction ```analyse_fichiers_remontees``` produit un dataframe ```remontees_dispo``` de synthèse où pour chaque remontée on liste l'absence (0) ou la présence (1) des fichiers qui seront utilisés. Ce dataframe sera également utilisé pour les autres fonctions.
+La première étape consiste à scanner le dossier contenant les archives afin de dresser la liste de remontées disponibles ce qui produit un tableaux de données référençant l'ensemble des informations utiles sur les archives et leur contenu. Ce tableau appelé ```fichiers_genrsa``` sera utilisé par les autres fonctions d'imports comme reférentiel pour décrire les données disponibles. Il est sauvegardé dans les options. 
 
-```{r analyse_fichier_remontees}
-remontees_dispo <- dimRactivite:::analyse_fichiers_remontees(fichiers_genrsa)
+Les fichiers sont ensuite analysés afin de préparer la création (ou non) des fichiers .RData. On vérifie la présence dans les fichiers zippés en entrée et en sortie de GENRSA de l'ensemble des fichiers nécessaires à la facturation et à l'analyse de l'activité en lisant l'extension des fichiers de l'archive. La (sous) fonction ```analyse_fichiers_remontees``` produit un dataframe ```remontees_dispo``` de synthèse où pour chaque remontée on liste l'absence (0) ou la présence (1) des fichiers qui seront utilisés. Ce dataframe sera également utilisé pour les autres fonctions.
 
-remontees_dispo%>%arrange(annee,mois,finess)
+
+```{r analyse_dossier_remontees}
+remontees_dispo <- dimRactivite:::analyse_dossier_remontees()
+#Voir la liste des fichiers RData non disponibles qui seront générés à l'étape suivante
+print( remontees_dispo %>% filter( RData != 1 ) )
+
 ```
 
 #### Création et sauvegarde des .RData de remontée (si manquant) et mise à jour de la liste des remontées disponibles
@@ -67,25 +65,32 @@ Par défaut, l'option ```option recent = TRUE``` induit la création du .RData p
 
 
 ```{r save_remontee}
-#remontees_dispo <- dimRactivite:::save_remontees( remontees_dispo, fichiers_genrsa )
+remontees_dispo <- dimRactivite:::save_remontees( remontees_dispo )
 ```
 
 
-#### Sélection des remontées à importer dans R
+### Import dans l'environement de travail
+
+#### RUM, RSA, ANO et des données de valorisation
+
 Les données peuvent ensuite être importées dans la mémoire de R. Par défaut on choisit le M12 des années antérieures et le dernier mois pour l'année en cours.
 
 ```{r sel_remontees_import}
-sel_remontees_import<-remontees_dispo%>%filter(as.numeric(annee)> max(as.numeric(remontees_dispo$annee))-profondeur_imports, RData==1)%>%
-  group_by(finess,annee)%>%summarise(mois = max(as.numeric(mois)))
+
+sel_remontees_import<-remontees_dispo%>%filter( as.numeric(annee) > max( as.numeric(remontees_dispo$annee) ) - profondeur_imports, RData == 1 )%>%
+  mutate( mois  =  as.numeric(mois) )%>%
+  group_by( finess, annee )%>% filter( mois == max(mois) )
 
 sel_remontees_import
 ```
 Le df ```sel_remontees_import``` est passé en argument de la fonction ```load_all()``` qui permet le chargment des données.
 
 ```{r load_all}
-dimRactivite:::load_all(sel_remontees_import%>%filter(as.numeric(annee) > max(as.numeric(sel_remontees_import$annee))-profondeur_imports))
-table(rsa$nofiness,rsa$ansor)
+dimRactivite:::load_RData( sel_remontees_import )
 ```
+
+#### Import des fichiers MO et DMI
+
 
 #### Ajout des données de struture
 
@@ -95,19 +100,20 @@ La fonction ```verif_structure()``` permet de s'assurer que l'ensemble des uma p
 
 ```{r Chargement du fichier structure}
 
-fichier_structure <- readxl::read_excel("structures.xlsx",
+# ajout des structures dans les rum
+fichier_structure <- readxl::read_excel(getOption("dimRactivite.structures")$fichier,
                                         col_types = c( "text" , "text" , "text" , "text" ,"text" ,
                                                        "text" , "text" , "text" , "text" ),
                                         col_names = c('nofiness','hopital','cdurm','uma_locale','uma_locale2',
                                                       'libelle_um','service','regroupement1','pole'),
                                         skip = 1
 )
-
+#vérification que toutes les UMA sont bien renseignées dans le fichier structure
 dimRactivite:::verif_structure(rum,fichier_structure)
 
 rum <- rum %>% left_join( ., fichier_structure ) %>%
-           mutate(pole = ifelse(is.na(pole),'Erreurs',pole),
-           service = ifelse(is.na(service),'Erreur service non renseigné',service))
+          mutate( pole = ifelse(is.na(pole), 'Erreurs', pole ),
+                  service = ifelse(is.na(service), 'Erreur service non renseigné', service ) )
 
 ```
 
@@ -143,18 +149,18 @@ profondeur_tdb = 2
 ghm_dms_nationales<-referime::get_table("ghm_dms_nationales")
 
 #Merge rsa, dms pour les cas ou la référence dans ghm_dms_nationales = ghs
-rsa_dms1<-inner_join(rsa%>%unite("ghm",gpcmd,gptype,gpnum,gpcompx,sep="")%>%
-                       rename(ghs = noghs)%>%
-                       select(nofiness,cle_rsa,ansor,anseqta,ghs,ghm),
+rsa_dms1<-dplyr::inner_join( rsa %>% unite("ghm",gpcmd,gptype,gpnum,gpcompx,sep="")%>%
+                       rename( ghs = noghs )%>%
+                       select( nofiness, cle_rsa, ansor, anseqta, ghs, ghm ),
                      ghm_dms_nationales%>%filter(ghs!=""))
 #Merge rsa, dms pour les cas ou la référence dans ghm_dms_nationales = ghm
-rsa_dms2<-inner_join(rsa%>%unite("ghm",gpcmd,gptype,gpnum,gpcompx,sep="")%>%
-                       select(nofiness,cle_rsa,ansor,anseqta,ghm),
-                     ghm_dms_nationales%>%filter(ghs==""))
-rsa_dms<-bind_rows(rsa_dms1%>%select(nofiness,cle_rsa,ansor,dms_n),
-                   rsa_dms2%>%select(nofiness,cle_rsa,ansor,dms_n)
+rsa_dms2 <- dplyr::inner_join( rsa %>% unite("ghm", gpcmd, gptype, gpnum, gpcompx, sep="" )%>%
+                       select( nofiness, cle_rsa, ansor, anseqta, ghm ),
+                     ghm_dms_nationales %>% filter( ghs=="" ) )
+rsa_dms <- dplyr::bind_rows( rsa_dms1 %>% select( nofiness, cle_rsa, ansor, dms_n ),
+                   rsa_dms2 %>% select( nofiness, cle_rsa, ansor, dms_n )
                    )
-rm(rsa_dms1,rsa_dms2) 
+rm( rsa_dms1, rsa_dms2 ) 
 
 
 #### Import des paramètres (liste des indicateurs à calculer pour chaque niveau du fichier structure)

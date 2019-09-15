@@ -5,7 +5,7 @@
 \title{Généralisation de la fonction adzip de pmeasyr pour l'ensemble d'une archive in et out
 avec contrôle du type de fichier et création des fichiers manquants}
 \usage{
-adzipComplet(zfichiers, ext_to_import)
+adzipComplet( zfichiers )
 }
 \arguments{
 \item{zfichiers}{vecteur, nom des fichiers zippés}
@@ -18,4 +18,12 @@ aucun, dézip des archives en fonction du type de fichier voulus et création de
 \description{
 Généralisation de la fonction adzip de pmeasyr pour l'ensemble d'une archive in et out
 avec contrôle du type de fichier et création des fichiers manquants
+}
+\examples{
+\dontrun{
+
+   adzipComplet( zfichiers )
+   
+}
+
 }

@@ -4,18 +4,26 @@
 \alias{adzipRemonteee}
 \title{Généralisation de la fonction adzip de pmeasyr pour l'ensemble d'une remontée (avec plusieurs sites)}
 \usage{
-adzipRemonteee(p, fichiers_genrsa, ext_to_import = NULL)
+adzipRemonteee( p )
 }
 \arguments{
 \item{p}{nouyau pmeasyr}
 
-\item{fichiers_genrsa}{liste des fichiers contenue dans le dossier archive}
-
 \item{ext_to_import}{extension des fichiers à lire et importer}
+
+\item{fichiers_genrsa}{liste des fichiers contenue dans le dossier archive}
 }
 \value{
 aucun, dézip des archives en fonction du type de fichier voulus et création de fichier vide pour les types de fichier manquant
 }
 \description{
 Généralisation de la fonction adzip de pmeasyr pour l'ensemble d'une remontée (avec plusieurs sites)
+}
+\examples{
+\dontrun{
+
+   adzipRemonteee( p )
+   
+}
+
 }
