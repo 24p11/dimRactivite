@@ -26,7 +26,6 @@ library(jsonlite)
 library(referentiels)
 library(referime)
 library(readxl)
-devtools::load_all()
 ```
 
 Les fonctions d'imports et d'analyses sont construites sur le principe que chaque établissement produit tous les mois des fichiers de données de facturation mis en entrée du logiciel ATIH GENRSA utilisé pour transmettre les données PMSI aux tutelles.  L’analyse de ces fichiers par GENRSA produit 2 types d’archives (.zip) le in (les fichiers d’entrée) et le out (fichiers préparés pour être envoyés). Le package généralise l’import des fichiers zippés en sortie de GENRSA (in et out) dans un environnement de travail R permettant l’analyse des données et la production de tableaux de bord automatiques.
@@ -51,7 +50,7 @@ Les fichiers sont ensuite analysés afin de préparer la création (ou non) des 
 
 
 ```{r analyse_dossier_remontees}
-remontees_dispo <- dimRactivite:::analyse_dossier_remontees()
+remontees_dispo <- dimRactivite:::analyse_dossier_remontees( maj_dernier_mois = FALSE )
 #Voir la liste des fichiers RData non disponibles qui seront générés à l'étape suivante
 print( remontees_dispo %>% filter( RData != 1 ) )
 
@@ -65,7 +64,7 @@ Par défaut, l'option ```option recent = TRUE``` induit la création du .RData p
 
 
 ```{r save_remontee}
-remontees_dispo <- dimRactivite:::save_remontees( remontees_dispo )
+#remontees_dispo <- dimRactivite:::save_remontees( remontees_dispo )
 ```
 
 
