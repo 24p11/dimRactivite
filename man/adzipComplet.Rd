@@ -5,7 +5,7 @@
 \title{Généralisation de la fonction adzip de pmeasyr pour l'ensemble d'une archive in et out
 avec contrôle du type de fichier et création des fichiers manquants}
 \usage{
-adzipComplet( zfichiers )
+adzipComplet( zfichiers, ext_to_import )
 }
 \arguments{
 \item{zfichiers}{vecteur, nom des fichiers zippés}

@@ -2,7 +2,7 @@
 % Please edit documentation in R/fonctions_complementaires.R
 \name{get_data}
 \alias{get_data}
-\title{Selection de données en fonction de critère temporels et géographique (lieu d'hopsitalisation)
+\title{Selection de données en fonction de critère temporels et de structure
  Applicable sur des objets en sortie de pmeasyr}
 \usage{
 get_data(DF, ref = "ansor", m, a, val = NULL, niveau = NULL,
@@ -30,6 +30,6 @@ Si NULL pas de critères géographiques pour la sélection}
 tibble, un tibble contenant la sélection selon les critères indiqués
 }
 \description{
-Selection de données en fonction de critère temporels et géographique (lieu d'hopsitalisation)
+Selection de données en fonction de critère temporels et de structure
  Applicable sur des objets en sortie de pmeasyr
 }

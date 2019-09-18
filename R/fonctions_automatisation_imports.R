@@ -11,8 +11,8 @@
 #' }
 #' 
 #' @export scan_path
-#' @usage scan_path( )
-#' @export 
+#' @usage scan_path( path, ext )
+
 scan_path<-function( path = getOption("dimRactivite.path"), ext = getOption("dimRactivite.extensions") ){
 
   fichiers_genrsa =NULL
@@ -105,8 +105,8 @@ scan_path<-function( path = getOption("dimRactivite.path"), ext = getOption("dim
 #' }
 #' 
 #' @export analyse_fichiers_remontees
-#' @usage analyse_fichiers_remontees( )
-#' @export 
+#' @usage analyse_fichiers_remontees( maj_dernier_mois = TRUE )
+
 analyse_fichiers_remontees <- function( maj_dernier_mois = TRUE ){
   
   imco_files_types = getOption("dimRactivite.fichiers_imco")%>%purrr::flatten_chr()
@@ -169,8 +169,8 @@ analyse_fichiers_remontees <- function( maj_dernier_mois = TRUE ){
 #' }
 #' 
 #' @export analyse_dossier_remontees
-#' @usage analyse_dossier_remontees( )
-#' @export 
+#' @usage analyse_dossier_remontees( path, ext, maj_dernier_mois )
+#' 
 analyse_dossier_remontees<-function( path = getOption("dimRactivite.path"), ext = getOption("dimRactivite.extensions"), maj_dernier_mois = TRUE ){
   
   #Liste des fichiers présents dans le dossier racine
@@ -202,8 +202,8 @@ analyse_dossier_remontees<-function( path = getOption("dimRactivite.path"), ext 
 #' }
 #' 
 #' @export maj_variable_RData
-#' @usage maj_variable_RData( remontees )
-#' @export 
+#' @usage maj_variable_RData( remontees, p )
+
 maj_variable_RData<-function( remontees, p = NULL ){
   
   #Si pas de noyau la variable .RData mise à jour est celle des remontées les plus récentes
@@ -254,8 +254,8 @@ maj_variable_RData<-function( remontees, p = NULL ){
 #' }
 #' 
 #' @export adzipComplet
-#' @usage adzipComplet( zfichiers )
-#' @export 
+#' @usage adzipComplet( zfichiers, ext_to_import )
+
 adzipComplet<-function(zfichiers, ext_to_import = NULL ){
 
   dz_fichiers<-NULL
@@ -354,7 +354,7 @@ adzipComplet<-function(zfichiers, ext_to_import = NULL ){
 #' }
 #' 
 #' @export adzipRemonteee
-#' @usage adzipRemonteee( p )
+#' @usage adzipRemonteee( p, ext_to_import )
 #' @export 
 
 adzipRemonteee<-function( p, ext_to_import = NULL ){
@@ -543,7 +543,7 @@ save_remontees<-function(remontees){
 #' @export load_RData
 #' @usage load_RData( remontees_sel )
 #' @export 
-load_RData<- function(remontees_sel){
+load_RData<- function( remontees_sel ){
   
 
   
@@ -727,13 +727,15 @@ load_dmi<- function( remontees_sel ){
 #' }
 #' 
 #' @export imco
-#' @usage imco( p )
+#' @usage imco( p, tarifsante, save, persist,  )
 #' @export 
-imco <- function( p, tarifsante = FALSE, save = TRUE, persist = FALSE, pathm12 = NULL ){
+imco <- function( p, tarifsante = FALSE, save = TRUE, persist = FALSE ){
 
   if(tarifsante==TRUE) {
-    tarifs      <- referime::get_table('tarifs_mco_ghs') %>% dplyr::distinct(ghs, anseqta, .keep_all = TRUE) %>% dplyr::mutate(anseqta=as.character(as.numeric(anseqta)+1))
-    supplements <- referime::get_table('tarifs_mco_supplements') %>% dplyr::mutate(anseqta=as.character(as.numeric(anseqta)+1))
+    tarifs      <- referime::get_table('tarifs_mco_ghs') %>% dplyr::distinct(ghs, anseqta, .keep_all = TRUE) %>%
+      dplyr::mutate(anseqta=as.character(as.numeric(anseqta)+1))
+    supplements <- referime::get_table('tarifs_mco_supplements') %>%
+      dplyr::mutate(anseqta=as.character(as.numeric(anseqta)+1))
     suffixe = "tarifs_anterieurs_"
   } else {
     tarifs      <- referime::get_table('tarifs_mco_ghs') %>% dplyr::distinct(ghs, anseqta, .keep_all = TRUE)
@@ -742,8 +744,9 @@ imco <- function( p, tarifsante = FALSE, save = TRUE, persist = FALSE, pathm12 =
   }
 
   #Pour le cacul des pmct mono rum on préfère toujours utiliser les 12 derniers mois.
-  #Si l'import concerne un mois autre que décembre, on importe également si elles sont dispnibles les données M12 de l'année antérieure
-  #deb et fin ne semblent pas utilisés:
+  #Si l'import concerne un mois autre que décembre, on importe également si elles sont disponibles les données M12 de l'année antérieure
+  #Dans ce cas on modifie le noyau de départ en changeant l'année (cf p_import),
+  #ce qui suppose que les autres paramètres du noyau sont fixes.
 
   if(p$mois !=12){
     deb  = p$annee -1
@@ -766,7 +769,9 @@ imco <- function( p, tarifsante = FALSE, save = TRUE, persist = FALSE, pathm12 =
     
     #On change l'année et le mois du noyau d'import en fonction du contexte
     if(p$annee != a){
+      
       p_import$mois = 12
+      
     }
     message(
       "\n",

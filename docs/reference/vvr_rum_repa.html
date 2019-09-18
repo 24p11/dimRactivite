@@ -91,7 +91,7 @@ rec_sdc: Valorisation supplément défibrilateur cardiaque" />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">dimRactivite</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.2.0</span>
       </span>
     </div>
 
@@ -165,7 +165,7 @@ rec_sdc: Valorisation supplément défibrilateur cardiaque" />
 <code>rec_sdc</code>: Valorisation supplément défibrilateur cardiaque</p>
     </div>
 
-    <pre class="usage"><span class='fu'><a href='pmct_mono_uma.html'>pmct_mono_uma</a></span>(<span class='no'>rsa</span>, <span class='no'>rum</span>, <span class='no'>annee</span>, <span class='no'>mois</span>)</pre>
+    <pre class="usage"><span class='fu'>vvr_rum_repa</span>(<span class='no'>rsa</span>, <span class='no'>rum</span>, <span class='no'>annee</span>, <span class='no'>mois</span>)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -199,7 +199,10 @@ Le package en implémente 4 qui sont disponibles dans l'objet <code>rum_v</code>
 L'ensemble des suppléments individuels sont présents en sortie avec le suffixes _repa</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"></pre>
+    <pre class="examples"><div class='input'><span class='kw'>if</span> (<span class='fl'>FALSE</span>) {
+
+   <span class='fu'>vvr_rum_repa</span>(<span class='no'>rsa</span>, <span class='no'>rum</span>, <span class='no'>pmctmono</span>) <span class='kw'>-&gt;</span> <span class='no'>rum_v</span>
+}</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>

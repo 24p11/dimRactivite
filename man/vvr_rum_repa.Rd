@@ -4,7 +4,7 @@
 \alias{vvr_rum_repa}
 \title{Fonction pmctmono (on doit encore repartir les supplements RAP et ANTEPARTUM)}
 \usage{
-pmct_mono_uma(rsa, rum, annee, mois)
+vvr_rum_repa(rsa, rum, annee, mois)
 }
 \arguments{
 \item{rsa}{rsa valorisés = tibble \code{vrsa$rsa} en sortie de \code{pmeasyr::vvr_ghs_supp}}
@@ -53,8 +53,6 @@ L'ensemble des suppléments individuels sont présents en sortie avec le suffixe
 }
 \examples{
 \dontrun{
-   cf fonction imco de dimRactivite sur le détail de la préparation 
-   des données détail sur la tableaux de données en entrée de la fonction
    
    vvr_rum_repa(rsa, rum, pmctmono) -> rum_v
 }

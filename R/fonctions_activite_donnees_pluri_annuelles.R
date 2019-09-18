@@ -16,7 +16,7 @@
 #'    
 #' }
 #' 
-#' @export vvr_rum_repa
+#' @export get_tdb
 #' @usage get_tdb(df, indicateurs)
 #' @export
 #' 
@@ -1637,7 +1637,7 @@ get_activite_recettes<-function( df, structure ){
 #' @examples
 #' \dontrun{
 #' 
-#'    get_tdb(df, indicateurs) -> tdb
+#'    make_tdb(df, indicateurs) -> tdb
 #' }
 #' @export make_tdb
 #' @usage make_tdb(val, niveau, annee, mois )

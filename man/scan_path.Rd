@@ -4,7 +4,7 @@
 \alias{scan_path}
 \title{Récupération de la liste de l'ensemble des fichiers de remontée contenu dans un dossier}
 \usage{
-scan_path( )
+scan_path( path, ext )
 }
 \arguments{
 \item{path}{racine du dossier contenant les archives}

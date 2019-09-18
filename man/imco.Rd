@@ -4,7 +4,7 @@
 \alias{imco}
 \title{Import des principaux fichiers de remontées éavec pmeasyr et valorisation des séjours et résumés}
 \usage{
-imco( p )
+imco( p, tarifsante, save, persist,  )
 }
 \arguments{
 \item{p}{un noyau pmeasyr}

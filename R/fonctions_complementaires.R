@@ -1,6 +1,4 @@
-is.date <- function(x) inherits(x, 'Date')
-
-#' Selection de données en fonction de critère temporels et géographique (lieu d'hopsitalisation)
+#' Selection de données en fonction de critère temporels et de structure
 #'  Applicable sur des objets en sortie de pmeasyr
 #' @param df tibble, un tibble en sortie de pmeasyr
 #' @param ref chaine de caractères, la variable de référence qui sera utilisée pour la selection temporel
@@ -131,7 +129,7 @@ get_indicateurs<-function(nom,val,df= references){
 
 #' Suppression des caractères spéciaux et accentués
 #'
-#' @param text chaine de caractères
+#' @param string chaine de caractères
 #'
 #' @return 
 #' @export prep_string
@@ -173,7 +171,7 @@ nb_unique<-function(x){
 #' @param tab tableau résultats de table/tapply un tableau de bord
 #'
 #' @return tableau modifié
-#' @export
+#' @export prep_tb
 #'
 #' @examples
 #'
@@ -242,11 +240,11 @@ IP_SEJOUR<-function(df){
 #' Utilisé pour la tableaux de bord généraux
 #' Reformatage d'objets en sortie de table/tapply selon l'ordonnancement décidé dans le fichier de structure
 #'  Fusion des tableaux
-#' @param tdb list d'objets en sortie de table/tapply avec 3 dimenssions
-#'
 #'        - Nom du niveau de structure (ex nom de service ou de pole)
 #'        - Variable de temporalité (par exemple l'année)
 #'        - C / P
+#' @param tdb list d'objets en sortie de table/tapply avec 3 dimenssions
+
 #'
 #' @return concaténation et restructuration des tableaux de données
 #' @export order_by_structure
@@ -319,7 +317,7 @@ get_diff<-function(df){
 #' @param df un tibble de type diagnostic
 #'
 #' @return une sélection de df pour la cancerologie
-#' @export
+#' @export selection_cancer_diag
 #' @section Warning: utilise la liste inca_cancero
 #' @examples
 

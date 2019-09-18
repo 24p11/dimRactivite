@@ -4,7 +4,7 @@
 \alias{adzipRemonteee}
 \title{Généralisation de la fonction adzip de pmeasyr pour l'ensemble d'une remontée (avec plusieurs sites)}
 \usage{
-adzipRemonteee( p )
+adzipRemonteee( p, ext_to_import )
 }
 \arguments{
 \item{p}{nouyau pmeasyr}

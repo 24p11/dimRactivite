@@ -4,16 +4,15 @@
 \alias{order_by_structure}
 \title{Utilisé pour la tableaux de bord généraux
 Reformatage d'objets en sortie de table/tapply selon l'ordonnancement décidé dans le fichier de structure
- Fusion des tableaux}
+ Fusion des tableaux
+       - Nom du niveau de structure (ex nom de service ou de pole)
+       - Variable de temporalité (par exemple l'année)
+       - C / P}
 \usage{
 order_by_structure(tdb, structure)
 }
 \arguments{
-\item{tdb}{list d'objets en sortie de table/tapply avec 3 dimenssions
-
-       - Nom du niveau de structure (ex nom de service ou de pole)
-       - Variable de temporalité (par exemple l'année)
-       - C / P}
+\item{tdb}{list d'objets en sortie de table/tapply avec 3 dimenssions}
 }
 \value{
 concaténation et restructuration des tableaux de données
@@ -22,4 +21,7 @@ concaténation et restructuration des tableaux de données
 Utilisé pour la tableaux de bord généraux
 Reformatage d'objets en sortie de table/tapply selon l'ordonnancement décidé dans le fichier de structure
  Fusion des tableaux
+       - Nom du niveau de structure (ex nom de service ou de pole)
+       - Variable de temporalité (par exemple l'année)
+       - C / P
 }

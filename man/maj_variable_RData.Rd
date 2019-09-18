@@ -5,7 +5,7 @@
 \title{Mise à jour de la variabla RData du tableau de synthèse des remontées disponibles pour la dernière remontée disponible
 force la variable RData à 0 pour que la dernière remontée disponible soit importée}
 \usage{
-maj_variable_RData( remontees )
+maj_variable_RData( remontees, p )
 }
 \arguments{
 \item{remontees}{tibble, tableau de synthèse des remontées disponibles}

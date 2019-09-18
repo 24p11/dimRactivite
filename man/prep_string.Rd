@@ -7,7 +7,7 @@
 prep_string(string)
 }
 \arguments{
-\item{text}{chaine de caractères}
+\item{string}{chaine de caractères}
 }
 \description{
 Suppression des caractères spéciaux et accentués

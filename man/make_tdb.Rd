@@ -20,6 +20,6 @@ Création des tableaux de bord
 \examples{
 \dontrun{
 
-   get_tdb(df, indicateurs) -> tdb
+   make_tdb(df, indicateurs) -> tdb
 }
 }

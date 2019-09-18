@@ -4,7 +4,7 @@
 \alias{analyse_fichiers_remontees}
 \title{Lecture des fichiers en sortie de scan_path pour vérification de leur contenu et préparation aux imports}
 \usage{
-analyse_fichiers_remontees( )
+analyse_fichiers_remontees( maj_dernier_mois = TRUE )
 }
 \arguments{
 \item{maj_dernier_mois}{logical, si TRUE considère par défaut que le .RData du dernier mois est manquant}

@@ -22,7 +22,9 @@
 #'
 #' @examples
 #' \dontrun{
+#' 
 #'    pmct_mono_uma(rsa, rum, annee, mois) -> pmcto_mono
+#'    
 #' }
 #' @export pmct_mono_uma
 #' @usage pmct_mono_uma(rsa, rum, annee, mois)
@@ -115,13 +117,11 @@ pmct_mono_uma <- function (rsa, rum, annee, mois) {
 #' 
 #' @examples
 #' \dontrun{
-#'    cf fonction imco de dimRactivite sur le détail de la préparation 
-#'    des données détail sur la tableaux de données en entrée de la fonction
 #'    
 #'    vvr_rum_repa(rsa, rum, pmctmono) -> rum_v
 #' }
 #' @export vvr_rum_repa
-#' @usage pmct_mono_uma(rsa, rum, annee, mois)
+#' @usage vvr_rum_repa(rsa, rum, annee, mois)
 #' @export
 vvr_rum_repa <- function (rsa, rum, pmctmono) {
 

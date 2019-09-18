@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">dimRactivite</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.2.0</span>
       </span>
     </div>
 
@@ -84,12 +84,12 @@
     
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(pmeasyr)
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(tidyverse)
-<span class="co">#&gt; ── Attaching packages ────────────────────────────────────────────────────────────────────────────────────────────── tidyverse 1.2.1 ──</span>
+<span class="co">#&gt; ── Attaching packages ──────────────────────────────────────────────────────────────────────────────────────── tidyverse 1.2.1 ──</span>
 <span class="co">#&gt; ✔ ggplot2 3.2.1.9000     ✔ purrr   0.3.2     </span>
 <span class="co">#&gt; ✔ tibble  2.1.3          ✔ dplyr   0.8.3     </span>
 <span class="co">#&gt; ✔ tidyr   1.0.0          ✔ stringr 1.4.0     </span>
 <span class="co">#&gt; ✔ readr   1.3.1          ✔ forcats 0.4.0</span>
-<span class="co">#&gt; ── Conflicts ───────────────────────────────────────────────────────────────────────────────────────────────── tidyverse_conflicts() ──</span>
+<span class="co">#&gt; ── Conflicts ─────────────────────────────────────────────────────────────────────────────────────────── tidyverse_conflicts() ──</span>
 <span class="co">#&gt; ✖ dplyr::filter() masks stats::filter()</span>
 <span class="co">#&gt; ✖ dplyr::lag()    masks stats::lag()</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span> (RCurl)
@@ -107,9 +107,7 @@
 <span class="co">#&gt;     flatten</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(referentiels)
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(referime)
-<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(readxl)
-devtools<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/devtools/man/load_all.html">load_all</a></span>()
-<span class="co">#&gt; Loading dimRactivite</span></code></pre></div>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(readxl)</code></pre></div>
 <p>Les fonctions d’imports et d’analyses sont construites sur le principe que chaque établissement produit tous les mois des fichiers de données de facturation mis en entrée du logiciel ATIH GENRSA utilisé pour transmettre les données PMSI aux tutelles. L’analyse de ces fichiers par GENRSA produit 2 types d’archives (.zip) le in (les fichiers d’entrée) et le out (fichiers préparés pour être envoyés). Le package généralise l’import des fichiers zippés en sortie de GENRSA (in et out) dans un environnement de travail R permettant l’analyse des données et la production de tableaux de bord automatiques.</p>
 <div id="import-des-donnees-dans-r" class="section level1">
 <h1 class="hasAnchor">
@@ -119,7 +117,7 @@ devtools<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/
 <a href="#parametre-des-imports" class="anchor"></a>Paramètre des imports</h3>
 <p>Le paramètres nécessaires pour les imports se trouvent dans un le fichier options.yaml (cf exemple) en particulier la variable <code>path</code> qui donne le chemin du dossier racine dans le quel se trouve les archives PMSI en sortie de GENRSA.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">
-dimRactivite<span class="op">:::</span><span class="kw"><a href="../reference/update_options.html">update_options</a></span>(<span class="st">'~/GH_PMSI/INFORMATIQUE/GIT/remi/tableaux_de_bord/options.yaml'</span>)
+dimRactivite<span class="op">:::</span><span class="kw"><a href="../reference/update_options.html">update_options</a></span>(<span class="st">'options.yaml'</span>)
 
 profondeur_imports =<span class="st"> </span><span class="dv">2</span></code></pre></div>
 </div>
@@ -131,198 +129,20 @@ profondeur_imports =<span class="st"> </span><span class="dv">2</span></code></p
 <a href="#analyse-des-fichiers-en-fonction-de-leur-extentions-ext-imco--zip-et-verification-de-la-presence-des--rdata" class="anchor"></a>Analyse des fichiers en fonction de leur extentions (ext imco + .zip) et vérification de la présence des .RData</h4>
 <p>La première étape consiste à scanner le dossier contenant les archives afin de dresser la liste de remontées disponibles ce qui produit un tableaux de données référençant l’ensemble des informations utiles sur les archives et leur contenu. Ce tableau appelé <code>fichiers_genrsa</code> sera utilisé par les autres fonctions d’imports comme reférentiel pour décrire les données disponibles. Il est sauvegardé dans les options.</p>
 <p>Les fichiers sont ensuite analysés afin de préparer la création (ou non) des fichiers .RData. On vérifie la présence dans les fichiers zippés en entrée et en sortie de GENRSA de l’ensemble des fichiers nécessaires à la facturation et à l’analyse de l’activité en lisant l’extension des fichiers de l’archive. La (sous) fonction <code>analyse_fichiers_remontees</code> produit un dataframe <code>remontees_dispo</code> de synthèse où pour chaque remontée on liste l’absence (0) ou la présence (1) des fichiers qui seront utilisés. Ce dataframe sera également utilisé pour les autres fonctions.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">remontees_dispo &lt;-<span class="st"> </span>dimRactivite<span class="op">:::</span><span class="kw"><a href="../reference/analyse_dossier_remontees.html">analyse_dossier_remontees</a></span>()
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">remontees_dispo &lt;-<span class="st"> </span>dimRactivite<span class="op">:::</span><span class="kw"><a href="../reference/analyse_dossier_remontees.html">analyse_dossier_remontees</a></span>( <span class="dt">maj_dernier_mois =</span> <span class="ot">FALSE</span> )
 <span class="co">#Voir la liste des fichiers RData non disponibles qui seront générés à l'étape suivante</span>
 <span class="kw"><a href="https://rdrr.io/r/base/print.html">print</a></span>( remontees_dispo <span class="op">%&gt;%</span><span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span>( RData <span class="op">!=</span><span class="st"> </span><span class="dv">1</span> ) )
-<span class="co">#&gt; # A tibble: 2 x 13</span>
-<span class="co">#&gt;   finess annee mois    rss   rsa   tra   ano   ium  diap  porg   pie</span>
-<span class="co">#&gt;   &lt;chr&gt;  &lt;chr&gt; &lt;chr&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;</span>
-<span class="co">#&gt; 1 75010… 2019  7         1     1     1     1     1     1     1     0</span>
-<span class="co">#&gt; 2 75010… 2019  7         1     1     1     1     1     1     1     0</span>
-<span class="co">#&gt; # … with 2 more variables: manquants &lt;dbl&gt;, RData &lt;dbl&gt;</span></code></pre></div>
+<span class="co">#&gt; # A tibble: 0 x 13</span>
+<span class="co">#&gt; # … with 13 variables: finess &lt;chr&gt;, annee &lt;chr&gt;, mois &lt;chr&gt;, rss &lt;dbl&gt;,</span>
+<span class="co">#&gt; #   rsa &lt;dbl&gt;, tra &lt;dbl&gt;, ano &lt;dbl&gt;, ium &lt;dbl&gt;, diap &lt;dbl&gt;, porg &lt;dbl&gt;,</span>
+<span class="co">#&gt; #   pie &lt;dbl&gt;, manquants &lt;dbl&gt;, RData &lt;dbl&gt;</span></code></pre></div>
 </div>
 <div id="creation-et-sauvegarde-des--rdata-de-remontee-si-manquant-et-mise-a-jour-de-la-liste-des-remontees-disponibles" class="section level4">
 <h4 class="hasAnchor">
 <a href="#creation-et-sauvegarde-des--rdata-de-remontee-si-manquant-et-mise-a-jour-de-la-liste-des-remontees-disponibles" class="anchor"></a>Création et sauvegarde des .RData de remontée (si manquant) et mise à jour de la liste des remontées disponibles</h4>
 <p>La fonction <code>save_remontee</code> prend comme argument le tableau de synthèse des fichiers diponibles dans le dossier racine (<code>remontees_dispo</code>) et produit un fichier .RData pour chaque remontée, qui est enregisté dans le dossier racine. Pour être importée, une remontée doit comprendre le in et le out de GENRSA. Les fichiers indispensables sont le .rss et le .rsa. S’ils ne sont pas présents dans l’archive les autres fichiers servant à la facturation seront générés automatiquement (fichier vide). Les remontées pour lequelles un fichier .RData est disponible ne seront pas ré-importés.</p>
 <p>Par défaut, l’option <code>option recent = TRUE</code> induit la création du .RData pour la dernière remontée disponible en forçant la variable .RData du tableau de données <code>remontees_dispo</code> à 0 (même si un fichier .RData est disponible pour cette remontée dans le dossier racine).</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">remontees_dispo &lt;-<span class="st"> </span>dimRactivite<span class="op">:::</span><span class="kw"><a href="../reference/save_remontees.html">save_remontees</a></span>( remontees_dispo )
-<span class="co">#&gt; </span>
-<span class="co">#&gt; Dézippage de l'archive MCO_IN_00047_201907.zip</span>
-<span class="co">#&gt; Taille    : 11 Mo</span>
-<span class="co">#&gt; Type      : </span>
-<span class="co">#&gt; Finess    : </span>
-<span class="co">#&gt; Période   :  M</span>
-<span class="co">#&gt; Date prod : </span>
-<span class="co">#&gt; Fichiers  : rss.txt</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; Dézippage de l'archive MCO_OUT_00047_201907.zip</span>
-<span class="co">#&gt; Taille    : 13 Mo</span>
-<span class="co">#&gt; Type      : </span>
-<span class="co">#&gt; Finess    : </span>
-<span class="co">#&gt; Période   :  M</span>
-<span class="co">#&gt; Date prod : </span>
-<span class="co">#&gt; Fichiers  : ano, diap, ium, porg, rsa, tra.txt</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; Fichiers créés : pie</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; Dézippage de l'archive MCO_IN_00047_201812.zip</span>
-<span class="co">#&gt; Taille    : 18 Mo</span>
-<span class="co">#&gt; Type      : </span>
-<span class="co">#&gt; Finess    : </span>
-<span class="co">#&gt; Période   :  M</span>
-<span class="co">#&gt; Date prod : </span>
-<span class="co">#&gt; Fichiers  : rss.txt</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; Dézippage de l'archive MCO_OUT_00047_201812.zip</span>
-<span class="co">#&gt; Taille    : 21 Mo</span>
-<span class="co">#&gt; Type      : </span>
-<span class="co">#&gt; Finess    : </span>
-<span class="co">#&gt; Période   :  M</span>
-<span class="co">#&gt; Date prod : </span>
-<span class="co">#&gt; Fichiers  : ano, diap, ium, porg, rsa, tra.txt</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; Fichiers créés : pie</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; Attachement du package : 'magrittr'</span>
-<span class="co">#&gt; The following object is masked from 'package:purrr':</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt;     set_names</span>
-<span class="co">#&gt; The following object is masked from 'package:tidyr':</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt;     extract</span>
-<span class="co">#&gt; ## Retrieving data from http://referime.aphp.fr/v0.2/ref/tarifs_mco_ghs/json</span>
-<span class="co">#&gt; ## Retrieving data from http://referime.aphp.fr/v0.2/ref/tarifs_mco_supplements/json</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; Imports fichiers remontée: 750100042, 2018, 12</span>
-<span class="co">#&gt; Argument `label` must be of same length as numbers of columns in `x`.</span>
-<span class="co">#&gt; Argument `label` must be of same length as numbers of columns in `x`.</span>
-<span class="co">#&gt; Joining, by = "typeaut"</span>
-<span class="co">#&gt; Joining, by = c("cle_rsa", "moissor", "ansor", "anseqta", "nas")</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; Imports fichiers remontée: 750100042, 2019, 7</span>
-<span class="co">#&gt; Argument `label` must be of same length as numbers of columns in `x`.</span>
-<span class="co">#&gt; Argument `label` must be of same length as numbers of columns in `x`.</span>
-<span class="co">#&gt; Joining, by = "typeaut"</span>
-<span class="co">#&gt; Joining, by = c("cle_rsa", "moissor", "ansor", "anseqta", "nas")</span>
-<span class="co">#&gt; Joining, by = c("nofiness", "nas")</span>
-<span class="co">#&gt; Joining, by = c("nofiness", "nas")</span>
-<span class="co">#&gt; Joining, by = c("nofiness", "cdurm", "typeaut")</span>
-<span class="co">#&gt; Joining, by = c("nas", "ansor", "moissor")</span>
-<span class="co">#&gt; Joining, by = c("nofiness", "cdurm", "typeaut")</span>
-<span class="co">#&gt; Joining, by = c("nas", "ansor", "moissor")</span>
-<span class="co">#&gt; Joining, by = c("nofiness", "cdurm", "typeaut")</span>
-<span class="co">#&gt; Joining, by = "nas"</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; Nb séjours importés pour l'année 2019 : 28006</span>
-<span class="co">#&gt; ## Retrieving data from http://referime.aphp.fr/v0.2/ref/tarifs_mco_ghs/json</span>
-<span class="co">#&gt; ## Retrieving data from http://referime.aphp.fr/v0.2/ref/tarifs_mco_supplements/json</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; Imports fichiers remontée: 750100042, 2018, 12</span>
-<span class="co">#&gt; Argument `label` must be of same length as numbers of columns in `x`.</span>
-<span class="co">#&gt; Argument `label` must be of same length as numbers of columns in `x`.</span>
-<span class="co">#&gt; Joining, by = "typeaut"</span>
-<span class="co">#&gt; Joining, by = c("cle_rsa", "moissor", "ansor", "anseqta", "nas")</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; Imports fichiers remontée: 750100042, 2019, 7</span>
-<span class="co">#&gt; Argument `label` must be of same length as numbers of columns in `x`.</span>
-<span class="co">#&gt; Argument `label` must be of same length as numbers of columns in `x`.</span>
-<span class="co">#&gt; Joining, by = "typeaut"</span>
-<span class="co">#&gt; Joining, by = c("cle_rsa", "moissor", "ansor", "anseqta", "nas")</span>
-<span class="co">#&gt; Joining, by = c("nofiness", "nas")</span>
-<span class="co">#&gt; Joining, by = c("nofiness", "nas")</span>
-<span class="co">#&gt; Joining, by = c("nofiness", "cdurm", "typeaut")</span>
-<span class="co">#&gt; Joining, by = c("nas", "ansor", "moissor")</span>
-<span class="co">#&gt; Joining, by = c("nofiness", "cdurm", "typeaut")</span>
-<span class="co">#&gt; Joining, by = c("nas", "ansor", "moissor")</span>
-<span class="co">#&gt; Joining, by = c("nofiness", "cdurm", "typeaut")</span>
-<span class="co">#&gt; Joining, by = "nas"</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; Nb séjours importés pour l'année 2019 : 28006</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; Dézippage de l'archive MCO_IN_00076_201907.zip</span>
-<span class="co">#&gt; Taille    : 11 Mo</span>
-<span class="co">#&gt; Type      : </span>
-<span class="co">#&gt; Finess    : </span>
-<span class="co">#&gt; Période   :  M</span>
-<span class="co">#&gt; Date prod : </span>
-<span class="co">#&gt; Fichiers  : rss.txt</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; Dézippage de l'archive MCO_OUT_00076_201907.zip</span>
-<span class="co">#&gt; Taille    : 25 Mo</span>
-<span class="co">#&gt; Type      : </span>
-<span class="co">#&gt; Finess    : </span>
-<span class="co">#&gt; Période   :  M</span>
-<span class="co">#&gt; Date prod : </span>
-<span class="co">#&gt; Fichiers  : ano, diap, ium, porg, rsa, tra.txt</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; Fichiers créés : pie</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; Dézippage de l'archive MCO_IN_00076_201812.zip</span>
-<span class="co">#&gt; Taille    : 18 Mo</span>
-<span class="co">#&gt; Type      : </span>
-<span class="co">#&gt; Finess    : </span>
-<span class="co">#&gt; Période   :  M</span>
-<span class="co">#&gt; Date prod : </span>
-<span class="co">#&gt; Fichiers  : rss.txt</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; Dézippage de l'archive MCO_OUT_00076_201812.zip</span>
-<span class="co">#&gt; Taille    : 41 Mo</span>
-<span class="co">#&gt; Type      : </span>
-<span class="co">#&gt; Finess    : </span>
-<span class="co">#&gt; Période   :  M</span>
-<span class="co">#&gt; Date prod : </span>
-<span class="co">#&gt; Fichiers  : ano, diap, ium, porg, rsa, tra.txt</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; Fichiers créés : pie</span>
-<span class="co">#&gt; ## Retrieving data from http://referime.aphp.fr/v0.2/ref/tarifs_mco_ghs/json</span>
-<span class="co">#&gt; ## Retrieving data from http://referime.aphp.fr/v0.2/ref/tarifs_mco_supplements/json</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; Imports fichiers remontée: 750100075, 2018, 12</span>
-<span class="co">#&gt; Argument `label` must be of same length as numbers of columns in `x`.</span>
-<span class="co">#&gt; Argument `label` must be of same length as numbers of columns in `x`.</span>
-<span class="co">#&gt; Joining, by = "typeaut"</span>
-<span class="co">#&gt; Joining, by = c("cle_rsa", "moissor", "ansor", "anseqta", "nas")</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; Imports fichiers remontée: 750100075, 2019, 7</span>
-<span class="co">#&gt; Argument `label` must be of same length as numbers of columns in `x`.</span>
-<span class="co">#&gt; Argument `label` must be of same length as numbers of columns in `x`.</span>
-<span class="co">#&gt; Joining, by = "typeaut"</span>
-<span class="co">#&gt; Joining, by = c("cle_rsa", "moissor", "ansor", "anseqta", "nas")</span>
-<span class="co">#&gt; Joining, by = c("nofiness", "nas")</span>
-<span class="co">#&gt; Joining, by = c("nofiness", "nas")</span>
-<span class="co">#&gt; Joining, by = c("nofiness", "cdurm", "typeaut")</span>
-<span class="co">#&gt; Joining, by = c("nas", "ansor", "moissor")</span>
-<span class="co">#&gt; Joining, by = c("nofiness", "cdurm", "typeaut")</span>
-<span class="co">#&gt; Joining, by = c("nas", "ansor", "moissor")</span>
-<span class="co">#&gt; Joining, by = c("nofiness", "cdurm", "typeaut")</span>
-<span class="co">#&gt; Joining, by = "nas"</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; Nb séjours importés pour l'année 2019 : 62449</span>
-<span class="co">#&gt; ## Retrieving data from http://referime.aphp.fr/v0.2/ref/tarifs_mco_ghs/json</span>
-<span class="co">#&gt; ## Retrieving data from http://referime.aphp.fr/v0.2/ref/tarifs_mco_supplements/json</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; Imports fichiers remontée: 750100075, 2018, 12</span>
-<span class="co">#&gt; Argument `label` must be of same length as numbers of columns in `x`.</span>
-<span class="co">#&gt; Argument `label` must be of same length as numbers of columns in `x`.</span>
-<span class="co">#&gt; Joining, by = "typeaut"</span>
-<span class="co">#&gt; Joining, by = c("cle_rsa", "moissor", "ansor", "anseqta", "nas")</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; Imports fichiers remontée: 750100075, 2019, 7</span>
-<span class="co">#&gt; Argument `label` must be of same length as numbers of columns in `x`.</span>
-<span class="co">#&gt; Argument `label` must be of same length as numbers of columns in `x`.</span>
-<span class="co">#&gt; Joining, by = "typeaut"</span>
-<span class="co">#&gt; Joining, by = c("cle_rsa", "moissor", "ansor", "anseqta", "nas")</span>
-<span class="co">#&gt; Joining, by = c("nofiness", "nas")</span>
-<span class="co">#&gt; Joining, by = c("nofiness", "nas")</span>
-<span class="co">#&gt; Joining, by = c("nofiness", "cdurm", "typeaut")</span>
-<span class="co">#&gt; Joining, by = c("nas", "ansor", "moissor")</span>
-<span class="co">#&gt; Joining, by = c("nofiness", "cdurm", "typeaut")</span>
-<span class="co">#&gt; Joining, by = c("nas", "ansor", "moissor")</span>
-<span class="co">#&gt; Joining, by = c("nofiness", "cdurm", "typeaut")</span>
-<span class="co">#&gt; Joining, by = "nas"</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; Nb séjours importés pour l'année 2019 : 62449</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#remontees_dispo &lt;- dimRactivite:::save_remontees( remontees_dispo )</span></code></pre></div>
 </div>
 </div>
 <div id="import-dans-lenvironement-de-travail" class="section level3">
@@ -364,7 +184,7 @@ sel_remontees_import
 <p>La fonction <code><a href="../reference/verif_structure.html">verif_structure()</a></code> permet de s’assurer que l’ensemble des uma présentes dans les fichiers GENRSA sont bien renseignées dans le fichier structure.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">
 <span class="co"># ajout des structures dans les rum</span>
-fichier_structure &lt;-<span class="st"> </span>readxl<span class="op">::</span><span class="kw"><a href="https://readxl.tidyverse.org/reference/read_excel.html">read_excel</a></span>(<span class="kw"><a href="https://rdrr.io/r/base/options.html">getOption</a></span>(<span class="st">"dimRactivite.structures"</span>)<span class="op">$</span>fichier,
+fichier_structure &lt;-<span class="st"> </span>readxl<span class="op">::</span><span class="kw"><a href="https://readxl.tidyverse.org/reference/read_excel.html">read_excel</a></span>(<span class="kw"><a href="https://rdrr.io/r/base/options.html">getOption</a></span>(<span class="st">"dimRactivite.structures"</span>),
                                         <span class="dt">col_types =</span> <span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>( <span class="st">"text"</span> , <span class="st">"text"</span> , <span class="st">"text"</span> , <span class="st">"text"</span> ,<span class="st">"text"</span> ,
                                                        <span class="st">"text"</span> , <span class="st">"text"</span> , <span class="st">"text"</span> , <span class="st">"text"</span> ),
                                         <span class="dt">col_names =</span> <span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">'nofiness'</span>,<span class="st">'hopital'</span>,<span class="st">'cdurm'</span>,<span class="st">'uma_locale'</span>,<span class="st">'uma_locale2'</span>,
@@ -407,6 +227,14 @@ profondeur_tdb =<span class="st"> </span><span class="dv">2</span>
 
 #### Import des paramètres des tableaux 
 ghm_dms_nationales&lt;-referime<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/referime/man/get_table.html">get_table</a></span>(<span class="st">"ghm_dms_nationales"</span>)
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Attachement du package : 'magrittr'</span>
+<span class="co">#&gt; The following object is masked from 'package:purrr':</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt;     set_names</span>
+<span class="co">#&gt; The following object is masked from 'package:tidyr':</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt;     extract</span>
 <span class="co">#&gt; ## Retrieving data from http://referime.aphp.fr/v0.2/ref/ghm_dms_nationales/json</span>
 
 <span class="co">#Merge rsa, dms pour les cas ou la référence dans ghm_dms_nationales = ghs</span>

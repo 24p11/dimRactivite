@@ -34,6 +34,8 @@ Le périmètre du calcul est le suivant :
 }
 \examples{
 \dontrun{
+
    pmct_mono_uma(rsa, rum, annee, mois) -> pmcto_mono
+   
 }
 }

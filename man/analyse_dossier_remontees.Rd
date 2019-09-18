@@ -4,7 +4,7 @@
 \alias{analyse_dossier_remontees}
 \title{Scan le dossier de sauvegarde des fichiers en sortie de GENRSA, les analyse et prépare un tableau de synthèse des remontées disponibles}
 \usage{
-analyse_dossier_remontees( )
+analyse_dossier_remontees( path, ext, maj_dernier_mois )
 }
 \arguments{
 \item{path}{chemin du dossier dans lequel se trouve les fichiers zipper de remontée}

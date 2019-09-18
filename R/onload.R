@@ -37,6 +37,15 @@ update_options<-function(file = 'options.yaml'){
 
 }
 
+#' set option from val
+#'
+#' @param opt string, name of the option
+#' @param val string/number, value of the option
+#'
+#' @return
+#' @export
+#'
+#' @examples
 set_option<-function(opt,val){
 
   opt = paste0('dimRactivite.',opt)
@@ -44,6 +53,16 @@ set_option<-function(opt,val){
   options(setNames(list(val),opt) )
 }
 
+
+#' Actions to do when package is called
+#'
+#' @param libname 
+#' @param pkgname 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 .onLoad <- function(libname, pkgname) {
 
   #update_options()
