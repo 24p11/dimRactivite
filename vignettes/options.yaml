@@ -39,19 +39,7 @@ services_exclus:
   - titi
   - rea chir
 
-structures:
-  fichier :
-   - ~/GH_PMSI/INFORMATIQUE/GIT/remi/tableaux_de_bord/structures.xlsx
-  colonnes :
-   - nofiness
-   - site
-   - cdurm
-   - code_um1
-   - code_um2
-   - libelle_um
-   - service
-   - regroupement1
-   - pole
+structures: structures.xlsx
 
 gestion_doublons_rum:
     service: service

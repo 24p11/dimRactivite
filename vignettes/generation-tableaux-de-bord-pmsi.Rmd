@@ -37,7 +37,7 @@ Les fonctions d'imports et d'analyses sont construites sur le principe que chaqu
 Le paramètres nécessaires pour les imports se trouvent dans un le fichier options.yaml (cf exemple) en particulier la variable ```path``` qui donne le chemin du dossier racine dans le quel se trouve les archives PMSI en sortie de GENRSA.
 ```{r profondeur}
 
-dimRactivite:::update_options('~/GH_PMSI/INFORMATIQUE/GIT/remi/tableaux_de_bord/options.yaml')
+dimRactivite:::update_options('options.yaml')
 
 profondeur_imports = 2
 ```
@@ -101,7 +101,7 @@ La fonction ```verif_structure()``` permet de s'assurer que l'ensemble des uma p
 ```{r Chargement du fichier structure}
 
 # ajout des structures dans les rum
-fichier_structure <- readxl::read_excel(getOption("dimRactivite.structures")$fichier,
+fichier_structure <- readxl::read_excel(getOption("dimRactivite.structures"),
                                         col_types = c( "text" , "text" , "text" , "text" ,"text" ,
                                                        "text" , "text" , "text" , "text" ),
                                         col_names = c('nofiness','hopital','cdurm','uma_locale','uma_locale2',
