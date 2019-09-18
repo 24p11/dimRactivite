@@ -732,14 +732,14 @@ load_dmi<- function( remontees_sel ){
 imco <- function( p, tarifsante = FALSE, save = TRUE, persist = FALSE ){
 
   if(tarifsante==TRUE) {
-    tarifs      <- referime::get_table('tarifs_mco_ghs') %>% dplyr::distinct(ghs, anseqta, .keep_all = TRUE) %>%
+    tarifs      <- nomensland::get_table('tarifs_mco_ghs') %>% dplyr::distinct(ghs, anseqta, .keep_all = TRUE) %>%
       dplyr::mutate(anseqta=as.character(as.numeric(anseqta)+1))
-    supplements <- referime::get_table('tarifs_mco_supplements') %>%
+    supplements <- nomensland::get_table('tarifs_mco_supplements') %>%
       dplyr::mutate(anseqta=as.character(as.numeric(anseqta)+1))
     suffixe = "tarifs_anterieurs_"
   } else {
-    tarifs      <- referime::get_table('tarifs_mco_ghs') %>% dplyr::distinct(ghs, anseqta, .keep_all = TRUE)
-    supplements <- referime::get_table('tarifs_mco_supplements')
+    tarifs      <- nomensland::get_table('tarifs_mco_ghs') %>% dplyr::distinct(ghs, anseqta, .keep_all = TRUE)
+    supplements <- nomensland::get_table('tarifs_mco_supplements')
     suffixe = ""
   }
 

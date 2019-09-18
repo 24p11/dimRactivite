@@ -84,12 +84,12 @@
     
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(pmeasyr)
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(tidyverse)
-<span class="co">#&gt; ── Attaching packages ──────────────────────────────────────────────────────────────────────────────────────── tidyverse 1.2.1 ──</span>
+<span class="co">#&gt; ── Attaching packages ────────────────────────────────────────────────────────────────────────────────────────────── tidyverse 1.2.1 ──</span>
 <span class="co">#&gt; ✔ ggplot2 3.2.1.9000     ✔ purrr   0.3.2     </span>
 <span class="co">#&gt; ✔ tibble  2.1.3          ✔ dplyr   0.8.3     </span>
 <span class="co">#&gt; ✔ tidyr   1.0.0          ✔ stringr 1.4.0     </span>
 <span class="co">#&gt; ✔ readr   1.3.1          ✔ forcats 0.4.0</span>
-<span class="co">#&gt; ── Conflicts ─────────────────────────────────────────────────────────────────────────────────────────── tidyverse_conflicts() ──</span>
+<span class="co">#&gt; ── Conflicts ───────────────────────────────────────────────────────────────────────────────────────────────── tidyverse_conflicts() ──</span>
 <span class="co">#&gt; ✖ dplyr::filter() masks stats::filter()</span>
 <span class="co">#&gt; ✖ dplyr::lag()    masks stats::lag()</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span> (RCurl)
@@ -106,7 +106,7 @@
 <span class="co">#&gt; </span>
 <span class="co">#&gt;     flatten</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(referentiels)
-<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(referime)
+<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(nomensland)
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(readxl)</code></pre></div>
 <p>Les fonctions d’imports et d’analyses sont construites sur le principe que chaque établissement produit tous les mois des fichiers de données de facturation mis en entrée du logiciel ATIH GENRSA utilisé pour transmettre les données PMSI aux tutelles. L’analyse de ces fichiers par GENRSA produit 2 types d’archives (.zip) le in (les fichiers d’entrée) et le out (fichiers préparés pour être envoyés). Le package généralise l’import des fichiers zippés en sortie de GENRSA (in et out) dans un environnement de travail R permettant l’analyse des données et la production de tableaux de bord automatiques.</p>
 <div id="import-des-donnees-dans-r" class="section level1">
@@ -226,16 +226,7 @@ annee=<span class="kw"><a href="https://rdrr.io/r/base/numeric.html">as.numeric<
 profondeur_tdb =<span class="st"> </span><span class="dv">2</span>
 
 #### Import des paramètres des tableaux 
-ghm_dms_nationales&lt;-referime<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/referime/man/get_table.html">get_table</a></span>(<span class="st">"ghm_dms_nationales"</span>)
-<span class="co">#&gt; </span>
-<span class="co">#&gt; Attachement du package : 'magrittr'</span>
-<span class="co">#&gt; The following object is masked from 'package:purrr':</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt;     set_names</span>
-<span class="co">#&gt; The following object is masked from 'package:tidyr':</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt;     extract</span>
-<span class="co">#&gt; ## Retrieving data from http://referime.aphp.fr/v0.2/ref/ghm_dms_nationales/json</span>
+ghm_dms_nationales&lt;-nomensland<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/nomensland/man/get_table.html">get_table</a></span>(<span class="st">"ghm_dms_nationales"</span>)
 
 <span class="co">#Merge rsa, dms pour les cas ou la référence dans ghm_dms_nationales = ghs</span>
 rsa_dms1&lt;-dplyr<span class="op">::</span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/join.html">inner_join</a></span>( rsa <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">unite</span>(<span class="st">"ghm"</span>,gpcmd,gptype,gpnum,gpcompx,<span class="dt">sep=</span><span class="st">""</span>)<span class="op">%&gt;%</span>

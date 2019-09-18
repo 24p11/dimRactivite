@@ -24,7 +24,7 @@ library(tidyverse)
 library (RCurl)
 library(jsonlite)
 library(referentiels)
-library(referime)
+library(nomensland)
 library(readxl)
 ```
 
@@ -145,7 +145,7 @@ annee=as.numeric(format(Sys.Date()-55,'%Y'))
 profondeur_tdb = 2
 
 #### Import des paramètres des tableaux 
-ghm_dms_nationales<-referime::get_table("ghm_dms_nationales")
+ghm_dms_nationales<-nomensland::get_table("ghm_dms_nationales")
 
 #Merge rsa, dms pour les cas ou la référence dans ghm_dms_nationales = ghs
 rsa_dms1<-dplyr::inner_join( rsa %>% unite("ghm",gpcmd,gptype,gpnum,gpcompx,sep="")%>%

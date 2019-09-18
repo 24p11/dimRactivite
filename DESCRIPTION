@@ -30,7 +30,7 @@ Imports:
     stringr,
     yaml,
     purrr,
-    referime,
+    nomensland,
     readxl,
     tools,
     pmeasyr

@@ -58,7 +58,7 @@ names(references)[!names(references)%in%c(prep_string(str),'tdb','niv','libelle'
 #####################################################################################################################
 #Prération des DMS base nationale
 #####################################################################################################################
-ghm_dms_nationales<-referime::get_table("ghm_dms_nationales")
+ghm_dms_nationales<-nomensland::get_table("ghm_dms_nationales")
 
 #Merge rsa, dms pour les cas ou la référence dans ghm_dms_nationales = ghs
 rsa_dms1<-inner_join(rsa%>%unite("ghm",gpcmd,gptype,gpnum,gpcompx,sep="")%>%

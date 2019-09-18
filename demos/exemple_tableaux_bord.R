@@ -19,7 +19,7 @@ labels<-labels[,-1]
 
 
 #Prération des DMS base nationale
-ghm_dms_nationales<-referime::get_table("ghm_dms_nationales")
+ghm_dms_nationales<-nomensland::get_table("ghm_dms_nationales")
 
 #Il y a 2 type d'appariement différents pour les dms, en effet certain GHM sont associés à plusieurs ghs.
 #On réalise donc
