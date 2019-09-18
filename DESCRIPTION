@@ -29,6 +29,7 @@ Imports:
     dplyr,
     stringr,
     yaml,
+    purrr,
     referime,
     readxl,
     tools,
