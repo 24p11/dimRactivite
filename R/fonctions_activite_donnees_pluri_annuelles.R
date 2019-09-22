@@ -1586,7 +1586,7 @@ get_activite_sejours<-function( df, structure ){
     tdb[['gh']] <- table(df %>% distinct( nofiness, cle_rsa, ansor, .keep_all = T )%>%
                            select( typehosp, ansor ) )
 
-    tdb <- order_by_structure( tdb, structure )
+    tdb <- dimRactivite:::order_by_structure( tdb, structure )
 
     tdb_final<-cbind( get_diff(tdb$hc), NA, get_diff(tdb$hp) )
 
