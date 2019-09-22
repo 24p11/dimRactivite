@@ -1,0 +1,95 @@
+""	"2017"	"2018"	"2019"	"diff"	"p_diff"	""	"2017"	"2018"	"2019"	"diff"	"p_diff"
+""											
+"Groupe Hospitalier"											
+"Lariboisière"	0	2307	0	-2307	-100		0	561	0	-561	-100
+"Saint Louis"	0	1566	0	-1566	-100		0	6907	0	-6907	-100
+"Total GH"	0	3873	0	-3873	-100		0	7468	0	-7468	-100
+""											
+"B2P"											
+"Biologie cellulaire & cinétique"	0	0	0	0			0	51	0	-51	-100
+"Physiologie EF"	0	0	0	0			0	34	0	-34	-100
+"Total pole"	0	0	0	0			0	85	0	-85	-100
+""											
+"Centre de Traitement des Brûlés"											
+"Réanimation Centre des brûlés"	0	10	0	-10	-100		0	0	0	0	
+"SC Centre des brûlés"	0	12	0	-12	-100		0	0	0	0	
+"HC Centre des brûlés"	0	1	0	-1	-100		0	0	0	0	
+"Total pole"	0	23	0	-23	-100		0	0	0	0	
+""											
+"DOREM"											
+"Chirurgie plastique & brûlés"	0	231	0	-231	-100		0	59	0	-59	-100
+"CMF stomatologie"	0	10	0	-10	-100		0	19	0	-19	-100
+"Dermatologie"	0	91	0	-91	-100		0	276	0	-276	-100
+"Total pole"	0	332	0	-332	-100		0	354	0	-354	-100
+""											
+"DUNEGO"											
+"Chirurgie digestive"	0	135	0	-135	-100		0	0	0	0	
+"Chirurgie générale SLS"	0	206	0	-206	-100		0	39	0	-39	-100
+"Chirurgie mammaire"	0	38	0	-38	-100		0	14	0	-14	-100
+"CRN LRB"	0	0	0	0			0	66	0	-66	-100
+"CRN SLS"	0	0	0	0			0	59	0	-59	-100
+"Gastro-entérologie SLS"	0	80	0	-80	-100		0	540	0	-540	-100
+"Néphrologie"	0	47	0	-47	-100		0	616	0	-616	-100
+"Urologie"	0	119	0	-119	-100		0	48	0	-48	-100
+"Gynécologie"	0	81	0	-81	-100		0	56	0	-56	-100
+"Obstétrique"	0	476	0	-476	-100		0	0	0	0	
+"Néonatalogie"	0	43	0	-43	-100		0	0	0	0	
+"Total pole"	0	1225	0	-1225	-100		0	1438	0	-1438	-100
+""											
+"HI-3RO"											
+"Centre des maladies du sein"	0	0	0	0			0	605	0	-605	-100
+"Hématologie greffe"	0	10	0	-10	-100		0	287	0	-287	-100
+"AJA - hématologie"	0	41	0	-41	-100		0	88	0	-88	-100
+"Hématologie adultes"	0	37	0	-37	-100		0	223	0	-223	-100
+"Hématologie sénior"	0	28	0	-28	-100		0	271	0	-271	-100
+"Hémato-oncologie"	0	82	0	-82	-100		0	379	0	-379	-100
+"Immuno-hématologie"	0	70	0	-70	-100		0	259	0	-259	-100
+"Immuno-pathologie clinique"	0	76	0	-76	-100		0	132	0	-132	-100
+"Oncologie médicale"	0	102	0	-102	-100		0	408	0	-408	-100
+"Neuro-oncologie"	0	26	0	-26	-100		0	60	0	-60	-100
+"Onco-radiothérapie"	0	53	0	-53	-100		0	2204	0	-2204	-100
+"Pneumologie"	0	84	0	-84	-100		0	8	0	-8	-100
+"Réanimation médicale SLS"	0	68	0	-68	-100		0	0	0	0	
+"Aphérèse Thérapeutique"	0	0	0	0			0	101	0	-101	-100
+"Total pole"	0	677	0	-677	-100		0	5025	0	-5025	-100
+""											
+"IMAGINE"											
+"Diabétologie et endocrinologie"	0	111	0	-111	-100		0	30	0	-30	-100
+"Gériatrie"	0	52	0	-52	-100		0	0	0	0	
+"Maladies infectieuses SLS"	0	73	0	-73	-100		0	42	0	-42	-100
+"Médecine interne aval urgences et thérap"	0	52	0	-52	-100		0	0	0	0	
+"Médecine interne et immuno-clinique"	0	86	0	-86	-100		0	0	0	0	
+"Médecine interne et maladies infectieuses"	0	51	0	-51	-100		0	24	0	-24	-100
+"Médecine interne maladies auto imm et patho vasc"	0	27	0	-27	-100		0	21	0	-21	-100
+"Médecine interne maladies systémiques"	0	61	0	-61	-100		0	0	0	0	
+"Réanimation médicale & toxicologie"	0	53	0	-53	-100		0	0	0	0	
+"SC médicale et toxicologie"	0	34	0	-34	-100		0	0	0	0	
+"Total pole"	0	600	0	-600	-100		0	117	0	-117	-100
+""											
+"Locomoteur"											
+"Chirurgie Orthopédique"	0	171	0	-171	-100		0	49	0	-49	-100
+"Rhumatologie"	0	131	0	-131	-100		0	87	0	-87	-100
+"Total pole"	0	302	0	-302	-100		0	136	0	-136	-100
+""											
+"NTC"											
+"Céphalées"	0	0	0	0			0	20	0	-20	-100
+"Douleur"	0	13	0	-13	-100		0	19	0	-19	-100
+"Maladies rares"	0	6	0	-6	-100		0	1	0	-1	-100
+"Médecine addictologique"	0	43	0	-43	-100		0	110	0	-110	-100
+"MPR"	0	0	0	0			0	17	0	-17	-100
+"Neuro-vasculaire"	0	26	0	-26	-100		0	0	0	0	
+"Neuro-vasculaire USI"	0	78	0	-78	-100		0	0	0	0	
+"Neurochirurgie"	0	111	0	-111	-100		0	0	0	0	
+"Neurologie"	0	35	0	-35	-100		0	1	0	-1	-100
+"ORL"	0	187	0	-187	-100		0	22	0	-22	-100
+"Total pole"	0	499	0	-499	-100		0	190	0	-190	-100
+""											
+"Urgences"											
+"Cardiologie"	0	104	0	-104	-100		0	25	0	-25	-100
+"Cardiologie USI"	0	87	0	-87	-100		0	0	0	0	
+"Réanimation chirurgicale & HDJ KT"	0	38	0	-38	-100		0	98	0	-98	-100
+"Réanimation chirurgicale LRB"	0	71	0	-71	-100		0	0	0	0	
+"USC LRB"	0	25	0	-25	-100		0	0	0	0	
+"Urgences UHCD LRB"	0	556	0	-556	-100		0	0	0	0	
+"Urgences UHCD SLS"	0	294	0	-294	-100		0	0	0	0	
+"Total pole"	0	1175	0	-1175	-100		0	123	0	-123	-100

@@ -1,0 +1,82 @@
+---
+title: "Méthodes"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{methodes}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+Documentation package dimRactivite :
+- [Informations utiles sur les objets importés](#informations-utiles-sur-les-objets-importés)
+- [Détail sur la valorisation des RUM](#détail-sur-la-valorisation-des-RUM)
+  * Valorisation des RSA
+  * Répartition des recettes par UMA
+  * Calcul du PMCT mono RUM
+- [Précisions sur le calcul des indicateurs présents dans les tableaux de bord](#précisions-sur-le-calcul-des-indicateurs-présents-dans-les-tableaux-de-bord)
+  * Dédoublonnage des RUM
+  * Calcul des index de performance et durées de séjours de référence dans la base nationale
+- [Options](Options)
+- [liste des indicateurs disponibles](Liste-des-indicateurs-disponibles)
+
+Informations utiles sur les objets importés
+-------------------------------------------
+
+##### Clé permettant de lier les différentes tables
+La structure des données importées est basée sur le format des fichiers de remontée en entrée et sortie de GENRSA. La variable identifiante des RSA dans GENRSA est la clé de RSA (```cle_rsa```) qui est un numéro incrémental basé sur le numéro de ligne du RSA dans le fichier de sortie. En conséquence cette clé n'est pas adaptée pour une utilisation pluri-annuelle et avec la mise en commun des données de plusieurs établissements. Dans le package, la clé d'indentification des RSA est composée de l'association des variables ```anosr```, ```nofiness```, ```cle_rsa``` . Ces trois variables sont donc présentes dans toutes les tables finales. La fonction ```inner_join``` de dplyr peut en outre être utilisée directement sans nommer ces variables spécifiquement.
+
+Détail sur la valorisation des RUM
+-------------------------------------------
+
+__Valorisation des RSA__
+
+La valorisation des RSA est réalisée grâce aux fonctions de [valorisation de pmeasyr](https://guillaumepressiat.github.io/pmeasyr/vvr-valoriser-les-rsa.html)
+
+__Répartition des recettes par UMA__
+
+La répartition des recettes par RUM est réalisée par la fonction ```vvr_rum_repa```. Plusieurs clés ont été proposées pour cette répartition. Le package en implémente 4 qui sont disponibles dans l'objet ```rum_v``` (les valeur et les coefficients sont disponibles) : 
+- répartition selon la durée du RUM (```coeftime```,```valotime```)
+- répartition selon le pmct moyen dans l'unité pour les mono RUM  (```coefpmctmono```,```valopmctmono```)
+- répartition selon un coefficient composite obtenu par multiplication des deux précédents (```coefpmctmonotime1```,```valopmctmonotime1```)
+- répartition selon un coefficient composite obtenu par la moyenne des deux précédents (```coefpmctmonotime2```,```valopmctmonotime2```)
+
+__Calcul du PMCT mono RUM__
+
+Cet indicateur est calculé à partir des recettes ghs (sans la valorisation des extrêmes ni des suppléments) pour les séjours dont la variable ```nbrum = 1``` sauf pour les réanimations (autorisations PMSI 01A et 01B) où cette restriction n'a pas été faite.
+Le périmètre du calcul est le suivant
+- pour les remontées en année pleine, à M12, les pmct monorum sont calculés sur les 12 mois de l'année,
+- pour les remontées infra-annuelle, les pmct monorum sont calculés sur 12 mois glissants
+
+Précisions sur le calcul des indicateurs présents dans les tableaux de bord
+--------------------------------------------------------------------------
+
+__Dédoublonnage des RUM__ 
+
+Pour les séjours multi UMA, il arrive fréquemment qu'un patient passe deux fois dans un même service au cours de son hospitalisation (ex : ORL - REA - ORL). Dans ce cas le parti pris est de ne compter qu'une seule fois le séjour lors de la détermination du nombre de séjours par service (dans l'exemple ci dessus : nombre de séjours en ORL = 1). Les RUM qui sont répétés sont considérés comme doublonnés. Une variable ```doublon``` est ajouté aux jeux de données par la fonction ```get_data```, de façon contre intuitive elle est positionnée à 1 lors que le RUM est à comptabiliser et à 0 dans le cas contraire (dans l'exemple ci dessus : ORL doublon = 1, REA doublon = 1, ORL doublon = 0).
+
+Les situations où cette option est à prendre en considération sont renseignées dans les options par la variable ```gestion_doublons_rum``` et en référence au fichier structure. Par exemple, dans l'exemple ci dessus, les variables ```service``` et ```pole``` sont renseignées dans le fichier structure et le fichier d'option comprend la déclaration suivante :
+```
+gestion_doublons_rum:
+    service: service
+    pole: service
+
+```
+Pour le niveau ```service```, les RUM sont dédoublonnés par service, et de la même façon pour le niveau ```pole``` ils également dédoublonnés par service.
+
+
+__Calcul des index de performance et durées de séjours de référence dans la base nationale__
+
+L'index de performance de la durée moyenne de séjour (IP DMS) est calculé avec les DMS de référence de la base nationale PMSI de l'année précédente (en fonction de la date de mise à disposition par l'ATIH) selon la méthode mise au point la siège de l'APHP et présentée au congrès EMOIS 2014 (Le-Leplat 2014).
+
+
+
+Références
+-------------
+Le-Leplat 2014 - C. Lê-Leplat, F. Guilmineau, N. Taright Un nouveau regard sur l’IP DMS : son calcul, son interprétation - Congrès EMOIS 2014. [Doi : 10.1016/j.respe.2014.01.046](https://www.em-consulte.com/article/878209/article/un-nouveau-regard-sur-l-ip-dms%C2%A0-son-calcul-son-int)

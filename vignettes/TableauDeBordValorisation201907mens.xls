@@ -1,0 +1,101 @@
+""	"2017"	"2018"	"2019"	"diff"	"p_diff"	""	"2017"	"2018"	"2019"	"diff"	"p_diff"
+""											
+"Groupe Hospitalier"											
+"Lariboisière"		10709594	10232489	-477105	-4.5			932946	996854	63908	6.9
+"Saint Louis"		10822751	10804194	-18557	-0.2			3151601	3122925	-28676	-0.9
+"Total GH"		21532345	21036683	-495662	-2.3			4084546	4119779	35233	0.9
+""											
+"B2P"											
+"Biologie cellulaire & cinétique"								14871	39359	24488	164.7
+"Physiologie EF"								33425	31072	-2353	-7
+"Total pole"								48297	70431	22134	45.8
+""											
+"Centre de Traitement des Brûlés"											
+"Réanimation Centre des brûlés"		531020	294978	-236042	-44.5						
+"SC Centre des brûlés"		152759	155332	2573	1.7						
+"HC Centre des brûlés"		86292									
+"Total pole"		770071	450310	-319761	-41.5						
+""											
+"DOREM"											
+"Chirurgie plastique & brûlés"		896701	963075	66374	7.4			146883	133604	-13279	-9
+"CMF stomatologie"		81723						25608			
+"Dermatologie"		502931	538352	35421	7			169778	216071	46293	27.3
+"Total pole"		1481354	1501427	20073	1.4			342269	349675	7406	2.2
+""											
+"DUNEGO"											
+"Chirurgie digestive"		471380	330393	-140987	-29.9			36813	79987	43174	117.3
+"Chirurgie générale SLS"		813509	706305	-107204	-13.2			87623	32503	-55120	-62.9
+"Chirurgie mammaire"		155214	71432	-83782	-54			77705	81873	4168	5.4
+"CRN LRB"								0			
+"CRN SLS"								608	0	-608	-100
+"Gastro-entérologie SLS"		193507	228782	35275	18.2			255783	269179	13396	5.2
+"Hépato-gastro-entérologie"								4706	21806	17100	363.4
+"Néphrologie"		345031	365926	20895	6.1			244386	212566	-31820	-13
+"Urologie"		452480	465886	13406	3			88761	96665	7904	8.9
+"Gynécologie"		265303	223458	-41845	-15.8			91417	77032	-14385	-15.7
+"Obstétrique"		758592	857331	98739	13						
+"Néonatalogie"		180047	177939	-2108	-1.2						
+"Total pole"		3635063	3427451	-207612	-5.7			887801	871611	-16190	-1.8
+""											
+"HI-3RO"											
+"Centre des maladies du sein"								244272	286935	42663	17.5
+"Hématologie greffe"		874961	716667	-158294	-18.1			170155	159547	-10608	-6.2
+"AJA - hématologie"		416647	716828	300181	72			52614	49938	-2676	-5.1
+"Hématologie adultes"		713076	532730	-180346	-25.3			109215	95167	-14048	-12.9
+"Hématologie sénior"		477355	503233	25878	5.4			132644	134711	2067	1.6
+"Hémato-oncologie"		341707	457318	115611	33.8			164992	147407	-17585	-10.7
+"Immuno-hématologie"		540511	581498	40987	7.6			109826	146336	36510	33.2
+"Immuno-pathologie clinique"		274761	423057	148296	54			61433	77656	16223	26.4
+"Oncologie médicale"		269897	309706	39809	14.7			158892	175145	16253	10.2
+"Neuro-oncologie"		149572	146066	-3506	-2.3			25760	24282	-1478	-5.7
+"Onco-radiothérapie"		244672	133379	-111293	-45.5			523098	453388	-69710	-13.3
+"Pneumologie"		304141	368501	64360	21.2			38047	36848	-1199	-3.2
+"Réanimation médicale SLS"		497881	656682	158801	31.9						
+"Aphérèse Thérapeutique"								134885	133209	-1676	-1.2
+"Pharmacologie clinique"									6160		
+"Total pole"		5105180	5545666	440486	8.6			1925833	1926728	895	0
+""											
+"IMAGINE"											
+"Diabétologie et endocrinologie"		419745	421974	2229	0.5			135807	181516	45709	33.7
+"Gériatrie"		245147	276807	31660	12.9						
+"Maladies infectieuses SLS"		371499	393644	22145	6			37985	40530	2545	6.7
+"Médecine interne aval urgences et thérap"		342335	399796	57461	16.8						
+"Médecine interne et immuno-clinique"		313882	226269	-87613	-27.9						
+"Médecine interne et maladies infectieuses"		277360	250067	-27293	-9.8			35598	42201	6603	18.5
+"Médecine interne maladies auto imm et patho vasc"		126910	75642	-51268	-40.4			8563	14751	6188	72.3
+"Médecine interne maladies systémiques"		314002	135266	-178736	-56.9						
+"Réanimation médicale & toxicologie"		623290	566338	-56952	-9.1						
+"SC médicale et toxicologie"		124824	122097	-2727	-2.2						
+"Total pole"		3158994	2867901	-291093	-9.2			217953	278998	61045	28
+""											
+"Locomoteur"											
+"Chirurgie Orthopédique"		1109603	1080509	-29094	-2.6			177020	132181	-44839	-25.3
+"Rhumatologie"		506484	465817	-40667	-8			72809	98645	25836	35.5
+"Total pole"		1616087	1546326	-69761	-4.3			249829	230826	-19003	-7.6
+""											
+"NTC"											
+"Céphalées"								5692	6407	715	12.6
+"Douleur"		10677	25509	14832	138.9			10707	12449	1742	16.3
+"Maladies rares"		26637	29733	3096	11.6			19034	18062	-972	-5.1
+"Médecine addictologique"		571419	572142	723	0.1			49014	59343	10329	21.1
+"MPR"								8560	8982	422	4.9
+"Neuro-vasculaire"		147586	147916	330	0.2						
+"Neuro-vasculaire USI"		267557	324044	56487	21.1						
+"Neurochirurgie"		828119	895302	67183	8.1						
+"Neurologie"		165519	101757	-63762	-38.5			37643	31522	-6121	-16.3
+"ORL"		565853	452205	-113648	-20.1			101295	113685	12390	12.2
+"Total pole"		2583367	2548607	-34760	-1.3			231944	250450	18506	8
+""											
+"Urgences"											
+"Cardiologie"		379960	366383	-13577	-3.6			108497	80354	-28143	-25.9
+"Cardiologie USI"		363301	350141	-13160	-3.6						
+"Réanimation chirurgicale & HDJ KT"		548908	581806	32898	6			67214	59096	-8118	-12.1
+"Réanimation chirurgicale LRB"		921663	886865	-34798	-3.8						
+"USC LRB"		301635	191550	-110085	-36.5						
+"Urgences UHCD LRB"		521676	490149	-31527	-6						
+"Urgences UHCD SLS"		145086	282103	137017	94.4						
+"Total pole"		3182229	3148996	-33233	-1			175711	139450	-36261	-20.6
+""											
+"Imagerie"											
+"UCA Radio interventionnelle"								4909	1611	-3298	-67.2
+"Total pole"								4909	1611	-3298	-67.2

@@ -26,6 +26,7 @@ library(jsonlite)
 library(referentiels)
 library(nomensland)
 library(readxl)
+library(dimRactivite)
 ```
 
 Les fonctions d'imports et d'analyses sont construites sur le principe que chaque établissement produit tous les mois des fichiers de données de facturation mis en entrée du logiciel ATIH GENRSA utilisé pour transmettre les données PMSI aux tutelles.  L’analyse de ces fichiers par GENRSA produit 2 types d’archives (.zip) le in (les fichiers d’entrée) et le out (fichiers préparés pour être envoyés). Le package généralise l’import des fichiers zippés en sortie de GENRSA (in et out) dans un environnement de travail R permettant l’analyse des données et la production de tableaux de bord automatiques.
@@ -36,9 +37,9 @@ Les fonctions d'imports et d'analyses sont construites sur le principe que chaqu
 Le paramètres nécessaires pour les imports se trouvent dans un le fichier options.yaml (cf exemple) en particulier la variable ```path``` qui donne le chemin du dossier racine dans le quel se trouve les archives PMSI en sortie de GENRSA.
 ```{r profondeur}
 
-dimRactivite:::update_options('options.yaml')
+dimRactivite::update_options('options.yaml')
 
-profondeur_imports = 1
+profondeur_imports = 2
 ```
 ### Création des fichiers .RData par remontée
 
@@ -50,7 +51,7 @@ Les fichiers sont ensuite analysés afin de préparer la création (ou non) des 
 
 
 ```{r analyse_dossier_remontees}
-remontees_dispo <- dimRactivite:::analyse_dossier_remontees( maj_dernier_mois = FALSE )
+remontees_dispo <- dimRactivite::analyse_dossier_remontees( maj_dernier_mois = FALSE )
 #Voir la liste des fichiers RData non disponibles qui seront générés à l'étape suivante
 print( remontees_dispo %>% filter( RData != 1 ) )
 
@@ -64,7 +65,7 @@ Par défaut, l'option ```option recent = TRUE``` induit la création du .RData p
 
 
 ```{r save_remontee}
-#remontees_dispo <- dimRactivite:::save_remontees( remontees_dispo )
+#remontees_dispo <- dimRactivite::save_remontees( remontees_dispo )
 ```
 
 
@@ -85,7 +86,7 @@ sel_remontees_import
 Le df ```sel_remontees_import``` est passé en argument de la fonction ```load_all()``` qui permet le chargment des données.
 
 ```{r load_all}
-dimRactivite:::load_RData( sel_remontees_import )
+dimRactivite::load_RData( sel_remontees_import )
 ```
 
 #### Import des fichiers MO et DMI
@@ -108,7 +109,7 @@ fichier_structure <- readxl::read_excel(getOption("dimRactivite.structures"),
                                         skip = 1
 )
 #vérification que toutes les UMA sont bien renseignées dans le fichier structure
-dimRactivite:::verif_structure(rum,fichier_structure)
+dimRactivite::verif_structure(rum,fichier_structure)
 
 rum <- rum %>% left_join( ., fichier_structure ) %>%
           mutate( pole = ifelse(is.na(pole), 'Erreurs', pole ),
@@ -121,7 +122,7 @@ On pourrait à cet endroit, vouloir également ajouter d'autres informations sur
 # Génération des tableaux de bord
 
 Deux types de tableaux de bord peuvent être générés (les exemples donnés ici ne sont accéssibles que sur l'intranet de l'APHP) :
-- des tableaux synthétiques permettant une vue de l'évolution temporelle d'un indicateur pour l'ensemble de l'établissement ou du groupe hospitalier  (ex : [intranet aphp](http://msi.sls.aphp.fr/tdb/index.php?_tbl=TableauDeBordGeneral&_mois=07&_annee=2019&_type=mens) ), des recettes avec une répartition par service (ex : [intranet aphp]http://msi.sls.aphp.fr/tdb/index.php?_tbl=TableauDeBordValorisation&_mois=07&_annee=2019&_type=mens)
+- des tableaux synthétiques permettant une vue de l'évolution temporelle d'un indicateur pour l'ensemble de l'établissement ou du groupe hospitalier  (ex : [intranet aphp](http://msi.sls.aphp.fr/tdb/index.php?_tbl=TableauDeBordGeneral&_mois=07&_annee=2019&_type=mens) ), des recettes avec une répartition par service (ex : [intranet aphp](http://msi.sls.aphp.fr/tdb/index.php?_tbl=TableauDeBordValorisation&_mois=07&_annee=2019&_type=mens) )
 - des tableaux détaillés pour chaque niveau du fichier structure permettant de suivre l'évolution temporelle pour ce niveau d'un ensemble d'indicateurs prédéfinis (ex [intranet aphp](http://msi.sls.aphp.fr/tdb/index.php?_tbl=TableauDeBordActivite&_service=Lariboisiere&_mois=07&_annee=2019&_type=mens)).
 
 Pour l'ensemble de ces tableaux on produit une version mensuelle et une version cumulée. La fonction ```get_data()``` permet de préparer les données.
@@ -202,25 +203,25 @@ cancer_rsa <- dplyr::inner_join(cancer_pat,
 
 ```{r tableaux de bord synthetiques }
 
-df<-dimRactivite:::get_data(inner_join(rum,rum_v), a =(annee-profondeur_tdb):annee, m = 1:mois )
+df<-dimRactivite::get_data(inner_join(rum,rum_v), a =(annee-profondeur_tdb):annee, m = 1:mois )
 
 
-tdb <- dimRactivite:::get_activite_sejours( df, structure )
+tdb <- dimRactivite::get_activite_sejours( df, structure )
 path_file=paste0('TableauDeBordGeneral',annee,stringr::str_pad(mois,2,"left","0"),'cum.xls')  
 write.table( tdb, file=path_file, sep='\t', row.names=T, col.names=NA, na='' , fileEncoding = "utf-8" )
 
-tdb <- dimRactivite:::get_activite_recettes( df, structure )
+tdb <- dimRactivite::get_activite_recettes( df, structure )
 path_file=paste0('TableauDeBordValorisation',annee,stringr::str_pad(mois,2,"left","0"),'cum.xls')  
 write.table( tdb, file=path_file, sep='\t', row.names=T, col.names=NA, na='' , fileEncoding = "utf-8" )
 
 
 df <- df %>% filter( as.numeric(moissor) == mois )
 
-tdb <- dimRactivite:::get_activite_sejours( df, structure )
+tdb <- dimRactivite::get_activite_sejours( df, structure )
 path_file=paste0('TableauDeBordGeneral',annee,stringr::str_pad(mois,2,"left","0"),'mens.xls')  
 write.table( tdb, file=path_file, sep='\t', row.names=T, col.names=NA, na='' , fileEncoding = "utf-8" )
 
-tdb <- dimRactivite:::get_activite_recettes( df, structure )
+tdb <- dimRactivite::get_activite_recettes( df, structure )
 path_file=paste0('TableauDeBordValorisation',annee,stringr::str_pad(mois,2,"left","0"),'mens.xls')  
 write.table( tdb, file=path_file, sep='\t', row.names=T, col.names=NA, na='' , fileEncoding = "utf-8" )
 
