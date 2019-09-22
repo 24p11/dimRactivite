@@ -38,7 +38,7 @@ Le paramètres nécessaires pour les imports se trouvent dans un le fichier opti
 
 dimRactivite:::update_options('options.yaml')
 
-profondeur_imports = 2
+profondeur_imports = 1
 ```
 ### Création des fichiers .RData par remontée
 

@@ -58,6 +58,9 @@
 <li>
       <a href="articles/generation-tableaux-de-bord-pmsi.html">Import des archives GENSRA et génération de tableaux de bord</a>
     </li>
+    <li>
+      <a href="articles/methodes.html">Méthodes</a>
+    </li>
   </ul>
 </li>
       </ul>
@@ -76,8 +79,8 @@
 <div id="dimractivite" class="section level1">
 <div class="page-header"><h1 class="hasAnchor">
 <a href="#dimractivite" class="anchor"></a>dimRactivite</h1></div>
-<p>L’objectif du package est de standardiser l’import dans R des données PMSI avec le package pmeasyr permettant de créer un environement de travail synthétique comprenant plusieurs années et plusieurs établissements. Une fois les données intégrées, des fonctions de générations automatiques de tableaux de bord sont disponibles pour de suivre l’activté des établissements.</p>
-<p>Les fonctions d’imports et d’analyses sont construites sur le principe que chaque établissement produit tous les mois des fichiers de données de facturation mis en entrée du logiciel ATIH GENRSA utilisé pour transmettre les données PMSI aux tutelles. L’analyse de ces fichiers par GENRSA produit 2 types d’archives (.zip) le in (les fichiers d’entrée) et le out (fichiers préparés pour être envoyés). Le package généralise l’import des fichiers zippés en sortie de GENRSA (in et out) dans un environnement de travail R. Au cours de cet import les RSA et les RUM sont valorisés permettant l’analyse de recettes T2A séjours des établissements.</p>
+<p>L’objectif du package est de standardiser avec pmeasyr l’import dans R des données PMSI pour créer un environement de travail synthétique comprenant plusieurs années et plusieurs établissements. Une fois les données intégrées, des fonctions de générations automatiques de tableaux de bord sont disponibles permettant de suivre l’activté des établissements.</p>
+<p>Les fonctions d’imports et d’analyse sont construites sur le principe que chaque établissement produit tous les mois des fichiers de facturation mis en entrée du logiciel ATIH GENRSA utilisé pour transmettre les données PMSI aux tutelles (remontées mensuelles). L’analyse de ces fichiers par GENRSA produit 2 types d’archives (.zip) le in (les fichiers d’entrée) et le out (fichiers préparés pour être envoyés). Le package généralise l’import des fichiers zippés en sortie de GENRSA (in et out) dans un environnement de travail R. Au cours de cet import les RSA et les RUM sont valorisés permettant l’analyse de recettes T2A séjours des établissements.</p>
 <p>Des informations complèmentaires non contenues dans les formats officiels peuvent être intégrées, en particulier des informations sur les structures, permettant de générer des tableaux de bord compréhensibles et de décliner le calcul d’indicateurs sur les différents niveaux d’analyse d’un groupe hospitalier.</p>
 <div id="installation" class="section level4">
 <h4 class="hasAnchor">
@@ -93,12 +96,12 @@ devtools<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/
 <pre><code>+ demos
   +--- import_pmeasyr.R
   +--- generation_tableaux_de_bord.R</code></pre>
-<p>Un scénario complet d’import et de génération peut être trouver dans la vignette <a href="https://24p11.github.io/dimRactivite/articles/generation-tableaux-de-bord-pmsi.html">Génération de tableaux de bord PMSI avec pmeasyr</a> .</p>
+<p>Un scénario complet d’import et de génération peut être trouvé dans la vignette <a href="https://24p11.github.io/dimRactivite/articles/generation-tableaux-de-bord-pmsi.html">Génération de tableaux de bord PMSI avec pmeasyr</a> .</p>
 </div>
 <div id="organisation-du-file-system" class="section level2">
 <h2 class="hasAnchor">
 <a href="#organisation-du-file-system" class="anchor"></a>Organisation du file system</h2>
-<p>Comme préconisé par G.Pressiat dans la documentation du package pmeasyr <a href="https://guillaumepressiat.github.io/pmeasyr/archives.html">les archives PMSI</a>, dimRactivite utilisera un dossier unique comprenant l’ensemble des fichiers zippés en entrée et en sortie de GENRSA. Les fichiers contenus dans ce dossier seront analysés, un fichier .RData par remontée sera crée s’il n’existe pas encore, puis les données seront automatiquement chargées dans R à partir des fichiers .RData (par défaut la remontée la plus récente est prise en compte).</p>
+<p>Comme préconisé par G.Pressiat dans la documentation du package pmeasyr <a href="https://guillaumepressiat.github.io/pmeasyr/archives.html">les archives PMSI</a>, dimRactivite utilisera un dossier unique comprenant l’ensemble des fichiers zippés en entrée et en sortie de GENRSA pour le MCO. Les fichiers contenus dans ce dossier seront analysés, un fichier .RData par remontée sera crée s’il n’existe pas encore, puis les données seront automatiquement chargées dans R à partir des fichiers .RData (par défaut la remontée la plus récente est prise en compte).</p>
 <p>L’adresse de ce dossier est renseigné dans l’option du fichier de configuration <code>path</code> .</p>
 </div>
 <div id="import-des-donnees-pmsi" class="section level2">
@@ -125,17 +128,20 @@ devtools<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/
 </ul>
 <p>La procédure réalise ensuite des opérations de transformation et de valorisation :</p>
 <ul>
-<li>intégration du tra (cf inner_tra)</li>
+<li>intégration du tra (cf <a href="https://im-aphp.github.io/pmeasyr/reference/inner_tra.html"><code>inner_tra</code></a>)</li>
 <li>ajout au rum des variables de fichier ium et de typologies des autorisations,</li>
 <li>valorisation des rsa ,</li>
-<li>valorisation des rum (cf fonction vvr_rum_repa)</li>
+<li>valorisation des rum (cf fonction <a href="https://24p11.github.io/dimRactivite/reference/vvr_rum_repa.html"><code>vvr_rum_repa</code></a>)</li>
 <li>ajout des données de facturation à l’ano (vvr_ano_mco)</li>
 </ul>
-<p>Ces fonctions font appel aux données de référentiels suivantes (disponibles dans le package <strong><em>referentiels</em></strong>) :</p>
+<p>Ces fonctions font appel aux données de référentiels suivantes (disponibles dans les packages <strong><em>nomensland</em></strong> et <strong><em>referentiels</em></strong>) ou dans les tableaux de données de dimRactive:</p>
 <ul>
-<li>nomenclature_uma</li>
-<li>tarifs_mco_ghs</li>
-<li>tarifs_mco_supplements</li>
+<li>
+<code>nomenclature_uma</code> (dimRactivite)</li>
+<li>
+<code>tarifs_mco_ghs</code> (nomensland)</li>
+<li>
+<code>tarifs_mco_supplements</code> (nomensland)</li>
 </ul>
 </div>
 <div id="generation-des-tableaux-de-bord" class="section level2">

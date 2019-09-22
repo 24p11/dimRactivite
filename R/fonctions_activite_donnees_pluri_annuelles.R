@@ -1572,6 +1572,8 @@ get_activite_sejours<-function( df, structure ){
   
     tdb <-list()
     
+    df<-df%>%mutate(typehosp = factor(typehosp))
+    
     tdb[['services']] <- table( df %>%  distinct( nofiness, cle_rsa, ansor, service, .keep_all = T)%>%
                                  select(service, ansor, typehosp) )
     
@@ -1609,6 +1611,8 @@ get_activite_sejours<-function( df, structure ){
 get_activite_recettes<-function( df, structure ){
   
   tdb_v <-list()
+  
+  df<-df%>%mutate(typehosp = factor(typehosp))
 
   tdb_v[['services']] <- round( with( df, tapply( valopmctmonotime1, list(service,ansor,typehosp), sum, na.rm=T ) ) )
   

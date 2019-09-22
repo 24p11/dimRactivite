@@ -253,8 +253,8 @@ IP_SEJOUR<-function(df){
 order_by_structure<-function( tdb, structure ){
   
   
-  services = unique(fichier_structure$service)
-  poles = unique(fichier_structure$pole)
+  services = unique( fichier_structure%>%filter(service%in%dimnames(tdb$services)$service)%>%select(service) )$service
+  poles = unique(  fichier_structure%>%filter(pole%in%dimnames(tdb$poles)$pole)%>%select(pole) )$pole
 
   tdb$hc <- rbind( NA, "Groupe Hospitalier" = NA, tdb$hopitaux[,,"C"], "Total GH" = tdb$gh['C',] )
   tdb$hp <- rbind( NA, "Groupe Hospitalier" = NA, tdb$hopitaux[,,"P"], "Total GH" = tdb$gh['P',] )

@@ -1,11 +1,6 @@
-path: "~/GH_PMSI/DATA/GENRSA"
+path: "~/GH_PMSI/DATA/GENRSA/"
 
 path_tdb_files: "~/GH_PMSI/ACTIVITE_MSI/ANALYSES/TABLEAUX_DE_BORD/"
-
-arborescence:
-  - {finess}
-  - {annee}
-  - M{mois}
 
 extensions:
   - rum
@@ -46,7 +41,7 @@ gestion_doublons_rum:
     pole: service
     Centre de Traitement des Brûlés: pole
 
-profondeur_tdb: 5
+profondeur_tdb: 1
 
 #Actes donnant lieu à un supplément de raduithérapie
 actesradio : "AZNL001|QZNL001|ZZNL045|ZZNL046|ZZNL047|ZZNL048|ZZNL050|ZZNL051|ZZNL052|ZZNL053|ZZNL054|ZZNL058|ZZNL059|ZZNL060|ZZNL061|ZZNL062|ZZNL063|ZZNL064|ZZNL065|ZZNL066"
