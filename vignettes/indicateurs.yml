@@ -1,0 +1,1126 @@
+TitreMCO:
+ - libelle: Activite MCO
+ - Type: titre
+ - tableaux de bord: TableauDeBordActivite,TableauDeBordDIM,TableauDeBordMedical
+
+TitreHC:
+ - libelle: Hospitalisation complète
+ - type: titre
+ - tableaux de bord:  TableauDeBordActivite,TableauDeBordDIM,TableauDeBordMedical
+
+HCtot:
+ libelle: Nombre de sejours dans les structures HC
+ type: indicateur 
+ variables nécessaires au calcul: typehosp
+ tableaux de données nécessaires: rum
+ tableaux de bord:  TableauDeBordActivite,TableauDeBordDIM,TableauDeBordMedical
+
+HC0:
+ libelle: HC 0 nuit
+ type: indicateur 
+ variables nécessaires au calcul: typehosp, duree
+ tableaux de bord:  TableauDeBordActivite,TableauDeBordDIM,TableauDeBordMedical
+
+HC1:
+ libelle: HC 1 nuit
+ type: indicateur 
+ variables nécessaires au calcul: typehosp, duree
+ tableaux de bord:  TableauDeBordActivite,TableauDeBordDIM,TableauDeBordMedical
+
+HC2:
+ libelle: HC 2 nuits
+ type: indicateur 
+ variables nécessaires au calcul: typehosp, duree
+ tableaux de bord:  TableauDeBordActivite,TableauDeBordDIM,TableauDeBordMedical
+
+HC2det:
+   libelle: details 2 sejours > 2 nuits
+   type: indicateur 
+   variables nécessaires au calcul: typehosp, duree
+   tableaux de bord:  TableauDeBordDIM
+
+NbMultiUMA:
+   libelle: Nombre de séjours multi-UMA
+   type: indicateur 
+   variables nécessaires au calcul: nbrum
+   tableaux de bord:  TableauDeBordActivite
+
+nb_jour_hc:
+   libelle: Nombre total de journées HC
+   type: indicateur 
+   variables nécessaires au calcul: duree
+   tableaux de bord:  TableauDeBordActivite, TableauDeBordDIM
+
+nb_jour_hc_repa:
+   libelle: Nombre total de journées HC service
+   type: indicateur 
+   variables nécessaires au calcul: dureesejpart
+   tableaux de bord:  TableauDeBordActivite, TableauDeBordDIM
+
+TitreHP:
+   libelle: Hospitalisation patielle
+   type: Titre  
+   tableaux de bord:  TableauDeBordActivite,TableauDeBordDIM,TableauDeBordMedical
+
+HPTot:
+   libelle: Nombre de séjours dans les structures HP
+   type: indicateur 
+   variables nécessaires au calcul: typehosp
+   tableaux de bord:  TableauDeBordActivite, TableauDeBordDIM, TableauDeBordMedical
+
+HPMed:
+   libelle: Hôpitaux de jour medicaux
+   type: indicateur 
+   variables nécessaires au calcul: typehosp, cdghm
+   tableaux de bord:  TableauDeBordActivite, TableauDeBordDIM, TableauDeBordMedical
+
+HPChir:
+   libelle: Hôpitaux de jour chirurgicaux
+   type: indicateur 
+   variables nécessaires au calcul: typehosp, cdghm
+   tableaux de bord:  TableauDeBordActivite, TableauDeBordDIM, TableauDeBordMedical
+
+HPMedTech:
+   libelle: Hôpitaux de jour médico-techniques
+   type: indicateur 
+   variables nécessaires au calcul: typehosp, cdghm
+   tableaux de bord: TableauDeBordActivite, TableauDeBordDIM, TableauDeBordMedical
+
+Seances:
+   libelle: Séances
+   type: indicateur 
+   variables nécessaires au calcul: cdghm
+   tableaux de bord:  TableauDeBordActivite
+
+SeancesDialyses:
+   libelle: Dialyse
+   type: indicateur 
+   variables nécessaires au calcul: cdghm
+   référentiel utilisé: ghm_seance_dialyse
+   tableaux de bord: TableauDeBordActivite
+
+SeancesChimio:
+   libelle: Chimiothérapie
+   type: indicateur 
+   variables nécessaires au calcul: cdghm
+   référentiel utilisé: ghm_seance_chimiotherapie
+   tableaux de bord: TableauDeBordActivite
+
+SeancesRadio:
+   libelle: Radiothérapie
+   type: indicateur 
+   variables nécessaires au calcul: cdghm
+   référentiel utilisé: ghm_seance_radiotherapie
+   tableaux de bord: TableauDeBordActivite
+
+PrepaRadio:
+   libelle: Préparation radiothérapie
+   type: indicateur 
+   variables nécessaires au calcul: cdghm
+   référentiel utilisé: ghm_seance_prepa_radiotherapie
+   tableaux de bord: TableauDeBordActivite
+
+NbIVG:
+   libelle: Nb IVG
+   type: indicateur 
+   variables nécessaires au calcul: cdghm
+   référentiel utilisé: ghm_ivg
+   tableaux de bord: TableauDeBordActivite
+
+TitreActiviteChir:
+   libelle: Activité Chirurgicale
+   type: titre 
+   tableaux de bord: TableauDeBordActivite
+
+TitreVolChir:
+   libelle: Volume activité
+   type: titre 
+   tableaux de bord: TableauDeBordActivite
+
+pSejChirHC:
+   libelle: Pourc. Sej. Chirurgicaux en HC
+   variables nécessaires au calcul: cdghm
+   tableaux de bord: TableauDeBordActivite
+
+pSejChir0j:
+   libelle: Pourc. Sej. Chir de 0 jour
+   variables nécessaires au calcul: cdghm,duree
+   tableaux de bord: TableauDeBordActivite
+
+NbChir0j:
+   libelle: Nbre Sej. Chirurgicaux 0 jour
+   type: indicateur 
+   variables nécessaires au calcul: cdghm,duree
+   tableaux de bord: TableauDeBordActivite
+
+ActiviteUniteChirAmbu:
+   libelle: Activité unité de chirurgie ambulatoire
+   type: indicateur 
+   variables nécessaires au calcul: cdghm
+   référentiel utilisé: unite_chir_umbu
+   tableaux de bord: 
+
+NbSejUCAservChir:
+   libelle: Nb sejours services de chirurgie dans unité
+   type: indicateur 
+   variables nécessaires au calcul: cdghm,duree
+   référentiel utilisé: unite_chir_umbu
+   tableaux de bord: 
+
+TxRehopsChirAmbu:
+   libelle: Taux de rehospitalisation en chir. ambu.
+   variables nécessaires au calcul: cdghm,duree
+   référentiel utilisé: unite_chir_umbu
+   tableaux de bord: 
+
+TitreActesMarqueurs:
+   libelle: Suivi des actes marqueurs de chirurgie ambulatoire
+   variables nécessaires au calcul: 
+   référentiel utilisé: actes_maqueurs_chirurgie_ambulatoire
+   tableaux de bord: 
+
+nbSejMarqueurs:
+   libelle: Nbre de sejours avec acte marqueur
+   type: indicateur
+   variables nécessaires au calcul: 
+   référentiel utilisé: actes_maqueurs_chirurgie_ambulatoire
+   tableaux de bord: 
+
+pSejMarqueurs0j:
+   libelle: Pourc. de sejours avec actes marqueurs et duree = 0 jours
+   type: indicateur
+   variables nécessaires au calcul: duree
+   référentiel utilisé: actes_maqueurs_chirurgie_ambulatoire
+   tableaux de bord: 
+
+TitreGreffes:
+   libelle: Activite de Greffe & transplantation
+   type: titre
+   tableaux de bord: TableauDeBordActivite,TableauDeBordCaseMix
+
+Greffes:
+   libelle: Greffes de moelle
+   type: titre
+   tableaux de bord: TableauDeBordActivite, TableauDeBordDIM, TableauDeBordMedical, TableauDeBordCaseMix
+
+AutoGreffes:
+   libelle: dont autogreffes
+   type: indicateur
+   variables nécessaires au calcul: cdghm
+   référentiel utilisé: ghm_greffe_moelle
+   tableaux de bord: TableauDeBordActivite,TableauDeBordDIM,TableauDeBordMedical,TableauDeBordCaseMix
+
+AlloGreffes:
+   libelle: dont allogreffes
+   variables nécessaires au calcul: cdghm
+   référentiel utilisé: ghm_autogreffe_moelle
+   tableaux de bord: TableauDeBordActivite,TableauDeBordDIM,TableauDeBordMedical,TableauDeBordCaseMix
+
+Transplantations:
+   libelle: Transplantations
+   type: indicateur
+   variables nécessaires au calcul: cdghm
+   référentiel utilisé: ghm_allogreffe_moelle
+   tableaux de bord: TableauDeBordActivite,TableauDeBordDIM,TableauDeBordMedical,TableauDeBordCaseMix
+
+TransplantationsRenales:
+   libelle: Transplantations renales
+   type: indicateur
+   variables nécessaires au calcul: cdghm
+   référentiel utilisé: ghm_greffe_rein
+   tableaux de bord: TableauDeBordActivite, TableauDeBordDIM, TableauDeBordMedical, TableauDeBordCaseMix
+
+TransplantationsPancreas:
+   libelle: Transplantatons pancreas
+   type: indicateur
+   variables nécessaires au calcul: cdghm
+   référentiel utilisé: ghm_greffe_pancreas
+   tableaux de bord: TableauDeBordActivite, TableauDeBordDIM, TableauDeBordMedical, TableauDeBordCaseMix
+
+TitreRepHp:
+   libelle: Repartition HDJ
+   type: indicateur
+   variables nécessaires au calcul: 
+   tableaux de bord: TableauDeBordActivite
+
+Qualite:
+   libelle: Indicateurs PMSI
+   type: titre
+   tableaux de bord: TableauDeBordActivite, TableauDeBordDIM
+
+TitreDuree:
+   libelle: Durées de séjours
+   type: titre
+   tableaux de bord: TableauDeBordActivite, TableauDeBordDIM
+
+DMSbis:
+   libelle: Duree moyenne séjours (Tous les séjours)
+   type: indicateur
+   variables nécessaires au calcul: duree
+   tableaux de bord: 
+
+DMS:
+   libelle: Durée moyenne séjours (Sejours >= 1 nuit)
+   type: indicateur
+   variables nécessaires au calcul: duree
+   tableaux de bord: TableauDeBordActivite, TableauDeBordDIM
+
+DMR:
+   libelle: Duree moyenne resumes (Sejours >= 1 nuit)
+   type: indicateur
+   variables nécessaires au calcul: dureesejpart
+   tableaux de bord: TableauDeBordActivite, TableauDeBordDIM
+
+TitreIP:
+   libelle: Index de performance
+   type: indicateur
+   variables nécessaires au calcul: 
+   tableaux de bord: TableauDeBordActivite, TableauDeBordDIM
+
+IP:
+   libelle: IP
+   type: indicateur
+   variables nécessaires au calcul: duree,dms_bn
+   tableaux de bord: TableauDeBordActivite, TableauDeBordDIM
+
+IP_SERV:
+   libelle: IP Service
+   type: indicateur
+   variables nécessaires au calcul: dureesejpart, dms_bn, coeftime
+   tableaux de bord: TableauDeBordActivite, TableauDeBordDIM
+
+NS:
+   libelle: Pourc. niveaux de sévérités (parmi les séjours éligibles)
+   type: indicateur
+   variables nécessaires au calcul: cdghm
+   tableaux de bord: TableauDeBordActivite,TableauDeBordDIM
+
+NS_2:
+   libelle:  Pourc. niv 2
+   type: indicateur
+   variables nécessaires au calcul: cdghm
+   tableaux de bord: TableauDeBordActivite, TableauDeBordDIM
+
+NS_3:
+   libelle:  Pourc. niv 3
+   type: indicateur
+   variables nécessaires au calcul: cdghm
+   tableaux de bord: TableauDeBordActivite, TableauDeBordDIM
+
+NS_4:
+   libelle:  Pourc. niv 4
+   type: indicateur
+   variables nécessaires au calcul: cdghm
+   tableaux de bord: TableauDeBordActivite, TableauDeBordDIM
+
+recettes:
+   libelle: Recettes
+   type: indicateur
+   variables nécessaires au calcul: 
+   tableaux de bord: TableauDeBordActivite, TableauDeBordDIM
+
+rec_totale:
+   libelle: Recettes totales
+   type: indicateur
+   variables nécessaires au calcul: rec_totale
+   tableaux de bord: TableauDeBordActivite, TableauDeBordDIM
+
+rec_base_hc:
+   libelle: Recettes GHS HC (hors supplements)
+   type: indicateur
+   variables nécessaires au calcul: rec_base, typehosp
+   tableaux de bord: TableauDeBordActivite, TableauDeBordDIM
+
+rec_totale_repa:
+   libelle: Recettes totales reparties par service
+   type: indicateur
+   variables nécessaires au calcul: valopmctmonotime1
+   tableaux de bord: TableauDeBordActivite, TableauDeBordDIM
+
+rec_totale_repa_hc:
+   libelle: Recettes totales HC reparties par service
+   type: indicateur
+   variables nécessaires au calcul: valopmctmonotime1
+   tableaux de bord: TableauDeBordActivite, TableauDeBordDIM
+
+rec_base_repa_hc:
+   libelle: Recettes GHS réparties par service HC (hors supplements)
+   type: indicateur
+   variables nécessaires au calcul: valopmctmonotime1, rec_sup_repa
+   tableaux de bord: TableauDeBordActivite, TableauDeBordDIM
+
+Recettes GHS sejours mono UMA:
+   libelle: rec_base_repa_mono_uma
+   type: indicateur
+   variables nécessaires au calcul: nbrum, valopmctmonotime1
+   tableaux de bord: TableauDeBordActivite, TableauDeBordDIM.
+
+rec_base_repa_multi_uma:
+   libelle: Recettes GHS réparties multi-UMA
+   type: indicateur
+   variables nécessaires au calcul: nbrum,valopmctmonotime1
+   tableaux de bord: TableauDeBordActivite, TableauDeBordDIM
+
+rec_base_hp:
+   libelle: Recettes GHS HP (hors supplements)
+   type: indicateur
+   variables nécessaires au calcul: rec_base
+   tableaux de bord: TableauDeBordActivite, TableauDeBordDIM
+
+TitrePMCT:
+   libelle: Poids moyen du cas traité
+   type: titre
+   tableaux de bord: TableauDeBordActivite,TableauDeBordDIM
+
+rmct_hc:
+   libelle: RMCT des sejours hospitalisation complete (rec. totale)
+   type: indicateur
+   variables nécessaires au calcul: rec_base
+   tableaux de bord: TableauDeBordActivite,TableauDeBordDIM
+
+rmct_repa_hc:
+   libelle: RMCT service (rec. totale)
+   type: indicateur
+   variables nécessaires au calcul: rec_base
+   tableaux de bord: TableauDeBordActivite, TableauDeBordDIM
+
+pmct_hc:
+   libelle: PMCT des sejours hospitalisation complete (tarif GHS)
+   type: indicateur
+   variables nécessaires au calcul: rec_base
+   tableaux de bord: TableauDeBordActivite, TableauDeBordDIM
+
+pmct_repa_hc:
+   libelle: PMCT service  (tarif GHS)
+   type: indicateur
+   variables nécessaires au calcul: valopmctmonotime1
+   tableaux de bord: TableauDeBordActivite, TableauDeBordDIM
+
+pmct_repa_mono_uma:
+   libelle: PMCT des sejours mono UMA
+   type: indicateur
+   variables nécessaires au calcul: nbrum, valopmctmonotime1
+   tableaux de bord: TableauDeBordActivite, TableauDeBordDIM
+
+pmct_repa_multi_uma:
+   libelle: PMCT des sejours multi UMA
+   type: indicateur
+   variables nécessaires au calcul: nbrum,valopmctmonotime1
+   tableaux de bord: TableauDeBordActivite, TableauDeBordDIM
+
+pmct_hp:
+   libelle: PMCT des séjours hospitalisation partielle
+   type: indicateur
+   variables nécessaires au calcul: rec_base
+   tableaux de bord: TableauDeBordActivite, TableauDeBordDIM
+
+TitreSupplements:
+   libelle: Suppléments
+   type: titre
+   tableaux de bord: TableauDeBordActivite, TableauDeBordDIM
+
+nbsuprea:
+   libelle: Nb journees avec sup. réanimation
+   type: indicateur
+   variables nécessaires au calcul: 
+   tableaux de bord: TableauDeBordActivite, TableauDeBordDIM
+
+p_nbsuprea:
+   libelle: Pourc. journées avec supp. réanimation
+   type: indicateur
+   variables nécessaires au calcul: 
+   tableaux de bord: TableauDeBordActivite, TableauDeBordDIM
+
+nssir:
+   libelle: Nb journées avec sup. USI en réanimation
+   type: indicateur
+   variables nécessaires au calcul: 
+   tableaux de bord: TableauDeBordActivite, TableauDeBordDIM
+
+stf_hr:
+   libelle: Nb journées avec sup. USI hors réanimation
+   type: indicateur
+   variables nécessaires au calcul: 
+   tableaux de bord: TableauDeBordActivite, TableauDeBordDIM
+
+nbsupsrc:
+   libelle: Nb journées avec sup. USC
+   type: indicateur
+   variables nécessaires au calcul: 
+   tableaux de bord: TableauDeBordActivite, TableauDeBordDIM
+
+p_nbsupsrc:
+   libelle: Pourc. journées avec sup. USC
+   type: indicateur
+   variables nécessaires au calcul: 
+   tableaux de bord: TableauDeBordActivite, TableauDeBordDIM
+
+dialhosp:
+   libelle: Nb sup. Dialyses
+   type: indicateur
+   variables nécessaires au calcul: 
+   tableaux de bord: TableauDeBordActivite, TableauDeBordDIM
+
+rec_supp:
+   libelle: Recettes suppléments
+   type: indicateur
+   variables nécessaires au calcul: rec_totale, rec_base
+   tableaux de bord: TableauDeBordActivite, TableauDeBordDIM
+
+rec_supp_repa:
+   libelle: Recettes suppléments par service
+   type: indicateur
+   variables nécessaires au calcul: rec_sup_repa
+   tableaux de bord: TableauDeBordActivite,TableauDeBordDIM
+
+GestionInfoMed:
+   libelle: Gestion information médicale
+   type: titre
+   tableaux de bord: 
+
+ActiviteCancero:
+   libelle: Activité de cancérologie
+   type: titre
+   tableaux de bord: TableauDeBordMedical
+
+NbPat:
+   libelle: Nombre de patients
+   type: indicateur
+   variables nécessaires au calcul: 
+   tableaux de bord: TableauDeBordMedical
+
+NbNxPat:
+   libelle: Nombre de nouveaux patients>
+   type: indicateur
+   variables nécessaires au calcul: 
+   tableaux de bord: TableauDeBordMedical
+
+NbSejHC:
+   libelle: Nombre de Sejours en HC
+   type: indicateur
+   variables nécessaires au calcul: 
+   tableaux de bord: TableauDeBordMedical
+
+NbSejHP:
+   libelle: Nombre de séjours en HP
+   type: indicateur
+   variables nécessaires au calcul: 
+   tableaux de bord: TableauDeBordMedical
+
+NbSejChir:
+   libelle: Nombre de séjours chirurgicaux
+   type: indicateur
+   variables nécessaires au calcul: 
+   tableaux de bord: TableauDeBordMedical
+
+TitreLocInca:
+   libelle: Nb de patients par localisation (appareils definis par INCA)
+   type: titre
+   variables nécessaires au calcul: 
+   tableaux de bord: TableauDeBordMedical
+
+NbPatientsParAppareilInca:
+   libelle: (NA)Nb de patients par localisation (appareils definis par INCA)
+   type: indicateur
+   tableaux de bord: TableauDeBordMedical
+
+SP:
+   libelle: Soins Palliatifs
+   type: indicateur
+   tableaux de bord: TableauDeBordMedical
+
+NbPatSP:
+   libelle: Nombre de patients pris en charge en soins palliatifs
+   type: indicateur
+   variables nécessaires au calcul: 
+   tableaux de bord: TableauDeBordMedical
+
+NbPatSpLitsDedies:
+   libelle: Nombre de patients lits dedies de soins palliatifs
+   type: indicateur
+   variables nécessaires au calcul: 
+   tableaux de bord: TableauDeBordMedical
+
+DCD:
+   libelle: Nombre de décès
+   type: indicateur
+   variables nécessaires au calcul: 
+   tableaux de bord: TableauDeBordMedical
+
+NbDCD:
+   libelle: Nombre de décès total
+   type: indicateur
+   variables nécessaires au calcul: 
+   tableaux de bord: TableauDeBordMedical
+
+NbDCDcancer:
+   libelle: Nombre de deces patients cancer
+   type: indicateur
+   variables nécessaires au calcul: 
+   tableaux de bord: TableauDeBordMedical
+
+NbDCDNonSP:
+   libelle: Nombre de décès hors soins palliatifs
+   type: indicateur
+   variables nécessaires au calcul: 
+   tableaux de bord: TableauDeBordMedical
+
+NbDCDspGhmNonSP:
+   libelle: Nombre de décès Z515 GHM non SP
+   type: indicateur
+   variables nécessaires au calcul: 
+   tableaux de bord: TableauDeBordMedical
+
+NbDCDspGhmSP:
+   libelle: Nombre de décès Z515 GHM SP
+   type: indicateur
+   variables nécessaires au calcul: 
+   tableaux de bord: TableauDeBordMedical
+
+NbDCDspLitsStandards:
+   libelle: Nombre de décès en soins palliatif, lit standard
+   type: indicateur
+   variables nécessaires au calcul: 
+   tableaux de bord: TableauDeBordMedical
+
+NbDCDspLitsDedies:
+   libelle: Nombre de décès lits dedies de soins palliatifs
+   type: indicateur
+   variables nécessaires au calcul: 
+   tableaux de bord: TableauDeBordMedical
+
+NbDCDspUsp:
+   libelle: Nombre de décès lits dédiés en unité de soins palliatifs
+   type: indicateur
+   variables nécessaires au calcul: 
+   tableaux de bord: 
+
+SejSp:
+   libelle: Nombre de séjours avec un diagnostic de soins palliatifs
+   type: indicateur
+   variables nécessaires au calcul: 
+   tableaux de bord: TableauDeBordMedical
+
+SejSpGhmNonSP:
+   libelle: Séjours dans un GHM non soins palliatifs
+   type: indicateur
+   variables nécessaires au calcul: 
+   tableaux de bord: TableauDeBordMedical
+
+SejSpLitsStandards:
+   libelle: Séjours GHM soins palliatifs lits standards
+   type: indicateur
+   variables nécessaires au calcul: 
+   tableaux de bord: TableauDeBordMedical
+
+SejSpLitsDedies:
+   libelle: Séjours lits dédiés de soins palliatifs
+   type: indicateur
+   variables nécessaires au calcul: 
+   tableaux de bord: TableauDeBordMedical
+
+JourneesSp:
+   libelle: Nombre de journées avec un diagnostic de soins palliatifs
+   type: indicateur
+   variables nécessaires au calcul: 
+   tableaux de bord: TableauDeBordMedical
+
+JourneesSpLitsStandards:
+   libelle: Journées GHM soins palliatifs lits standards
+   type: indicateur
+   variables nécessaires au calcul: 
+   tableaux de bord: TableauDeBordMedical
+
+JourneesSpLitsDedies:
+   libelle: Journées lits dédiés de soins palliatifs
+   type: indicateur
+   variables nécessaires au calcul: 
+   tableaux de bord: TableauDeBordMedical
+
+LitsDedies:
+   libelle: Lits dédiés
+   type: indicateur
+   variables nécessaires au calcul: 
+   tableaux de bord: TableauDeBordMedical
+
+NbLitsDediesUtilises:
+   libelle: Moyenne du nombre de lits dédiés utilisés
+   type: indicateur
+   variables nécessaires au calcul: 
+   tableaux de bord: TableauDeBordMedical
+
+Douleur:
+   libelle: Douleur
+   type: indicateur
+   variables nécessaires au calcul: 
+   tableaux de bord: TableauDeBordMedical
+
+PatientsDouleur:
+   libelle: Nombre de patients avec diagnostic de douleur
+   type: indicateur
+   variables nécessaires au calcul: 
+   tableaux de bord: TableauDeBordMedical
+
+SejoursDouleur:
+   libelle: Nombre de séjours avec diagnostic de douleur
+   type: indicateur
+   variables nécessaires au calcul: 
+   tableaux de bord: TableauDeBordMedical
+
+Infectieux:
+   libelle: Pathologies infectieuses
+   type: titre
+   tableaux de bord: TableauDeBordMedical
+
+NbSejoursInfectieux:
+   libelle: Nb de séjours avec un diagnostic de pathologie infectieuses
+   type: indicateur
+   variables nécessaires au calcul:
+   tableaux de bord: TableauDeBordMedical
+
+NbPateintsBMR:
+   libelle: Nb de patients porteurs/infectés par une BMR
+   type: indicateur
+   variables nécessaires au calcul:
+   tableaux de bord: TableauDeBordMedical
+
+NbSejoursBMR:
+   libelle: Nb de séjours de patients porteurs/infectés par une BMR
+   type: indicateur
+   variables nécessaires au calcul:
+   tableaux de bord: TableauDeBordMedical
+
+NbSejoursPortageBMR:
+   libelle: Nb sejours de patients porteurs de BMR
+   type: indicateur
+   variables nécessaires au calcul:
+   tableaux de bord: TableauDeBordMedical
+
+AutresPathologiesChroniques:
+   libelle: Autres pathologies chroniques
+   type: indicateur
+   variables nécessaires au calcul:
+   tableaux de bord: TableauDeBordMedical
+
+VIH:
+   libelle: VIH
+   type: titre
+   tableaux de bord: TableauDeBordMedical
+
+PatientsVIH:
+   libelle: Nombre de patients
+   type: indicateur
+   variables nécessaires au calcul:
+   tableaux de bord: TableauDeBordMedical
+
+SejoursVIH_HC:
+   libelle: Nombre de séjours HC
+   type: indicateur
+   variables nécessaires au calcul:
+   tableaux de bord: TableauDeBordMedical
+
+SejoursVIH_HP:
+   libelle: Nombre de séjours HP
+   type: indicateur
+   variables nécessaires au calcul:
+   tableaux de bord: TableauDeBordMedical
+
+Diabete:
+   libelle: Diabète
+   type: titre
+   tableaux de bord: TableauDeBordMedical
+
+PatientsDiabete:
+   libelle: Nombre de patients
+   type: indicateur
+   variables nécessaires au calcul:
+   tableaux de bord: TableauDeBordMedical
+
+SejoursDiabete_HC:
+   libelle: Nombre de séjours HC
+   type: indicateur
+   variables nécessaires au calcul:
+   tableaux de bord: TableauDeBordMedical
+
+SejoursDiabete_HP:
+   libelle: Nombre de séjours HP
+   type: indicateur
+   variables nécessaires au calcul:
+   tableaux de bord: TableauDeBordMedical
+
+InsRenaleChronique:
+   libelle: Insuffisance rénale chronique
+   type: titre
+   tableaux de bord: TableauDeBordMedical
+
+PatientsInsRenaleChronique:
+   libelle: Nombre de patients
+   type: indicateur
+   variables nécessaires au calcul:
+   tableaux de bord: TableauDeBordMedical
+
+SejoursInsRenaleChronique_HC:
+   libelle: Nombre de séjours HC
+   type: indicateur
+   variables nécessaires au calcul:
+   tableaux de bord: TableauDeBordMedical
+
+SejoursInsRenaleChronique_HP:
+   libelle: Nombre de séjours HP
+   type: indicateur
+   variables nécessaires au calcul:
+   tableaux de bord: TableauDeBordMedical
+
+InsRespChronique:
+   libelle: Insuffisance respiratoire chronique
+   type: titre
+   tableaux de bord: TableauDeBordMedical
+
+PatientsInsRespiratoireChronique:
+   libelle: Nombre de patients
+   type: indicateur
+   variables nécessaires au calcul:
+   tableaux de bord: TableauDeBordMedical
+
+SejoursInsRespiratoireChronique_HC:
+   libelle: Nombre de sejours HC
+   type: indicateur
+   variables nécessaires au calcul:
+   tableaux de bord: TableauDeBordMedical
+
+SejoursInsRespiratoireChronique_HP:
+   libelle: Nombre de sejours HP
+   type: indicateur
+   variables nécessaires au calcul:
+   tableaux de bord: TableauDeBordMedical
+
+InsCardiaqueChronique:
+   libelle: Insuffisance cardiaque chronique
+   type: titre
+   tableaux de bord: TableauDeBordMedical
+
+PatientsInsCardiaqueChronique:
+   libelle: Nombre de patients
+   type: indicateur
+   variables nécessaires au calcul:
+   tableaux de bord: TableauDeBordMedical
+
+SejoursInsCardiaqueChronique:
+   libelle: Nombre de séjours HC
+   type: indicateur
+   variables nécessaires au calcul:
+   tableaux de bord: TableauDeBordMedical
+
+IndicateursRea:
+   libelle: Indicateurs activité de réanimation
+   type: titre
+   tableaux de bord: TableauDeBordActivite,TableauDeBordMedical
+
+IGSmoyen:
+   libelle: IGS moyen
+   type: indicateur
+   variables nécessaires au calcul: igs
+   tableaux de bord: TableauDeBordActivite, TableauDeBordMedical
+
+Ventilation:
+   libelle: Ventilation
+   type: titre
+   tableaux de bord: TableauDeBordActivite, TableauDeBordMedical
+
+pPatientVentiles:
+   libelle: Pourc. de patients ventiles
+   type: indicateur
+   variables nécessaires au calcul: 
+   tableaux de bord: TableauDeBordActivite, TableauDeBordMedical
+
+NbSejoursPatientVentilesInt:
+   libelle: Nb. sej. patients ventilés/intubés
+   type: indicateur
+   variables nécessaires au calcul: 
+   tableaux de bord: TableauDeBordActivite, TableauDeBordMedical
+
+NbJourneesVentilesInt:
+   libelle: Nb. journees ventilés/intubés
+   type: indicateur
+   variables nécessaires au calcul: 
+   tableaux de bord: TableauDeBordActivite, TableauDeBordMedical
+
+NbSejoursPatientVentilesMasque:
+   libelle: Nb. sej. patients ventilés/masque
+   type: indicateur
+   variables nécessaires au calcul: 
+   tableaux de bord: TableauDeBordActivite, TableauDeBordMedical
+
+NbSejoursPatientVentilesTrac:
+   libelle: Nb. sej. patients ventilés/trachéotomie
+   type: indicateur
+   variables nécessaires au calcul: 
+   tableaux de bord: TableauDeBordActivite,TableauDeBordMedical
+
+NbSejoursPatientVentiles48h:
+   libelle: Nb de patients intubés plus de 48h (avec ou sans ventilation)
+   type: indicateur
+   variables nécessaires au calcul: 
+   tableaux de bord: TableauDeBordActivite, TableauDeBordMedical
+
+Dialyse:
+   libelle: Dialyses & aphérèses
+   type: indicateur
+   variables nécessaires au calcul: 
+   tableaux de bord: TableauDeBordActivite, TableauDeBordMedical
+
+NbSejoursPatientsDialyses:
+   libelle: Nb sej. de patients EER (continue et discontinue)
+   type: indicateur
+   variables nécessaires au calcul: 
+   tableaux de bord: TableauDeBordActivite, TableauDeBordMedical
+
+pPatientsDialyses:
+   libelle: Pourc. de patients EER (continue et discontinue)
+   type: indicateur
+   variables nécessaires au calcul: 
+   tableaux de bord: TableauDeBordActivite, TableauDeBordMedical
+
+NbSeancesDialyses:
+   libelle: Nombre de dialyses (seances EER intermitente)
+   type: indicateur
+   variables nécessaires au calcul: 
+   tableaux de bord: TableauDeBordActivite, TableauDeBordMedical
+
+NbjourneesEERcontinue:
+   libelle: Nb. journees EER continue
+   type: indicateur
+   variables nécessaires au calcul: 
+   tableaux de bord: TableauDeBordActivite, TableauDeBordMedical
+
+NbApherese:
+   libelle: Nombre apherese
+   type: indicateur
+   variables nécessaires au calcul: 
+   tableaux de bord: TableauDeBordActivite, TableauDeBordMedical
+
+Catecholamines:
+   libelle: Catecholamine
+   type: indicateur
+   variables nécessaires au calcul: 
+   tableaux de bord: TableauDeBordActivite, TableauDeBordMedical
+
+NbSejoursPatientCatecholamine:
+   libelle: Nombre de patients sous catecholamine
+   type: indicateur
+   variables nécessaires au calcul: 
+   tableaux de bord: TableauDeBordActivite, TableauDeBordMedical
+
+PvtOrgane:
+   libelle: Prelevement organes
+   type: indicateur
+   variables nécessaires au calcul: 
+   tableaux de bord: TableauDeBordActivite, TableauDeBordMedical
+
+NbSejoursPatientsSuppPvtOrgane:
+   libelle: Nombre de patients avec supp. prélèvement organes
+   type: indicateur
+   variables nécessaires au calcul: 
+   tableaux de bord: TableauDeBordActivite, TableauDeBordMedical
+
+Mortalite:
+   libelle: Mortalité
+   type: titre
+   tableaux de bord: TableauDeBordActivite,TableauDeBordMedical
+
+pDcdRea:
+   libelle: Pourc. de deces en réanimation
+   type: indicateur
+   variables nécessaires au calcul: 
+   tableaux de bord: TableauDeBordActivite, TableauDeBordMedical
+
+pDcdHopRea:
+   libelle: Pourc. de décès hospitalier (patients de réanimation)
+   type: indicateur
+   variables nécessaires au calcul: 
+   tableaux de bord: TableauDeBordActivite, TableauDeBordMedical
+
+SejLongs:
+   libelle: Analyses durées de séjours
+   type: indicateur
+   variables nécessaires au calcul: 
+   tableaux de bord: TableauDeBordDIM
+
+nb_sej_sup30:
+   libelle: Nb. séjours durée > DMS + 30 j
+   type: indicateur
+   variables nécessaires au calcul: 
+   tableaux de bord: TableauDeBordDIM
+   
+titreTitreSejBH:
+   libelle: Sejours duree > Borne Haute du GHM
+   type: titre
+   tableaux de bord: TableauDeBordDIM
+
+nb_sej_bh:
+   libelle: Nb. séjours durée > borne Haute
+   type: indicateur
+   variables nécessaires au calcul: 
+   tableaux de bord: TableauDeBordDIM
+
+p_sej_bh:
+   libelle: Pourc. séjours durée > borne Haute
+   type: indicateur
+   variables nécessaires au calcul: 
+   tableaux de bord: TableauDeBordDIM
+   
+nb_jour_bh:
+   libelle: Nb. journée > borne Haute
+   type: indicateur
+   variables nécessaires au calcul: 
+   tableaux de bord: TableauDeBordDIM
+
+nb_jour_bh_repa:
+   libelle: Nb. journée > borne Haute (répatie par service)
+   type: indicateur
+   variables nécessaires au calcul: 
+   tableaux de bord: TableauDeBordDIM
+   
+pertes_bh:
+   libelle: Montant pertes potentielles journees > Borne Haute
+   type: indicateur
+   variables nécessaires au calcul: 
+   tableaux de bord: TableauDeBordDIM
+
+pertes_bh_repa:
+   libelle: Montant pertes potentielles journées > borne Haute
+   type: indicateur
+   variables nécessaires au calcul: 
+   tableaux de bord: TableauDeBordDIM
+
+TitreSejDMS:
+   libelle: Séjours dont la durée > DMS de référence (base nationale)
+   type: titre
+   tableaux de bord: TableauDeBordDIM
+
+nb_sej_sup_dms:
+   libelle: Nombre de séjours durée > DMS (base nationale)
+   type: indicateur
+   variables nécessaires au calcul: duree
+   tableaux de bord: TableauDeBordDIM
+
+p_sej_sup_dms:
+   libelle: Pourc. séjours durée > DMS
+   type: indicateur
+   variables nécessaires au calcul: duree
+   tableaux de bord: TableauDeBordDIM
+   
+pSejDMSrevus:
+   libelle: Pourc. séjours durée > DMS ciblés par DIM
+   type: indicateur
+   variables nécessaires au calcul: dureesejpart
+   tableaux de bord: 
+
+nb_jour_sup_dms:
+   libelle: Nombre de journées  > DMS
+   type: indicateur
+   variables nécessaires au calcul: duree
+   tableaux de bord: TableauDeBordDIM
+
+p_jour_sup_dms:
+   libelle: Pour. des journées  > DMS
+   type: indicateur
+   variables nécessaires au calcul: duree
+   tableaux de bord: TableauDeBordDIM
+
+nb_jour_sup_dms_repa:
+   libelle: Nombre de journées  > DMS service
+   type: indicateur
+   variables nécessaires au calcul: dureesejpart
+   tableaux de bord: TableauDeBordDIM
+
+p_jour_sup_dms_repa:
+   libelle: Pour. des jouréees  > DMS service
+   type: indicateur
+   variables nécessaires au calcul: dureesejpart
+   tableaux de bord: TableauDeBordDIM
+
+TitreCiblage:
+   libelle: Ciblage améliorations recettes
+   type: titre
+   tableaux de bord: 
+
+NbSejCiblage:
+   libelle: Nb séjours ciblés (optimisation large)
+   type: indicateur
+   variables nécessaires au calcul: 
+   tableaux de bord: 
+
+pSejCiblage:
+   libelle: Pourc. séjours ciblés (optimisation large)
+   type: indicateur
+   variables nécessaires au calcul: 
+   tableaux de bord:
+
+TitreSejBB:
+   libelle: Séjours durée < borne basse GHM
+   type: titre
+   tableaux de bord: TableauDeBordDIM
+
+pSejBB:
+   libelle: Pourc. séjours durée < borne basse
+   type: indicateur
+   variables nécessaires au calcul: 
+   tableaux de bord: TableauDeBordDIM
+
+MontantEXB:
+   libelle: Montant extrêmes bas
+   type: indicateur
+   variables nécessaires au calcul: 
+   tableaux de bord: TableauDeBordDIM
+
+SejRevus:
+   libelle: Détails séjours revus par le DIM
+   type: indicateur
+   variables nécessaires au calcul: 
+   tableaux de bord: 
+
+DureeResumesParType:
+   libelle: Durée des résumés de réanimation
+   type: indicateur
+   variables nécessaires au calcul: 
+   tableaux de bord: TableauDeBordActivite
+
+TitreCasemix:
+   libelle: Casemix CMD
+   type: indicateur
+   variables nécessaires au calcul: typehosp, duree
+   tableaux de bord: TableauDeBordCaseMix
+
+TitreCaseMixCMD_HC:
+   libelle: Casemix CMD HC
+   type: titre
+   tableaux de bord: TableauDeBordCaseMix
+
+CaseMixCMD_HC:
+   libelle: (NA)Casemix CMD HC
+   type: indicateur
+   variables nécessaires au calcul: ghm
+   tableaux de bord: TableauDeBordCaseMix
+
+TitreCaseMixType_HC:
+   libelle: Casemix Type HC
+   type: titre
+   tableaux de bord: TableauDeBordCaseMix
+
+CaseMixType_HC:
+   libelle: (NA)Casemix Type HC
+   type: indicateur
+   variables nécessaires au calcul: ghm
+   tableaux de bord: TableauDeBordCaseMix
+
+TitreCaseMixGHM_HC:
+   libelle: Casemix GHM HC
+   type: titre
+   tableaux de bord: TableauDeBordCaseMix
+
+CaseMixGHM_HC:
+   libelle: (NA)Casemix GHM HC
+   type: indicateur
+   variables nécessaires au calcul: ghm
+   tableaux de bord: TableauDeBordCaseMix

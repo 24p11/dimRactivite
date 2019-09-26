@@ -1,0 +1,953 @@
+---
+title: "indicateurs"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{indicateurs}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+
+- Activite MCO
+    * abréviation : TitreMCO
+    * Type : titre
+    * tableaux de bord : TableauDeBordActivite,TableauDeBordDIM,TableauDeBordMedical
+- Hospitalisation complete
+    * abréviation : TitreHC
+    * type : titre
+    * tableaux de bord :  TableauDeBordActivite,TableauDeBordDIM,TableauDeBordMedical
+- Nombre de sejours dans les structures HC
+    * abréviation : HCtot
+    * type : indicateur 
+    * variables nécessaires au calcul : typehosp
+    * tableaux de données nécessaires : rum
+    * tableaux de bord :  TableauDeBordActivite,TableauDeBordDIM,TableauDeBordMedical
+- HC 0 nuit
+    * abréviation : HC0
+    * type : indicateur 
+    * variables nécessaires au calcul : typehosp, duree
+    * tableaux de bord :  TableauDeBordActivite,TableauDeBordDIM,TableauDeBordMedical
+- HC 1 nuit
+    * abréviation : HC1
+    * type : indicateur 
+    * variables nécessaires au calcul : typehosp, duree
+    * tableaux de bord :  TableauDeBordActivite,TableauDeBordDIM,TableauDeBordMedical
+- HC 2 nuits
+    * abréviation : HC2
+    * type : indicateur 
+    * variables nécessaires au calcul : typehosp, duree
+    * tableaux de bord :  TableauDeBordActivite,TableauDeBordDIM,TableauDeBordMedical
+- details 2 sejours > 2 nuits
+    * abréviation : HC2det
+    * type : indicateur 
+    * variables nécessaires au calcul : typehosp, duree
+    * tableaux de bord :  TableauDeBordDIM
+- Nombre de sejours multi-UMA
+    * abréviation : NbMultiUMA
+    * type : indicateur 
+    * variables nécessaires au calcul : nbrum
+    * tableaux de bord :  TableauDeBordActivite
+- Nombre total de journees HC
+    * abréviation : nb_jour_hc
+    * type : indicateur 
+    * variables nécessaires au calcul : duree
+    * tableaux de bord :  TableauDeBordActivite, TableauDeBordDIM
+- Nombre total de journees HC service
+    * abréviation : nb_jour_hc_repa
+    * type : indicateur 
+    * variables nécessaires au calcul : dureesejpart
+    * tableaux de bord :  TableauDeBordActivite, TableauDeBordDIM
+- Hospitalisation patielle
+    * abréviation : TitreHP
+    * type : Titre  
+    * tableaux de bord :  TableauDeBordActivite,TableauDeBordDIM,TableauDeBordMedical
+- Nombre de sejours dans les structures HP
+    * abréviation : HPTot
+    * type : indicateur 
+    * variables nécessaires au calcul : typehosp
+    * tableaux de bord :  TableauDeBordActivite, TableauDeBordDIM, TableauDeBordMedical
+- Hopitaux de jour medicaux
+    * abréviation : HPMed
+    * type : indicateur 
+    * variables nécessaires au calcul : typehosp, cdghm
+    * tableaux de bord :  TableauDeBordActivite, TableauDeBordDIM, TableauDeBordMedical
+- Hopitaux de jour chirurgicaux
+    * abréviation : HPChir
+    * type : indicateur 
+    * variables nécessaires au calcul : typehosp, cdghm
+    * tableaux de bord :  TableauDeBordActivite, TableauDeBordDIM, TableauDeBordMedical
+- Hopitaux de jour medico-techniques
+    * abréviation : HPMedTech
+    * type : indicateur 
+    * variables nécessaires au calcul : typehosp, cdghm
+    * tableaux de bord : TableauDeBordActivite, TableauDeBordDIM, TableauDeBordMedical
+- Seances
+    * abréviation : Seances
+    * type : indicateur 
+    * variables nécessaires au calcul : cdghm
+    * tableaux de bord :  TableauDeBordActivite
+- Dialyse
+    * abréviation : SeancesDialyses
+    * type : indicateur 
+    * variables nécessaires au calcul : cdghm
+    * référentiel utilisé : ghm_seance_dialyse
+    * tableaux de bord : TableauDeBordActivite
+- Chimiotherapie
+    * abréviation : SeancesChimio
+     * type : indicateur 
+    * variables nécessaires au calcul : cdghm
+    * référentiel utilisé : ghm_seance_chimiotherapie
+    * tableaux de bord : TableauDeBordActivite
+- Radiotherapie
+    * abréviation : SeancesRadio
+    * type : indicateur 
+    * variables nécessaires au calcul : cdghm
+    * référentiel utilisé : ghm_seance_radiotherapie
+    * tableaux de bord : TableauDeBordActivite
+- Preparation radiotherapie
+    * abréviation : PrepaRadio
+    * type : indicateur 
+    * variables nécessaires au calcul : cdghm
+    * référentiel utilisé : ghm_seance_prepa_radiotherapie
+    * tableaux de bord : TableauDeBordActivite
+- Nb IVG
+    * abréviation : NbIVG
+    * type : indicateur 
+    * variables nécessaires au calcul : cdghm
+    * référentiel utilisé : ghm_ivg
+    * tableaux de bord : TableauDeBordActivite
+- Activite Chirurgicale
+    * abréviation : TitreActiviteChir
+    * type : titre 
+    * tableaux de bord : TableauDeBordActivite
+- Volume activite
+    * abréviation : TitreVolChir
+    * type : titre 
+    * tableaux de bord : TableauDeBordActivite
+- Pourc. Sej. Chirurgicaux en HC
+    * abréviation : pSejChirHC
+    * variables nécessaires au calcul : cdghm
+    * tableaux de bord : TableauDeBordActivite
+- Pourc. Sej. Chir de 0 jour
+    * abréviation : pSejChir0j
+    * variables nécessaires au calcul : cdghm,duree
+    * tableaux de bord : TableauDeBordActivite
+- Nbre Sej. Chirurgicaux 0 jour
+    * abréviation : NbChir0j
+    * type : indicateur 
+    * variables nécessaires au calcul : cdghm,duree
+    * tableaux de bord : TableauDeBordActivite
+- Activite unite de chirurgie ambulatoire
+    * abréviation : ActiviteUniteChirAmbu
+    * type : indicateur 
+    * variables nécessaires au calcul : cdghm
+    * référentiel utilisé : unite_chir_umbu
+    * tableaux de bord : 
+- Nb sejours services de chirurgie dans unite
+    * abréviation : NbSejUCAservChir
+    * type : indicateur 
+    * variables nécessaires au calcul : cdghm,duree
+    * référentiel utilisé : unite_chir_umbu
+    * tableaux de bord : 
+- Taux de rehospitalisation en chir. ambu.
+    * abréviation : TxRehopsChirAmbu
+    * variables nécessaires au calcul : cdghm,duree
+    * référentiel utilisé : unite_chir_umbu
+    * tableaux de bord : 
+- Suivi des actes marqueurs de chirurgie ambulatoire
+    * abréviation : TitreActesMarqueurs
+    * variables nécessaires au calcul : 
+    * référentiel utilisé : actes_maqueurs_chirurgie_ambulatoire
+    * tableaux de bord : 
+- Nbre de sejours avec acte marqueur
+    * abréviation : nbSejMarqueurs
+    * type : indicateur
+    * variables nécessaires au calcul : 
+    * référentiel utilisé : actes_maqueurs_chirurgie_ambulatoire
+    * tableaux de bord : 
+- Pourc. de sejours avec actes marqueurs et duree = 0 jours
+    * abréviation : pSejMarqueurs0j
+    * type : indicateur
+    * variables nécessaires au calcul : duree
+    * référentiel utilisé : actes_maqueurs_chirurgie_ambulatoire
+    * tableaux de bord : 
+- Activite de Greffe & transplantation
+    * abréviation : TitreGreffes
+    * type : titre
+    * tableaux de bord : TableauDeBordActivite,TableauDeBordCaseMix
+- Greffes de moelle
+    * abréviation : Greffes
+    * type : titre
+    * tableaux de bord : TableauDeBordActivite, TableauDeBordDIM, TableauDeBordMedical, TableauDeBordCaseMix
+- dont autogreffes
+    * abréviation : AutoGreffes
+    * type : indicateur
+    * variables nécessaires au calcul : cdghm
+    * référentiel utilisé : ghm_greffe_moelle
+    * tableaux de bord : TableauDeBordActivite,TableauDeBordDIM,TableauDeBordMedical,TableauDeBordCaseMix
+- dont allogreffes
+    * abréviation : AlloGreffes
+    * variables nécessaires au calcul : cdghm
+    * référentiel utilisé : ghm_autogreffe_moelle
+    * tableaux de bord : TableauDeBordActivite,TableauDeBordDIM,TableauDeBordMedical,TableauDeBordCaseMix
+- Transplantations
+    * abréviation : Transplantations
+    * type : indicateur
+    * variables nécessaires au calcul : cdghm
+    * référentiel utilisé : ghm_allogreffe_moelle
+    * tableaux de bord : TableauDeBordActivite,TableauDeBordDIM,TableauDeBordMedical,TableauDeBordCaseMix
+- Transplantations renales
+    * abréviation : TransplantationsRenales
+    * type : indicateur
+    * variables nécessaires au calcul : cdghm
+    * référentiel utilisé : ghm_greffe_rein
+    * tableaux de bord : TableauDeBordActivite, TableauDeBordDIM, TableauDeBordMedical, TableauDeBordCaseMix
+- Transplantatons pancreas
+    * abréviation : TransplantationsPancreas
+    * type : indicateur
+    * variables nécessaires au calcul : cdghm
+    * référentiel utilisé : ghm_greffe_pancreas
+    * tableaux de bord : TableauDeBordActivite, TableauDeBordDIM, TableauDeBordMedical, TableauDeBordCaseMix
+- Repartition HDJ
+    * abréviation : TitreRepHp
+    * type : indicateur
+    * variables nécessaires au calcul : 
+    * tableaux de bord : TableauDeBordActivite
+- Indicateurs PMSI
+    * abréviation : Qualite
+    * type : titre
+    * tableaux de bord : TableauDeBordActivite, TableauDeBordDIM
+- Durees de sejours
+    * abréviation : TitreDuree
+    * type : titre
+    * tableaux de bord : TableauDeBordActivite, TableauDeBordDIM
+- Duree moyenne sejours (Tous les sejours)
+    * abréviation : DMSbis
+    * type : indicateur
+    * variables nécessaires au calcul : duree
+    * tableaux de bord : 
+- Duree moyenne sejours (Sejours >= 1 nuit)
+    * abréviation : DMS
+    * type : indicateur
+    * variables nécessaires au calcul : duree
+    * tableaux de bord : TableauDeBordActivite, TableauDeBordDIM
+- Duree moyenne resumes (Sejours >= 1 nuit)
+    * abréviation : DMR
+    * type : indicateur
+    * variables nécessaires au calcul : dureesejpart
+    * tableaux de bord : TableauDeBordActivite, TableauDeBordDIM
+- Index de performance
+    * abréviation : TitreIP
+    * type : indicateur
+    * variables nécessaires au calcul : 
+    * tableaux de bord : TableauDeBordActivite, TableauDeBordDIM
+- IP
+    * abréviation : IP
+    * type : indicateur
+    * variables nécessaires au calcul : duree,dms_bn
+    * tableaux de bord : TableauDeBordActivite, TableauDeBordDIM
+- IP Service
+    * abréviation : IP_SERV
+    * type : indicateur
+    * variables nécessaires au calcul : dureesejpart, dms_bn, coeftime
+    * tableaux de bord : TableauDeBordActivite, TableauDeBordDIM
+- % Niveaux de severites (parmi les sejours eligibles)
+    * abréviation : NS
+    * type : indicateur
+    * variables nécessaires au calcul : cdghm
+    * tableaux de bord : TableauDeBordActivite,TableauDeBordDIM
+- % niv 2
+    * abréviation : NS_2
+    * type : indicateur
+    * variables nécessaires au calcul : cdghm
+    * tableaux de bord : TableauDeBordActivite, TableauDeBordDIM
+- % niv 3
+    * abréviation : NS_3
+    * type : indicateur
+    * variables nécessaires au calcul : cdghm
+    * tableaux de bord : TableauDeBordActivite, TableauDeBordDIM
+- % niv 4
+    * abréviation : NS_4
+    * type : indicateur
+    * variables nécessaires au calcul : cdghm
+    * tableaux de bord : TableauDeBordActivite, TableauDeBordDIM
+- Recettes
+    * abréviation : recettes
+    * type : indicateur
+    * variables nécessaires au calcul : 
+    * tableaux de bord : TableauDeBordActivite, TableauDeBordDIM
+- Recettes totales
+    * abréviation : rec_totale
+    * type : indicateur
+    * variables nécessaires au calcul : rec_totale
+    * tableaux de bord : TableauDeBordActivite, TableauDeBordDIM
+- Recettes GHS HC (hors supplements)
+    * abréviation : rec_base_hc
+    * type : indicateur
+    * variables nécessaires au calcul : rec_base, typehosp
+    * tableaux de bord : TableauDeBordActivite, TableauDeBordDIM
+- Recettes totales reparties par service
+    * abréviation : rec_totale_repa
+    * type : indicateur
+    * variables nécessaires au calcul : valopmctmonotime1
+    * tableaux de bord : TableauDeBordActivite, TableauDeBordDIM
+- Recettes totales HC reparties par service
+    * abréviation : rec_totale_repa_hc
+    * type : indicateur
+    * variables nécessaires au calcul : valopmctmonotime1
+    * tableaux de bord : TableauDeBordActivite, TableauDeBordDIM
+- Recettes GHS reparties par service HC (hors supplements)
+    * abréviation : rec_base_repa_hc
+    * type : indicateur
+    * variables nécessaires au calcul : valopmctmonotime1, rec_sup_repa
+    * tableaux de bord : TableauDeBordActivite, TableauDeBordDIM
+- Recettes GHS sejours mono UMA
+    * abréviation : rec_base_repa_mono_uma
+    * type : indicateur
+    * variables nécessaires au calcul : nbrum, valopmctmonotime1
+    * tableaux de bord : TableauDeBordActivite, TableauDeBordDIM
+- Recettes GHS reparties multi UMA
+    * abréviation : rec_base_repa_multi_uma
+    * type : indicateur
+    * variables nécessaires au calcul : nbrum,valopmctmonotime1
+    * tableaux de bord : TableauDeBordActivite, TableauDeBordDIM
+- Recettes GHS HP (hors supplements)
+    * abréviation : rec_base_hp
+    * type : indicateur
+    * variables nécessaires au calcul : rec_base
+    * tableaux de bord : TableauDeBordActivite, TableauDeBordDIM
+- Poids moyen du cas traite
+    * abréviation : TitrePMCT
+    * type : titre
+    * tableaux de bord : TableauDeBordActivite,TableauDeBordDIM
+- RMCT des sejours hospitalisation complete (rec. totale)
+    * abréviation : rmct_hc
+    * type : indicateur
+    * variables nécessaires au calcul : rec_base
+    * tableaux de bord : TableauDeBordActivite,TableauDeBordDIM
+- RMCT service (rec. totale)
+    * abréviation : rmct_repa_hc
+    * type : indicateur
+    * variables nécessaires au calcul : rec_base
+    * tableaux de bord : TableauDeBordActivite, TableauDeBordDIM
+- PMCT des sejours hospitalisation complete (tarif GHS)
+    * abréviation : pmct_hc
+    * type : indicateur
+    * variables nécessaires au calcul : rec_base
+    * tableaux de bord : TableauDeBordActivite, TableauDeBordDIM
+- PMCT service  (tarif GHS)
+    * abréviation : pmct_repa_hc
+    * type : indicateur
+    * variables nécessaires au calcul : valopmctmonotime1
+    * tableaux de bord : TableauDeBordActivite, TableauDeBordDIM
+- PMCT des sejours mono UMA
+    * abréviation : pmct_repa_mono_uma
+    * type : indicateur
+    * variables nécessaires au calcul : nbrum, valopmctmonotime1
+    * tableaux de bord : TableauDeBordActivite, TableauDeBordDIM
+- PMCT des sejours multi UMA
+    * abréviation : pmct_repa_multi_uma
+    * type : indicateur
+    * variables nécessaires au calcul : nbrum,valopmctmonotime1
+    * tableaux de bord : TableauDeBordActivite, TableauDeBordDIM
+- PMCT des sejours hospitalisation partielle
+    * abréviation : pmct_hp
+    * type : indicateur
+    * variables nécessaires au calcul : rec_base
+    * tableaux de bord : TableauDeBordActivite, TableauDeBordDIM
+- Supplements
+    * abréviation : TitreSupplements
+    * type : titre
+    * tableaux de bord : TableauDeBordActivite, TableauDeBordDIM
+- Nb journees avec sup. reanimation
+    * abréviation : nbsuprea
+    * type : indicateur
+    * variables nécessaires au calcul : 
+    * tableaux de bord : TableauDeBordActivite, TableauDeBordDIM
+- Pourc. journees avec supp. reanimation
+    * abréviation : p_nbsuprea
+    * type : indicateur
+    * variables nécessaires au calcul : 
+    * tableaux de bord : TableauDeBordActivite, TableauDeBordDIM
+- Nb journees avec sup. USI en reanimation
+    * abréviation : nssir
+    * type : indicateur
+    * variables nécessaires au calcul : 
+    * tableaux de bord : TableauDeBordActivite, TableauDeBordDIM
+- Nb journees avec sup. USI hors reanimation
+    * abréviation : stf_hr
+    * type : indicateur
+    * variables nécessaires au calcul : 
+    * tableaux de bord : TableauDeBordActivite, TableauDeBordDIM
+- Nb journees avec sup. USC
+    * abréviation : nbsupsrc
+    * type : indicateur
+    * variables nécessaires au calcul : 
+    * tableaux de bord : TableauDeBordActivite, TableauDeBordDIM
+- Pourc. journees avec sup. USC
+    * abréviation : p_nbsupsrc
+    * type : indicateur
+    * variables nécessaires au calcul : 
+    * tableaux de bord : TableauDeBordActivite, TableauDeBordDIM
+- Nb sup. Dialyses
+    * abréviation : dialhosp
+    * type : indicateur
+    * variables nécessaires au calcul : 
+    * tableaux de bord : TableauDeBordActivite, TableauDeBordDIM
+- Recettes supplements
+    * abréviation : rec_supp
+    * type : indicateur
+    * variables nécessaires au calcul : rec_totale, rec_base
+    * tableaux de bord : TableauDeBordActivite, TableauDeBordDIM
+- Recettes supplements par service
+    * abréviation : rec_supp_repa
+    * type : indicateur
+    * variables nécessaires au calcul : rec_sup_repa
+    * tableaux de bord : TableauDeBordActivite,TableauDeBordDIM
+- Gestion information medicale
+    * abréviation : GestionInfoMed
+    * type : titre
+    * tableaux de bord : 
+- Activite de cancerologie
+    * abréviation : ActiviteCancero
+    * type : titre
+    * tableaux de bord : TableauDeBordMedical
+- Nombre de patients
+    * abréviation : NbPat
+    * type : indicateur
+    * variables nécessaires au calcul : 
+    * tableaux de bord : TableauDeBordMedical
+- Nombre de nouveaux patients
+    * abréviation : NbNxPat
+    * type : indicateur
+    * variables nécessaires au calcul : 
+    * tableaux de bord : TableauDeBordMedical
+- Nombre de Sejours en HC
+    * abréviation : NbSejHC
+    * type : indicateur
+    * variables nécessaires au calcul : 
+    * tableaux de bord : TableauDeBordMedical
+- Nombre de sejours en HP
+    * abréviation : NbSejHP
+    * type : indicateur
+    * variables nécessaires au calcul : 
+    * tableaux de bord : TableauDeBordMedical
+- Nombre de sejours chirurgicaux
+    * abréviation : NbSejChir
+    * type : indicateur
+    * variables nécessaires au calcul : 
+    * tableaux de bord : TableauDeBordMedical
+- Nb de patients par localisation (appareils definis par INCA)
+    * abréviation : TitreLocInca
+    * type : titre
+    * variables nécessaires au calcul : 
+    * tableaux de bord : TableauDeBordMedical
+- (NA)Nb de patients par localisation (appareils definis par INCA)
+    * abréviation : NbPatientsParAppareilInca
+    * type : indicateur
+    * tableaux de bord : TableauDeBordMedical
+- Soins Palliatifs
+    * abréviation : SP
+    * type : indicateur
+    * tableaux de bord : TableauDeBordMedical
+- Nombre de patients pris en charge en soins palliatifs
+    * abréviation : NbPatSP
+    * type : indicateur
+    * variables nécessaires au calcul : 
+    * tableaux de bord : TableauDeBordMedical
+- Nombre de patients lits dedies de soins palliatifs
+    * abréviation : NbPatSpLitsDedies
+    * type : indicateur
+    * variables nécessaires au calcul : 
+    * tableaux de bord : TableauDeBordMedical
+- Nombre de deces
+    * abréviation : DCD
+    * type : indicateur
+     * variables nécessaires au calcul : 
+    * tableaux de bord : TableauDeBordMedical
+- Nombre de deces total
+    * abréviation : NbDCD
+    * type : indicateur
+    * variables nécessaires au calcul : 
+    * tableaux de bord : TableauDeBordMedical
+- Nombre de deces patients cancer
+    * abréviation : NbDCDcancer
+    * type : indicateur
+    * variables nécessaires au calcul : 
+    * tableaux de bord : TableauDeBordMedical
+- Nombre de deces hors soins palliatifs
+    * abréviation : NbDCDNonSP
+    * type : indicateur
+    * variables nécessaires au calcul : 
+    * tableaux de bord : TableauDeBordMedical
+- Nombre de deces Z515 GHM non SP
+    * abréviation : NbDCDspGhmNonSP
+    * type : indicateur
+    * variables nécessaires au calcul : 
+    * tableaux de bord : TableauDeBordMedical
+- Nombre de deces Z515 GHM SP
+    * abréviation : NbDCDspGhmSP
+    * type : indicateur
+    * variables nécessaires au calcul : 
+    * tableaux de bord : TableauDeBordMedical
+- Nombre de deces en soins palliatif, lit standard
+    * abréviation : NbDCDspLitsStandards
+    * type : indicateur
+    * variables nécessaires au calcul : 
+    * tableaux de bord : TableauDeBordMedical
+- Nombre de deces lits dedies de soins palliatifs
+    * abréviation : NbDCDspLitsDedies
+    * type : indicateur
+    * variables nécessaires au calcul : 
+    * tableaux de bord : TableauDeBordMedical
+- Nombre de deces lits dedies en unite de soins palliatifs
+    * abréviation : NbDCDspUsp
+    * type : indicateur
+    * variables nécessaires au calcul : 
+    * tableaux de bord : 
+- Nombre de Sejours avec un diagnostic de soins palliatifs
+    * abréviation : SejSp
+    * type : indicateur
+    * variables nécessaires au calcul : 
+    * tableaux de bord : TableauDeBordMedical
+- Sejours dans un GHM non soins palliatifs
+    * abréviation : SejSpGhmNonSP
+    * type : indicateur
+    * variables nécessaires au calcul : 
+    * tableaux de bord : TableauDeBordMedical
+- Sejours GHM soins palliatifs lits standards
+    * abréviation : SejSpLitsStandards
+    * type : indicateur
+    * variables nécessaires au calcul : 
+    * tableaux de bord : TableauDeBordMedical
+- Sejours lits dedies de soins palliatifs
+    * abréviation : SejSpLitsDedies
+    * type : indicateur
+    * variables nécessaires au calcul : 
+    * tableaux de bord : TableauDeBordMedical
+- Nombre de journees avec un diagnostic de soins palliatifs
+    * abréviation : JourneesSp
+    * type : indicateur
+    * variables nécessaires au calcul : 
+    * tableaux de bord : TableauDeBordMedical
+- Journees GHM soins palliatifs lits standards
+    * abréviation : JourneesSpLitsStandards
+    * type : indicateur
+    * variables nécessaires au calcul : 
+    * tableaux de bord : TableauDeBordMedical
+- Journees lits dedies de soins palliatifs
+    * abréviation : JourneesSpLitsDedies
+    * type : indicateur
+    * variables nécessaires au calcul : 
+    * tableaux de bord : TableauDeBordMedical
+- Lits Dedies
+    * abréviation : LitsDedies
+    * type : indicateur
+    * variables nécessaires au calcul : 
+    * tableaux de bord : TableauDeBordMedical
+- Moyenne du nombre de lits dedies utilises
+    * abréviation : NbLitsDediesUtilises
+    * type : indicateur
+    * variables nécessaires au calcul : 
+    * tableaux de bord : TableauDeBordMedical
+- Douleur
+    * abréviation : Douleur
+    * type : indicateur
+    * variables nécessaires au calcul : 
+    * tableaux de bord : TableauDeBordMedical
+- Nombre de patients avec diagnostic de douleur
+    * abréviation : PatientsDouleur
+    * type : indicateur
+    * variables nécessaires au calcul : 
+    * tableaux de bord : TableauDeBordMedical
+- Nombre de sejours avec diagnostic de douleur
+    * abréviation : SejoursDouleur
+    * type : indicateur
+    * variables nécessaires au calcul : 
+    * tableaux de bord : TableauDeBordMedical
+- Pathologies infectieuses
+    * abréviation : Infectieux
+    * type : titre
+    * tableaux de bord : TableauDeBordMedical
+- Nb de sejours avec un diagnostic de pathologie infectieuses
+    * abréviation : NbSejoursInfectieux
+    * type : indicateur
+    * variables nécessaires au calcul :
+    * tableaux de bord : TableauDeBordMedical
+- Nb de patients porteurs/infectes par une BMR
+    * abréviation : NbPateintsBMR
+    * type : indicateur
+    * variables nécessaires au calcul :
+    * tableaux de bord : TableauDeBordMedical
+- Nb de séjours de patients porteurs/infectes par une BMR
+    * abréviation : NbSejoursBMR
+    * type : indicateur
+    * variables nécessaires au calcul :
+    * tableaux de bord : TableauDeBordMedical
+- Nb sejours de patients porteurs de BMR
+    * abréviation : NbSejoursPortageBMR
+    * type : indicateur
+    * variables nécessaires au calcul :
+    * tableaux de bord : TableauDeBordMedical
+- Autres pathologies chroniques
+    * abréviation : AutresPathologiesChroniques
+    * type : indicateur
+    * variables nécessaires au calcul :
+    * tableaux de bord : TableauDeBordMedical
+- VIH
+    * abréviation : VIH
+    * type : titre
+    * tableaux de bord : TableauDeBordMedical
+- Nombre de patients
+    * abréviation : PatientsVIH
+    * type : indicateur
+    * variables nécessaires au calcul :
+    * tableaux de bord : TableauDeBordMedical
+- Nombre de sejours HC
+    * abréviation : SejoursVIH_HC
+    * type : indicateur
+    * variables nécessaires au calcul :
+    * tableaux de bord : TableauDeBordMedical
+- Nombre de sejours HP
+    * abréviation : SejoursVIH_HP
+    * type : indicateur
+    * variables nécessaires au calcul :
+    * tableaux de bord : TableauDeBordMedical
+- Diabete
+    * abréviation : Diabete
+    * type : titre
+    * tableaux de bord : TableauDeBordMedical
+- Nombre de patients
+    * abréviation : PatientsDiabete
+    * type : indicateur
+    * variables nécessaires au calcul :
+    * tableaux de bord : TableauDeBordMedical
+- Nombre de sejours HC
+    * abréviation : SejoursDiabete_HC
+    * type : indicateur
+    * variables nécessaires au calcul :
+    * tableaux de bord : TableauDeBordMedical
+- Nombre de sejours HP
+    * abréviation : SejoursDiabete_HP
+    * type : indicateur
+    * variables nécessaires au calcul :
+    * tableaux de bord : TableauDeBordMedical
+- Insuffisance renale chronique
+    * abréviation : InsRenaleChronique
+    * type : titre
+    * tableaux de bord : TableauDeBordMedical
+- Nombre de patients
+    * abréviation : PatientsInsRenaleChronique
+    * type : indicateur
+    * variables nécessaires au calcul :
+    * tableaux de bord : TableauDeBordMedical
+- Nombre de sejours HC
+    * abréviation : SejoursInsRenaleChronique_HC
+    * type : indicateur
+    * variables nécessaires au calcul :
+    * tableaux de bord : TableauDeBordMedical
+- Nombre de sejours HP
+    * abréviation : SejoursInsRenaleChronique_HC
+    * type : indicateur
+    * variables nécessaires au calcul :
+    * tableaux de bord : TableauDeBordMedical
+- Insuffisance respiratoire chronique
+    * type : titre
+    * tableaux de bord : TableauDeBordMedical
+- Nombre de patients
+    * abréviation : PatientsInsRespiratoireChronique
+    * type : indicateur
+    * variables nécessaires au calcul :
+    * tableaux de bord : TableauDeBordMedical
+- Nombre de sejours HC
+    * abréviation : SejoursInsRespiratoireChronique_HC
+    * type : indicateur
+    * variables nécessaires au calcul :
+    * tableaux de bord : TableauDeBordMedical
+- Nombre de sejours HP
+    * abréviation : SejoursInsRespiratoireChronique_HP
+    * type : indicateur
+    * variables nécessaires au calcul :
+    * tableaux de bord : TableauDeBordMedical
+- Insuffisance cardiaque chronique
+    * abréviation : InsCardiaqueChronique
+    * type : titre
+    * tableaux de bord : TableauDeBordMedical
+- Nombre de patients
+    * abréviation : PatientsInsCardiaqueChronique
+    * type : indicateur
+    * variables nécessaires au calcul :
+    * tableaux de bord : TableauDeBordMedical
+- Nombre de sejours HC
+    * abréviation : SejoursInsCardiaqueChronique
+    * type : indicateur
+    * variables nécessaires au calcul :
+    * tableaux de bord : TableauDeBordMedical
+- Indicateurs activite de reanimation
+    * abréviation : IndicateursRea
+    * type : titre
+    * tableaux de bord : TableauDeBordActivite,TableauDeBordMedical
+- IGS moyen
+    * abréviation : GSmoyen
+    * type : indicateur
+    * variables nécessaires au calcul : igs
+    * tableaux de bord : TableauDeBordActivite, TableauDeBordMedical
+- Ventilation
+    * abréviation : Ventilation
+    * type : titre
+    * tableaux de bord : TableauDeBordActivite, TableauDeBordMedical
+- Pourc. de patients ventiles
+    * abréviation : pPatientVentiles
+    * type : indicateur
+    * variables nécessaires au calcul : 
+    * tableaux de bord : TableauDeBordActivite, TableauDeBordMedical
+- Nb. sej. patients ventiles/intubes
+    * abréviation : NbSejoursPatientVentilesInt
+    * type : indicateur
+    * variables nécessaires au calcul : 
+    * tableaux de bord : TableauDeBordActivite, TableauDeBordMedical
+- Nb. journees ventiles/intubes
+    * abréviation : NbJourneesVentilesInt
+    * type : indicateur
+    * variables nécessaires au calcul : 
+    * tableaux de bord : TableauDeBordActivite, TableauDeBordMedical
+- Nb. sej. patients ventiles/masque
+    * abréviation : NbSejoursPatientVentilesMasque
+    * type : indicateur
+    * variables nécessaires au calcul : 
+    * tableaux de bord : TableauDeBordActivite, TableauDeBordMedical
+- Nb. sej. patients ventiles/tracheotomie
+    * abréviation : NbSejoursPatientVentilesTrac
+    * type : indicateur
+    * variables nécessaires au calcul : 
+    * tableaux de bord : TableauDeBordActivite,TableauDeBordMedical
+- Nb de patients intubes plus de 48h (avec ou sans ventilation)
+    * abréviation : NbSejoursPatientVentiles48h
+    * type : indicateur
+    * variables nécessaires au calcul : 
+    * tableaux de bord : TableauDeBordActivite, TableauDeBordMedical
+- Dialyses & aphereses
+    * abréviation : Dialyse
+    * type : indicateur
+    * variables nécessaires au calcul : 
+    * tableaux de bord : TableauDeBordActivite, TableauDeBordMedical
+- Nb sej. de patients EER (continue et discontinue)
+    * abréviation : NbSejoursPatientsDialyses
+    * type : indicateur
+    * variables nécessaires au calcul : 
+    * tableaux de bord : TableauDeBordActivite, TableauDeBordMedical
+- Pourc. de patients EER (continue et discontinue)
+    * abréviation : pPatientsDialyses
+    * type : indicateur
+    * variables nécessaires au calcul : 
+    * tableaux de bord : TableauDeBordActivite, TableauDeBordMedical
+- Nombre de dialyses (seances EER intermitente)
+    * abréviation : NbSeancesDialyses
+    * type : indicateur
+    * variables nécessaires au calcul : 
+    * tableaux de bord : TableauDeBordActivite, TableauDeBordMedical
+- Nb. journees EER continue
+    * abréviation : NbjourneesEERcontinue
+    * type : indicateur
+    * variables nécessaires au calcul : 
+    * tableaux de bord : TableauDeBordActivite, TableauDeBordMedical
+- Nombre apherese
+    * abréviation : NbApherese
+    * type : indicateur
+    * variables nécessaires au calcul : 
+    * tableaux de bord : TableauDeBordActivite, TableauDeBordMedical
+- Catecholamines
+    * abréviation : Catecholamine
+    * type : indicateur
+    * variables nécessaires au calcul : 
+    * tableaux de bord : TableauDeBordActivite, TableauDeBordMedical
+- Nombre de patients sous catecholamine
+    * abréviation : NbSejoursPatientCatecholamine
+    * type : indicateur
+    * variables nécessaires au calcul : 
+    * tableaux de bord : TableauDeBordActivite, TableauDeBordMedical
+- Prelevement organes
+    * abréviation : PvtOrgane
+    * type : indicateur
+    * variables nécessaires au calcul : 
+    * tableaux de bord : TableauDeBordActivite, TableauDeBordMedical
+- Nombre de patients avec supp. prelevement organes
+    * abréviation : NbSejoursPatientsSuppPvtOrgane
+    * type : indicateur
+    * variables nécessaires au calcul : 
+    * tableaux de bord : TableauDeBordActivite, TableauDeBordMedical
+- Mortalite
+    * abréviation : Mortalite
+    * type : titre
+    * tableaux de bord : TableauDeBordActivite,TableauDeBordMedical
+- Pourc. de deces en reanimation
+    * abréviation : pDcdRea
+    * type : indicateur
+    * variables nécessaires au calcul : 
+    * tableaux de bord : TableauDeBordActivite, TableauDeBordMedical
+- Pourc. de deces hospitalier (patients de reanimation)
+    * abréviation : pDcdHopRea
+    * type : indicateur
+    * variables nécessaires au calcul : 
+    * tableaux de bord : TableauDeBordActivite, TableauDeBordMedical
+- Analyses durees de sejours
+    * abréviation : SejLongs
+    * type : indicateur
+    * variables nécessaires au calcul : 
+    * tableaux de bord : TableauDeBordDIM
+- Nb. Sejours duree > DMS + 30 j
+    * abréviation : nb_sej_sup30
+    * type : indicateur
+    * variables nécessaires au calcul : 
+    * tableaux de bord : TableauDeBordDIM
+- Sejours duree > Borne Haute du GHM
+    * abréviation : titreTitreSejBH
+    * type : titre
+    * tableaux de bord : TableauDeBordDIM
+- Nb. Sejours duree > Borne Haute
+    * abréviation : nb_sej_bh
+    * type : indicateur
+    * variables nécessaires au calcul : 
+    * tableaux de bord : TableauDeBordDIM
+- Pourc. Sejours duree > Borne Haute
+    * abréviation : p_sej_bh
+    * type : indicateur
+    * variables nécessaires au calcul : 
+    * tableaux de bord : TableauDeBordDIM
+- Nb. Journee > Borne Haute
+    * abréviation : nb_jour_bh
+    * type : indicateur
+    * variables nécessaires au calcul : 
+    * tableaux de bord : TableauDeBordDIM
+- Nb. Journee > Borne Haute (répatie par service)
+    * abréviation : nb_jour_bh_repa
+    * type : indicateur
+    * variables nécessaires au calcul : 
+    * tableaux de bord : TableauDeBordDIM
+- Montant pertes potentielles journees > Borne Haute
+    * abréviation : pertes_bh
+    * type : indicateur
+    * variables nécessaires au calcul : 
+    * tableaux de bord : TableauDeBordDIM
+- Montant pertes potentielles journees > Borne Haute
+    * abréviation : pertes_bh_repa
+    * type : indicateur
+    * variables nécessaires au calcul : 
+    * tableaux de bord : TableauDeBordDIM
+- Sejours dont la duree > DMS de reference (Base nationale)
+    * abréviation : TitreSejDMS
+    * type : titre
+    * tableaux de bord : TableauDeBordDIM
+- Nombre de sejours duree > DMS (base nationale)
+    * abréviation : nb_sej_sup_dms
+    * type : indicateur
+    * variables nécessaires au calcul : duree
+    * tableaux de bord : TableauDeBordDIM
+- Pourc. Sejours duree > DMS
+    * abréviation : p_sej_sup_dms
+    * type : indicateur
+    * variables nécessaires au calcul : duree
+    * tableaux de bord : TableauDeBordDIM
+- Pourc. Sejours duree > DMS cibles par DIM
+    * abréviation : pSejDMSrevus
+    * type : indicateur
+    * variables nécessaires au calcul : dureesejpart
+    * tableaux de bord : 
+- Nombre de journees  > DMS
+    * abréviation : nb_jour_sup_dms
+    * type : indicateur
+    * variables nécessaires au calcul : duree
+    * tableaux de bord : TableauDeBordDIM
+- Pour. des journees  > DMS
+    * abréviation : p_jour_sup_dms
+    * type : indicateur
+    * variables nécessaires au calcul : duree
+    * tableaux de bord : TableauDeBordDIM
+- Nombre de journees  > DMS service
+    * abréviation : nb_jour_sup_dms_repa
+    * type : indicateur
+    * variables nécessaires au calcul : dureesejpart
+    * tableaux de bord : TableauDeBordDIM
+- Pour. des journees  > DMS service
+    * abréviation : p_jour_sup_dms_repa
+    * type : indicateur
+    * variables nécessaires au calcul : dureesejpart
+    * tableaux de bord : TableauDeBordDIM
+- Ciblage ameliorations recettes
+    * abréviation : TitreCiblage
+    * type : titre
+    * tableaux de bord : 
+- Nb sejours cibles (optimisation large)
+    * abréviation : NbSejCiblage
+    * type : indicateur
+    * variables nécessaires au calcul : 
+    * tableaux de bord : 
+- Pourc. Sejours cibles (optimisation large)
+    * abréviation : pSejCiblage
+    * type : indicateur
+    * variables nécessaires au calcul : 
+    * tableaux de bord :
+-Sejours duree < Borne Basse GHM
+    * abréviation : TitreSejBB
+    * type : titre
+    * tableaux de bord : TableauDeBordDIM
+- Pourc. Sejours duree < Borne Basse
+    * abréviation : pSejBB
+    * type : indicateur
+    * variables nécessaires au calcul : 
+    * tableaux de bord : TableauDeBordDIM
+- Montant Extremes bas
+    * abréviation : MontantEXB
+    * type : indicateur
+    * variables nécessaires au calcul : 
+    * tableaux de bord : TableauDeBordDIM
+- Details sejours revus par le DIM
+    * abréviation : SejRevus
+    * type : indicateur
+    * variables nécessaires au calcul : 
+    * tableaux de bord : 
+- Duree des resumes de reanimation
+    * abréviation : DureeResumesParType
+    * type : indicateur
+    * variables nécessaires au calcul : 
+    * tableaux de bord : TableauDeBordActivite
+- Casemix CMD
+    * abréviation : TitreCasemix
+    * type : indicateur
+    * variables nécessaires au calcul : typehosp, duree
+    * tableaux de bord : TableauDeBordCaseMix
+- Casemix CMD HC
+    * abréviation : TitreCaseMixCMD_HC
+    * type : titre
+    * tableaux de bord : TableauDeBordCaseMix
+- (NA)Casemix CMD HC
+    * abréviation : CaseMixCMD_HC
+    * type : indicateur
+    * variables nécessaires au calcul : CaseMixCMD_HC
+    * variables nécessaires au calcul : ghm
+    * tableaux de bord : TableauDeBordCaseMix
+- Casemix Type HC
+    * abréviation : TitreCaseMixType_HC
+    * type : titre
+    * tableaux de bord : TableauDeBordCaseMix
+- (NA)Casemix Type HC
+    * abréviation : CaseMixType_HC
+    * type : indicateur
+    * variables nécessaires au calcul : ghm
+    * tableaux de bord : TableauDeBordCaseMix
+- Casemix GHM HC
+    * abréviation : TitreCaseMixGHM_HC
+    * type : titre
+    * tableaux de bord : TableauDeBordCaseMix
+- (NA)Casemix GHM HC
+    * abréviation : CaseMixGHM_HC
+    * type : indicateur
+    * variables nécessaires au calcul : ghm
+    * tableaux de bord : TableauDeBordCaseMix
