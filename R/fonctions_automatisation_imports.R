@@ -405,7 +405,7 @@ adzipRemonteee<-function( p, ext_to_import = NULL ){
 #' @export 
 verif_structure<-function(rum,fichier_structure){
   
-  manq <- rum %>% dplyr::filter(! cdurm %in% fichier_structure$cdurm )
+  manq <- rum %>% dplyr::filter( ! paste0(nofiness,cdurm) %in% paste0(fichier_structure$nofiness,fichier_structure$cdurm ))
   
   if(nrow(manq)==0){
     message(
@@ -531,6 +531,8 @@ save_remontees<-function(remontees){
 #' charge en mémoire les objets définitifs rum,rum_v,rsa,rsa_v,diagnostics, actes, vano préparé dans le RData
 #'
 #' @param remontees_sel tibble de type analyse_remontee avec l'ensemble des années à charger
+#' @param extra logical, si TRUE importe également les données de valorisation non consolidée de l'année antérieure, 
+#' et les données de l'année valorisées avec les tarifs de l'année antérieure
 #'
 #' @return NULL
 #' @examples
@@ -543,7 +545,7 @@ save_remontees<-function(remontees){
 #' @export load_RData
 #' @usage load_RData( remontees_sel )
 #' @export 
-load_RData<- function( remontees_sel ){
+load_RData<- function( remontees_sel, extra = FALSE ){
   
 
   
@@ -554,8 +556,20 @@ load_RData<- function( remontees_sel ){
     diagnostics <<- NULL
     actes <<- NULL
     vano <<- NULL
+    
+    if( extra ){
+      
+      rum_v_nonconsol <<- NULL
+      rsa_v_nonconsol <<- NULL
+      rum_v_tarifsante <<- NULL
+      rsa_v_tarifsante <<- NULL 
+      
+    }
   
   
+    a_max <- as.numeric( max( sel_remontees_import$annee ) )
+    m_min <- min( sel_remontees_import$mois )
+    
     for(i in 1:nrow(remontees_sel)){
       
       p= pmeasyr::noyau_pmeasyr(finess = remontees_sel$finess[i] ,
@@ -565,6 +579,7 @@ load_RData<- function( remontees_sel ){
       )
       
       
+
 
       load(paste0(getOption("dimRactivite.path"),'/',p$finess,'.',p$annee,'.',p$mois,'.RData'))
       
@@ -584,17 +599,55 @@ load_RData<- function( remontees_sel ){
                 paste0('pmctmono_',p$annee,'_',p$mois))
       )
       
+      if( extra == TRUE & p$annee == a_max-1 & m_min != 12 ){
+        
+        load(paste0(getOption("dimRactivite.path"),'/',p$finess,'.',p$annee,'.',m_min,'.RData'))
+        
+        rum_v_nonconsol <<- get(paste0('rum_v','_',p$annee,'_',m_min))
+        
+        rsa_v_nonconsol <<- get(paste0('rsa_v','_',p$annee,'_',m_min))
+                                
+        rm(list=c(paste0('rum','_',p$annee,'_',m_min),
+                  paste0('rum_v_',p$annee,'_',m_min),
+                  paste0('rsa_',p$annee,'_',m_min),
+                  paste0('rsa_v_',p$annee,'_',m_min),
+                  paste0('vano_',p$annee,'_',m_min),
+                  paste0('pmctmono_',p$annee,'_',m_min))
+        )
+                                
+      }
+      
+      if( extra == TRUE & p$annee == a_max ){
+        
+        load(paste0(getOption("dimRactivite.path"),'/',p$finess,'.',p$annee,'.',p$mois,'.tarifs_anterieurs.RData'))
+        
+        rum_v_tarifsante <<- get(paste0('rum_v','_tarifs_anterieurs_',p$annee,'_',p$mois))
+        
+        rsa_v_tarifsante <<- get(paste0('rsa_v','_tarifs_anterieurs_',p$annee,'_',p$mois))                                 
+                                                          
+        rm(list=c(paste0('rum_v_','_tarifs_anterieurs_',p$annee,'_',p$mois),
+                  paste0('rsa_v_','_tarifs_anterieurs_',p$annee,'_',p$mois))
+        )
+                                                          
+      }
+      
+      
       
     }
     
     
     
+    msg_for_extra = ""
+    if(extra){
+      msg_for_extra = "rum_v et rsa_v tarifsante , rum_v et rsa_v nonconsol"
+    }
     
     message(
-      "\n Importés dans l'espace de travail :",
-      "annees : ", toString(paste(unique(rsa$ansor),collapse = '/')) ,
+      "\n Importés dans l'espace de travail : \n",
+      "annees : ", toString(paste(unique(rsa$ansor),collapse = '/')) , "\n",
       "rsa, rsa_v  : ",  toString(nrow(rsa)) , " lignes \n",
-      "rum, rum_v :", toString(nrow(rum)), " lignes \n"
+      "rum, rum_v :", toString(nrow(rum)), " lignes \n",
+      msg_for_extra
     )
   
 }
@@ -640,7 +693,7 @@ load_med<- function( remontees_sel ){
     
     adzipRemonteee( p, ext_to_import = c("med","medatu") )
     
-    med_t2a<<-dplyr::bind_rows(med, pmeasyr::imed_mco(p))
+    med_t2a<<-dplyr::bind_rows(med_t2a, pmeasyr::imed_mco(p))
     
     pmeasyr::adelete( p, 
                       liste = c("med","medatu"), 
@@ -696,7 +749,7 @@ load_dmi<- function( remontees_sel ){
     
     adzipRemonteee( p, ext_to_import = c("dmip","dmi") )
     
-    dmi_t2a<<-dplyr::bind_rows(med, pmeasyr::idmi_mco(p))
+    dmi_t2a<<-dplyr::bind_rows(dmi_t2a, pmeasyr::idmi_mco(p))
     
     pmeasyr::adelete( p, 
                       liste = c("dmip","dmi"), 

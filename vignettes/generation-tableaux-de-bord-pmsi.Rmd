@@ -241,7 +241,7 @@ vals = fichier_structure%>%select(!!niveau)%>%unique()%>%flatten_chr()
 
 for (val in vals ){
   
-  #tdb[[val]]<-dimRactivite:::make_tdb( val, niveau, annee, mois )
+  #tdb[[val]]<-dimRactivite::make_tdb( val, niveau, annee, mois )
   
 }
 
@@ -251,7 +251,7 @@ vals = fichier_structure%>%select(!!niveau)%>%unique()%>%flatten_chr()
 
 for (val in vals ){
   
-  #tdb[[val]]<-dimRactivite:::make_tdb( val, niveau, annee, mois )
+  #tdb[[val]]<-dimRactivite::make_tdb( val, niveau, annee, mois )
   
 }
 
@@ -261,7 +261,7 @@ vals = fichier_structure%>%select(!!niveau)%>%unique()%>%flatten_chr()
 
 for ( val in vals ){
   
-#  tdb[[val]]<-make_tdb( val, niveau, annee, mois )
+#  tdb[[val]]<-dimRactivite::make_tdb( val, niveau, annee, mois )
   
 }
 

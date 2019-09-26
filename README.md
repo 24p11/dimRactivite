@@ -1,5 +1,4 @@
 
-<!-- README.md is generated from README.Rmd. Please edit that file -->
 dimRactivite
 ============
 
@@ -82,9 +81,12 @@ Paramètres
 L'ensemble des paramètres nécessaires au bon fonctionnement du package (chemin des fichiers, nombre d'années d'antériorité pour génération des tableaux de bord, variables du fichier structure,... ) est décrit dans un fichier yaml (un exemple de fichier se trouve dans le dossier demos)
 
 #### Accès aux options
-L'ensemble des paramètres seront chargés lors de l'appel du package. Il est possible de recharger ces paramètres après modification :
+Le package utilise les fonctionnalités offertes par R pour stocker des variables permettant d’exécuter les différentes fonctions (cf documentation R [option settings](https://stat.ethz.ch/R-manual/R-devel/library/base/html/options.html)).
+
+On utilisera ici un fichier au yaml qui sera interprété par la fonction ```update_option``` pour mettre à jour les options locales.
+
 ```r
-upate_options()
+upate_options("path/to/file")
 ```
 
 Les options du package sont accessibles une fois le package installé par la fonction :
@@ -94,3 +96,33 @@ getOption("dimRactivite.option_name")
 
 où option_name est le nom de l'option.
 
+##### Liste des options
+
+
+- ```path``` = chemin des vers le dossier contenant les archives PMSI
+- ```path_tdb_files``` = chemin vers un dossier permettant d'enregistrer les tableaux de bord
+
+- ```extensions``` = extension des fichiers qui seront reconnus par la fonction ```scan_path```.
+  * Valeurs par défaut :  rum,  rss,  rsa, rha, ano, tra, ium, leg, med, medatu, pie, porg, diap
+
+- ```fichiers_imco```: liste des types de fichiers nécessaires pour importer une archive
+  * valeurs par défaut :
+     - ```in``` : rss
+     - ```out```: rsa, tra, ano, ium, diap, porg, pie
+
+- ```services_exclus``` = liste des services présents dans le fichier structure que l'on souhaite extraire de l'analyse pour les tableaux de bord (fonction ```get_data```)
+
+- ```fichier_structure``` = chemin vers le fichier structure (au format xlsx) et nom des colonnes. Le fichier doit contenir au moins une colonne cdurm (qui correspond au numéro d'UMA) qui permettra le merge avec la table rum. Pour utiliser les tableaux de bord globaux, il sera nécessaire d'avoir également une colonne hopital, pole et service.
+
+- ```gestion_doublons_rum ``` = règle de gestion des doublons pour compter les séjours dans les indicateurs d'activité
+   * valeurs par défaut
+      - service: service
+      - pole: service
+      - Centre de Traitement des Brûlés: pole
+
+- ```profondeur_tdb``` = profondeur en année par défaut des tableaux de bord.
+   * valeur par défaut = 5
+
+##### Fichier indicateurs
+
+Le package le calcul et la mise en forme de nombreux indicateurs de suivi de l'activité et de la valorisation des séjours (cf liste des indicateurs)

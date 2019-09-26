@@ -92,11 +92,11 @@ cancer_rsa <- dplyr::inner_join(cancer_pat,
 df<-get_data(inner_join(rum,rum_v), a =(annee-3):annee, m = 1:mois )
 
 
-tdb <- get_activite_sejours( df, structure )
+tdb <- get_activite_sejours( df, fichier_structure )
 path_file=paste0(path_res,'/',annee,'/','TableauDeBordGeneral',annee,stringr::str_pad(mois,2,"left","0"),'cum.xls')  
 write.table( tdb, file=path_file, sep='\t', row.names=T, col.names=NA, na='' , fileEncoding = "utf-8" )
 
-tdb <- get_activite_recettes( df, structure )
+tdb <- get_activite_recettes( df, fichier_structure )
 path_file=paste0(path_res,'/',annee,'/','TableauDeBordValorisation',annee,stringr::str_pad(mois,2,"left","0"),'cum.xls')  
 write.table( tdb, file=path_file, sep='\t', row.names=T, col.names=NA, na='' , fileEncoding = "utf-8" )
 
