@@ -72,3 +72,5 @@ inds=get_indicateurs(nom="TableauDeBordDIM",val="Lariboisiere")
 #Génération du tableau de bord
 #####################################
 tdb<-get_tdb(df=df,indicateurs=inds)
+
+

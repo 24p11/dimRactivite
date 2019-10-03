@@ -60,7 +60,7 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
 
   #Données utiles pour la valorisation
   df<-dplyr::left_join( df %>% mutate( noghs = as.numeric(noghs), anseqta = as.numeric(anseqta) ),
-                referentiel_ghm_tarfis%>%rename( noghs = ghs, dms_n = dms )%>%select( anseqta, ghm, noghs, dms_n, bb,bh ) )
+                referentiel_ghm_tarfis%>%rename( noghs = ghs )%>%select( anseqta, ghm, noghs, dms_n, bb,bh ) )
 
   tb<-list()
 
@@ -418,7 +418,7 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
   #Index de performance
   ###########################################################################
   if('IP'%in%indicateurs){
-    tb[['IP']]<-as.data.frame(t(sapply(as.numeric(levels(df$pivot)),function(x)IP_SEJOUR(df%>%filter(ansor == x)))))
+    tb[['IP']]<-as.data.frame(t(sapply(as.numeric(levels(df$pivot)),function(x)IP_SEJOUR(df%>%filter(pivot == x)))))
 
     names(tb[['IP']])<-as.numeric(levels(df$pivot))
   }
@@ -427,7 +427,7 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
   #Index de performance service
   ###########################################################################
   if('IP_SERV'%in%indicateurs){
-    tb[['IP_SERV']]<-as.data.frame(t(sapply(as.numeric(levels(df$pivot)),function(x)IP_SERVICE(df%>%filter(ansor == x)))))
+    tb[['IP_SERV']]<-as.data.frame(t(sapply(as.numeric(levels(df$pivot)),function(x)IP_SERVICE(df%>%filter(pivot == x)))))
 
     names(tb[['IP_SERV']])<-as.numeric(levels(df$pivot))
   }
@@ -690,6 +690,92 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
 
     tb[['pmct_hp']]<-     round( tb[['rec_base_hp']] / sum(df$doublon[df$typehosp=="P"]) )
   }
+  
+  
+  #Recette journalières
+  ############################################################################
+  tb[['rec_totale_jour_hc']]<- round(
+    with(df%>%filter(typehosp=='C')%>%distinct(nofiness,ansor,cle_rsa,.keep_all = T),
+         tapply(rec_totale,pivot,sum,na.rm=T)) / 
+    with(df%>%filter(typehosp == 'C')%>%distinct(nofiness,ansor,cle_rsa,.keep_all = T),
+         tapply(duree,pivot,sum,na.rm=T))
+  )
+
+  
+  tb[['rec_base_jour_hc']]<- round(
+    with(df%>%filter(typehosp=='C')%>%distinct(nofiness,ansor,cle_rsa,.keep_all = T),
+         tapply(rec_base,pivot,sum,na.rm=T)) / 
+    with(df%>%filter(typehosp == 'C')%>%distinct(nofiness,ansor,cle_rsa,.keep_all = T),
+           tapply(duree,pivot,sum,na.rm=T))
+  )
+  
+
+  tb[['rec_totale_jour_hc_repa']]<- round(
+    with(df%>%filter(typehosp=='C')%>%distinct(nofiness,ansor,cle_rsa,.keep_all = T),
+         tapply(valopmctmonotime1,pivot,sum,na.rm=T)) / with(df%>%filter(typehosp == 'C'),tapply(dureesejpart,pivot,sum,na.rm=T))
+  )
+  
+  tb[['rec_base_jour_hc_repa']]<- round(
+    with(df%>%filter(typehosp=='C')%>%distinct(nofiness,ansor,cle_rsa,.keep_all = T),
+         tapply(valopmctmonotime1-rec_sup_repa,pivot,sum,na.rm=T)) / with(df%>%filter(typehosp == 'C'),tapply(dureesejpart,pivot,sum,na.rm=T))
+  )
+
+  
+  ##Détails recettes
+  if('0_nuit_nb_sej'%in%indicateurs){
+    
+    nb_journees <- with(df,tapply(dureesejpart,pivot,sum,na.rm=T))
+    rescettes_totales <- with(df,tapply(valopmctmonotime1,pivot,sum,na.rm=T))    
+    
+    tb[['0_nuit_nb_sej']]<- table(df%>%filter(duree == 0)%>%select(pivot))
+
+    tb[['0_nuit_recettes']]<- with(df%>%filter(duree == 0),tapply(valopmctmonotime1,pivot,sum,na.rm=T))
+
+
+    tb[['0_nuit_pourc_recettes']] <- round( with(df%>%filter(duree == 0),tapply(valopmctmonotime1,pivot,sum,na.rm=T))*100 / rescettes_totales, 1)
+    
+    tb[['0_nuit_recettes_jour']]<- round(tb[['0_nuit_recettes']] /  tb[['0_nuit_nb_sej']] )
+    
+    
+    tb[['1_nuit_nb_sej']]<- table(df%>%filter(duree == 1)%>%select(pivot))
+    
+    tb[['1_nuit_pourc_journnees']]<-  round(tb[['1_nuit_nb_sej']]*100 /  nb_journees,1 )
+    
+    tb[['1_nuit_recettes']]<- with(df%>%filter(duree == 1),tapply(valopmctmonotime1,pivot,sum,na.rm=T))
+    
+    
+    tb[['1_nuit_pourc_recettes']]<- round( tb[['1_nuit_recettes']] * 100 / rescettes_totales, 1)
+    
+    tb[['1_nuit_recettes_jour']]<- round(tb[['1_nuit_recettes']] /  tb[['1_nuit_nb_sej']] )
+    
+    
+    
+    tb[['2_nuits_nb_journees']]<- with( df %>% filter(duree > 1 , duree < dms_n +30 ), tapply( dureesejpart, pivot, sum, na.rm=T ) ) 
+    
+    tb[['2_nuits_pourc_journnees']]<-  round( tb[['2_nuits_nb_journees']]*100 /  nb_journees, 1 )
+    
+    tb[['2_nuits_recettes']]<- with( df %>% filter(duree > 1 , duree < dms_n +30 ), tapply( valopmctmonotime1, pivot, sum, na.rm=T ) )
+    
+    
+    tb[['2_nuits_pourc_recettes']]<- round( tb[['2_nuits_recettes']] * 100 / rescettes_totales, 1)
+    
+    tb[['2_nuits_recettes_jour']]<- round(tb[['2_nuits_recettes']] /  tb[['2_nuits_nb_journees']] )
+    
+    
+    tb[['sej_longs_nb_journees']]<- with( df %>% filter( duree >= dms_n +30 ), tapply( dureesejpart, pivot, sum, na.rm=T ) ) 
+    
+    tb[['sej_longs_pourc_journnees']]<-  round( tb[['sej_longs_nb_journees']]*100 /  nb_journees, 1 )
+    
+    tb[['sej_longs_recettes']]<- with( df %>% filter( duree < dms_n +30 ), tapply( valopmctmonotime1, pivot, sum, na.rm=T ) )
+    
+    
+    tb[['sej_longs_pourc_recettes']]<- round( tb[['sej_longs_recettes']] * 100 / rescettes_totales, 1)
+    
+    tb[['sej_longs_recettes_jour']]<- round(tb[['sej_longs_recettes']] /  tb[['2_nuits_nb_journees']] )
+    
+  }
+  
+
   #Somme des supplements
   ############################################################################
 
@@ -1608,7 +1694,7 @@ get_activite_sejours<-function( df, structure ){
 #' @usage make_tdb(val, niveau, annee, mois )
 #' @export 
 
-get_activite_recettes<-function( df, structure ){
+get_activite_recettes<-function( df, structures ){
   
   tdb_v <-list()
   
@@ -1622,7 +1708,7 @@ get_activite_recettes<-function( df, structure ){
   
   tdb_v[['gh']] <- t(round( with( df, tapply( valopmctmonotime1, list(ansor,typehosp), sum, na.rm=T ) ) ))
 
-  tdb_v <- order_by_structure( tdb_v, structure )
+  tdb_v <- order_by_structure( tdb_v, structures )
 
   tdb_v_final<-cbind( get_diff(tdb_v$hc), NA, get_diff(tdb_v$hp) )
 

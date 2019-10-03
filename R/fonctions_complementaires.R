@@ -52,6 +52,58 @@ get_data<-function( DF, ref = 'ansor', m, a, val = NULL, niveau = NULL, opt = T 
 }
 
 
+#source(paste(PathFonctions,"GetData.R",sep=""))
+get_data_glissant<-function( DF, ref = 'ansor', m, a, val = NULL, niveau = NULL, opt = T ){
+  #(Data,DateRef,Month,Years,val=NULL,niveau=NULL){
+  
+  #if( ref == 'ansor' ){
+    
+    DF <- DF  %>% mutate(ansor = if_else( as.numeric(moissor) > max(m), as.character( as.numeric(ansor) + 1 ), ansor ) ) %>%
+                  filter( as.numeric(ansor) %in% a ) %>%
+                  mutate(ansor = factor( ansor, levels = min(a):max(a) ) )
+    
+  #}else{
+    
+  #  DF <- DF  %>% filter ( as.numeric( format( !!sym(ref), '%Y') ) %in% a,
+  #                         as.numeric( format( !!sym(ref), '%m') ) %in% m )
+  #  
+  #}
+  
+  #if(is.null(niveau)|is.null(val)){
+    
+  #  DF<-DF[
+  #    DF[,DateRef]>=as.Date(paste(min(Years)-1,'-',Month+1,'-','01',sep=''))&
+  #      DF[,DateRef]<as.Date(paste(max(Years),'-',Month+1,'-','01',sep='')),
+  #    ]
+    
+  #}
+  
+  #if(!is.null(niveau)&!is.null(val)){
+    
+  #  Data<-Data[   
+  #    Data[,DateRef]>=as.Date(paste(min(Years)-1,'-',Month+1,'-','01',sep=''))&
+  #      Data[,DateRef]<as.Date(paste(max(Years),'-',Month+1,'-','01',sep=''))&
+  #      Data[,niveau]%in%val,
+  #    ]
+  #}
+  
+  #Data$A<-as.numeric(format(Data[,DateRef],'%Y'))
+  #Data$m<-factor(as.numeric(format(Data[,DateRef],'%m')))
+  #Data$A[which(as.numeric(format(Data[,DateRef],'%m'))>Month)]<-as.numeric(format(Data[which(as.numeric(format(Data[,DateRef],'%m'))>Month),DateRef],'%Y'))+1
+  #Data$A<-factor(Data$A,levels=Years)
+  #Data<-ReglesLocalesDataSet(Data,val,niveau)
+  
+  #print(paste(niveau,val,':',dim(Data)[1],'-',dim(Data)[2]))
+    
+  if( opt == T ){
+    
+    DF <- options_locales( DF, val, niveau )
+      
+  }
+    
+  return(DF)
+}
+
 #' Mise en oeuvre des options locales pour le décompte des séjours dans les données d'activité
 #'
 #' La fonction ajoute une variable doublon ( TRUE / FALSE ) à un objet de type rum/rsa
@@ -75,7 +127,7 @@ options_locales<-function(DF,val=NULL,niveau=NULL){
     DF <- DF %>% dplyr::filter( !service %in% getOption("dimRactivite.services_exclus") )
   }
   
-  DF <- DF %>% dplyr::group_by( nofiness, ansor, cle_rsa, .keep_all = T ) %>% dplyr::mutate( doublon = 1 ) %>% ungroup()
+  DF <- DF %>% dplyr::mutate( doublon = 1 ) 
 
   #Dédoublonnage en fonction des paramètres optionnels
   #On cherche dans val ou niveau la valeur d'une variable de déboublonnage
@@ -87,10 +139,10 @@ options_locales<-function(DF,val=NULL,niveau=NULL){
 
       if( niveau == i | val == i  ){
 
-        DF <- DF %>%  group_by( nofiness, ansor, cle_rsa, !!sym(n) )%>%
+        DF <- DF %>%  group_by( nofiness, ansor, cle_rsa, !!sym(n) ) %>%
                       arrange( nofiness,ansor, cle_rsa, !!sym(n), d8eeue ) %>%
                       mutate( nb_rum = n(),
-                              doublon = if_else( row_number() == 1, 1, 0 ) )%>%
+                              doublon = if_else( row_number() == 1, 1, 0 ) ) %>%
                       ungroup()
       }
 

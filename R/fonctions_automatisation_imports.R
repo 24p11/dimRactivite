@@ -561,6 +561,7 @@ load_RData<- function( remontees_sel, extra = FALSE ){
       
       rum_v_nonconsol <<- NULL
       rsa_v_nonconsol <<- NULL
+      vano_nonconsol <<- NULL
       rum_v_tarifsante <<- NULL
       rsa_v_tarifsante <<- NULL 
       
@@ -603,9 +604,24 @@ load_RData<- function( remontees_sel, extra = FALSE ){
         
         load(paste0(getOption("dimRactivite.path"),'/',p$finess,'.',p$annee,'.',m_min,'.RData'))
         
-        rum_v_nonconsol <<- get(paste0('rum_v','_',p$annee,'_',m_min))
+        tmp1 <-  get(paste0('rum','_',p$annee,'_',m_min))
+        tmp2 <- get(paste0('rum_v','_',p$annee,'_',m_min))
+
+        tmp<- inner_join( tmp1$rum %>% dplyr::select( nofiness, cle_rsa, nas, norum, ansor, moissor, cdghm, das, das, actes ),
+                          tmp2 )%>%select(-cle_rsa)
+      
+        rum_v_nonconsol <<- bind_rows( rum_v_nonconsol, tmp )
         
-        rsa_v_nonconsol <<- get(paste0('rsa_v','_',p$annee,'_',m_min))
+        tmp1 <-  get(paste0('rsa','_',p$annee,'_',m_min))
+        tmp2 <- get(paste0('rsa_v','_',p$annee,'_',m_min))
+        
+        tmp <- inner_join(tmp1%>%unite(cdghm,gpcmd,gptype,gpnum,sep="")%>%select(nofiness,cle_rsa,nas,ansor,moissor,cdghm,noghs),
+                         tmp2)
+        
+        rsa_v_nonconsol <<- bind_rows( rsa_v_nonconsol, tmp )
+        
+        vano_nonconsol <<- bind_rows( vano_nonconsol, get(paste0('vano','_',p$annee,'_',m_min)) )
+        
                                 
         rm(list=c(paste0('rum','_',p$annee,'_',m_min),
                   paste0('rum_v_',p$annee,'_',m_min),
@@ -621,9 +637,9 @@ load_RData<- function( remontees_sel, extra = FALSE ){
         
         load(paste0(getOption("dimRactivite.path"),'/',p$finess,'.',p$annee,'.',p$mois,'.tarifs_anterieurs.RData'))
         
-        rum_v_tarifsante <<- get(paste0('rum_v','_tarifs_anterieurs_',p$annee,'_',p$mois))
+        rum_v_tarifsante <<-  bind_rows( rum_v_tarifsante, get(paste0('rum_v','_tarifs_anterieurs_',p$annee,'_',p$mois)) )
         
-        rsa_v_tarifsante <<- get(paste0('rsa_v','_tarifs_anterieurs_',p$annee,'_',p$mois))                                 
+        rsa_v_tarifsante <<- bind_rows( rsa_v_tarifsante, get(paste0('rsa_v','_tarifs_anterieurs_',p$annee,'_',p$mois))  )                               
                                                           
         rm(list=c(paste0('rum_v_','_tarifs_anterieurs_',p$annee,'_',p$mois),
                   paste0('rsa_v_','_tarifs_anterieurs_',p$annee,'_',p$mois))
