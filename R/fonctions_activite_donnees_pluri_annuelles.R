@@ -729,7 +729,7 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
 
     tb[['0_nuit_recettes']] <- round( with( df %>% filter(duree == 0), tapply( valopmctmonotime1, pivot,sum, na.rm=T ) ) )
 
-    tb[['0_nuit_pourc_recettes']] <- round( with( df %>% filter( duree == 0 ), tapply( valopmctmonotime1, pivot, sum, na.rm=T ) ) * 100 / rescettes_totales, 1)
+    tb[['0_nuit_pourc_recettes']] <-  round( tb[['0_nuit_recettes']] * 100 / rescettes_totales, 1 )
     
     tb[['0_nuit_recettes_jour']]  <- round( tb[['0_nuit_recettes']] /  tb[['0_nuit_nb_sej']] )
     
@@ -765,7 +765,7 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
     
     tb[['sej_longs_pourc_recettes']] <- round( tb[['sej_longs_recettes']] * 100 / rescettes_totales, 1)
     
-    tb[['sej_longs_recettes_jour']] <- round( tb[['sej_longs_recettes']] /  tb[['2_nuits_nb_journees']] )
+    tb[['sej_longs_recettes_jour']] <- round( tb[['sej_longs_recettes']] /  tb[['sej_longs_nb_journees']] )
     
   }
   
