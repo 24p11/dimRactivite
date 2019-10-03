@@ -1739,7 +1739,7 @@ detail_diff_recettes <- function( df, pivot ) {
   
 }
 
-get_tdb_detail_recettes <- function( a, m )
+get_tdb_detail_recettes <- function( a, m ){
   #####################################################################################################################
   #Prération tarifs et tarif année antiérieure
   #####################################################################################################################
