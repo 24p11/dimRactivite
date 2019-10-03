@@ -149,4 +149,12 @@ for ( val in vals ){
   
 }
 
+tdb_detail_recettes <- get_tdb_detail_recettes <- function( a =(annee-1):annee, m = 1:mois )
+  path_file=paste0(path_res,'/',annee,'/','TableauDeBordDetailValorisation_',annee,stringr::str_pad(mois,2,"left","0"),'.xls')  
+write.table( tdb_detail_recettes, file=path_file, sep='\t', row.names=T, col.names=NA, na='' , fileEncoding = "latin1" )
+
+path_file=paste0(path_res,'/',annee,'/','TableauDeBordDetailValorisation_Resume_',annee,stringr::str_pad(mois,2,"left","0"),'.xls')  
+write.table( tdb_detail_recettes, file=path_file, sep='\t', row.names=T, col.names=NA, na='' , fileEncoding = "latin1" )
+
+
 
