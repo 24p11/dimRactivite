@@ -4,13 +4,15 @@
 ################################################
 
 #Génération de tableaux de bord d'activité après chargement des données pmeasyr
-#si besoin : load("~/GH_PMSI/DATA/GENRSA/Rpmeasyr.RData")
+#si besoin :
+load("~/GH_PMSI/DATA/WD/Rpmsi_pmeasyr.RData")
 
 library(tidyverse)
 library (RCurl)
 library(jsonlite)
 library(referentiels)
 library(referime)
+library(dimRactivite)
 
 
 #Règler la profondeur des tableaux de bord

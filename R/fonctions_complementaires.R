@@ -150,6 +150,16 @@ options_locales<-function(DF,val=NULL,niveau=NULL){
     }
 
   }
+  
+  if( is.null(niveau) ){
+    
+    DF <- DF %>%  group_by( nofiness, ansor, cle_rsa ) %>%
+      arrange( nofiness,ansor, cle_rsa, d8eeue ) %>%
+      mutate( nb_rum = n(),
+              doublon = if_else( row_number() == 1, 1, 0 ) ) %>%
+      ungroup()
+    
+  }
 
   return(DF)
 
