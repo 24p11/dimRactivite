@@ -1748,100 +1748,159 @@ detail_diff_recettes <- function( df, pivot ) {
   
 }
 
-get_tdb_detail_recettes <- function( a, m ){
-  #####################################################################################################################
-  #Prération tarifs et tarif année antiérieure
-  #####################################################################################################################
-  tarifs_ghs<-nomensland::get_table( "tarifs_mco_ghs" )
-  
-  tarifs_ghs_n1<-full_join(tarifs_ghs %>% distinct( anseqta, ghs,.keep_all = TRUE ) %>%select( anseqta, ghs, tarif_base ),
-                           tarifs_ghs %>% distinct( anseqta, ghs,.keep_all = TRUE ) %>% mutate(anseqta = as.character(as.numeric(anseqta)-1)) %>% select( anseqta, ghs, tarif_base ),
-                           by=c("ghs","anseqta"),suffix = c('',"_n_1")
-  )
-  
-  tarifs_ghs_n1<-tarifs_ghs_n1%>%mutate(tarif_base_n_1 = if_else(is.na(tarif_base_n_1),tarif_base,tarif_base_n_1))%>%
-    select(-tarif_base)%>%rename(tarif_base = tarif_base_n_1 )
-  
-  rum_v2 <- dplyr::left_join(rum_v, rum_v_nonconsol %>% dplyr::select( ansor, nofiness, nas, norum, coefpmctmonotime1, valotime, valopmctmono, valopmctmonotime1, valopmctmonotime2, cdghm ), 
-                             by = c("nofiness", "nas", "norum", "ansor") ,
-                             suffix = c( "", "_nonconsol" )) %>% rename(cdghm_nonconsol = cdghm)
-  
-  
-  #####################################################################################################################
-  #Prération tableau de données
-  #####################################################################################################################
-  
-  df <- get_data( inner_join(rum,rum_v2), a = a, m = a ) %>% mutate( ansor = as.character(ansor))
-  
-  df <- dplyr::left_join( df,
-                          rum_v_tarifsante %>% dplyr::select( ansor, nofiness, cle_rsa, nas, norum, valotime, valopmctmono, valopmctmonotime1, valopmctmonotime2 ), 
-                          suffix = c( "", "_tarifsante" ),
-                          by = c("nofiness", "nas", "norum", "cle_rsa", "ansor") ) %>% 
-    dplyr::left_join( ., inner_join(rsa,rsa_v) %>% dplyr::mutate( rec_exbh = rec_exh + rec_exb ) %>% 
-                        dplyr::select( ansor, anseqta, nofiness, cle_rsa, nas, ghs=noghs, rec_base, rec_exbh, duree ) ) %>%
-    dplyr::left_join(.,rsa_dms)
-  
-  df_n<- df %>% filter( as.numeric(ansor) == annee , typehosp == 'C' )
-  df_n<- df_n %>% dplyr::left_join( ., tarifs_ghs  %>% distinct( anseqta, ghs,.keep_all = TRUE ) %>% select(anseqta, ghs, tarif_base ) )
-  
-  
-  df_n1<- df %>% filter( as.numeric(ansor) == annee -1 , typehosp == 'C' )
-  df_n1 <- df_n1 %>% dplyr::left_join( ., tarifs_ghs_n1  %>% distinct( anseqta, ghs,.keep_all = TRUE ) %>% select(anseqta, ghs, tarif_base ) )
-  
-  
-  df<-bind_rows(df_n,df_n1)
-  
-  df<-df %>% mutate(service = factor(service),pole = factor(pole),hopital = factor(hopital), ansor = factor(ansor) )
-  
-  
-  
-  #####################################################################################################################
-  #Tableau de bord indicateurs
-  #####################################################################################################################
-  
+#' Tableau de bord de suivi d'indicateurs
+#'
+#' @param df un tiblle de type rum/rsa avec les variables suivantes : 
+#' - structure : service, pole hôpital
+#' - dédoublonnage : doublon (cf fonction get_data)
+#' - rum/rsa : cle_rsa, ansor, moissor, dureesejpart, nofiness
+#' - rmu_v : coeftime, valopmctmonotime1
+#' - référentiels : dms_n
+#'
+#' @return matrix, tableau de bord de suivi d'indicateur
+#' @export
+#'
+#' @examples
+get_tdb_indicateurs <- function( df ){
+#####################################################################################################################
+#Tableau de bord indicateurs
+#####################################################################################################################
+
   tdb <- NULL
   
-  tdb[['services']] <- get_diff( round( with( df, tapply(  nas , list(service,ansor), function(x) length( unique(x) ) ) ) ) ) [ , -1 ]
-  tdb[['poles']] <- get_diff( round( with( df, tapply(  nas , list(pole,ansor), function(x) length( unique(x) ) ) ) ) ) [ , -1 ]
-  tdb[['hopitaux']] <- get_diff( round( with( df, tapply(  nas , list(hopital,ansor), function(x) length( unique(x) ) ) ) ) ) [ , -1 ]
+  #Hospitalisation partielle
+  #############################################################
+  
+  
+  #Nombre de séjours HP
+  #------------------------------------------------------------
+  
+  df_hp<- df%>%filter(typehosp == "P")
+  tdb[['services']] <- get_diff( round( with( df_hp, tapply(  doublon , list(service,ansor), sum, na.rm=T ) ) ) ) [ , -1 ]
+  tdb[['poles']] <- get_diff( round( with( df_hp, tapply(  doublon, list(pole,ansor), sum, na.rm = T) ) ) ) [ , -1 ]
+  tdb[['hopitaux']] <- get_diff( round( with( df_hp, tapply(  doublon , list(hopital,ansor), sum, na.rm=T ) ) ) ) [ , -1 ]
+  tdb[['gh']] <- get_diff( as.data.frame(t (round( with( df_hp, tapply(  doublon , list(ansor),  sum, na.rm=T ) ) ) ) ) ) [ , -1 ]
+  
+  #Recettes HP
+  #------------------------------------------------------------
+
+  tdb[['services']] <-   cbind( tdb[['services']] , get_diff( round( with( df_hp, tapply( valopmctmonotime1, list(service,ansor), sum, na.rm=T ) ) ) )[, -1 ] )
+  tdb[['poles']] <-  cbind( tdb[['poles']] , get_diff( round( with( df_hp, tapply( valopmctmonotime1, list(pole,ansor), sum, na.rm=T ) ) ) )[, -1 ] )
+  tdb[['hopitaux']] <-  cbind( tdb[['hopitaux']] , get_diff( round( with( df_hp, tapply( valopmctmonotime1, list(hopital,ansor), sum, na.rm=T ) ) ) )[, -1 ] )
+  tdb[['gh']] <-  cbind( tdb[['gh']] , get_diff( as.data.frame(t (round( with( df_hp, tapply(  valopmctmonotime1 , list(ansor), sum, na.rm=T ) ) ) ) ) ) [ , -1 ] )
+  
+  
+  df<- df%>%filter(typehosp == "C")
+  
+  #Nombre de séjours HC
+  #------------------------------------------------------------
+  
+  tdb[['services']] <-  cbind( tdb[['services']], 'sep' = NA , get_diff( round( with( df, tapply(  doublon , list(service,ansor), sum, na.rm=T ) ) ) ) [ , -1 ])
+  tdb[['poles']] <- cbind( tdb[['poles']], 'sep' = NA , get_diff( round( with( df, tapply(  doublon, list(pole,ansor), sum, na.rm = T) ) ) ) [ , -1 ] )
+  tdb[['hopitaux']] <- cbind(tdb[['hopitaux']], 'sep' = NA , get_diff( round( with( df, tapply(  doublon , list(hopital,ansor), sum, na.rm=T ) ) ) ) [ , -1 ] )
+  tdb[['gh']] <- cbind(tdb[['gh']], 'sep' = NA , get_diff( as.data.frame(t (round( with( df, tapply(  doublon , list(ansor),  sum, na.rm=T ) ) ) ) ) ) [ , -1 ] )
+  
+  #Recettes HC
+  #------------------------------------------------------------
+  
+  tdb[['services']] <-   cbind( tdb[['services']] , get_diff( round( with( df, tapply( valopmctmonotime1, list(service,ansor), sum, na.rm=T ) ) ) )[, -1 ] )
+  tdb[['poles']] <-  cbind( tdb[['poles']] , get_diff( round( with( df, tapply( valopmctmonotime1, list(pole,ansor), sum, na.rm=T ) ) ) )[, -1 ] )
+  tdb[['hopitaux']] <-  cbind( tdb[['hopitaux']] , get_diff( round( with( df, tapply( valopmctmonotime1, list(hopital,ansor), sum, na.rm=T ) ) ) )[, -1 ] )
+  tdb[['gh']] <- cbind( tdb[['gh']] , get_diff( as.data.frame(t (round( with( df, tapply(  valopmctmonotime1 , list(ansor),  sum, na.rm=T ) ) ) ) ) ) [ , -1 ] )
+  
+  #PMCT
+  #------------------------------------------------------------
+  
+  tmp <- round( with( df, tapply( valopmctmonotime1, list(service,ansor), sum , na.rm=T ) ) / with( df, tapply( doublon , list(service,ansor), sum , na.rm=T ) ) )
+  tdb[['services']] <-   cbind( tdb[['services']] , round( get_diff( tmp ) , 1 ) [ , -1 ] ) 
+  
+  tmp <- round( with( df, tapply( valopmctmonotime1, list(pole,ansor), sum , na.rm=T ) ) / with( df, tapply( doublon , list(pole,ansor), sum , na.rm=T ) ) )
+  tdb[['poles']] <-   cbind( tdb[['poles']] , round( get_diff( tmp ) , 1 ) [ , -1 ] )
+  
+  tmp <- round( with( df, tapply( valopmctmonotime1, list(hopital,ansor), sum , na.rm=T ) ) / with( df, tapply( doublon , list(hopital,ansor), sum , na.rm=T ) ) )
+  tdb[['hopitaux']] <-   cbind( tdb[['hopitaux']] , round( get_diff( tmp ) , 1 ) [ , -1 ] )
+  
+  tmp <- get_diff( as.data.frame( t( round( with( df, tapply(  valopmctmonotime1 , list(ansor), sum, na.rm=T ) )
+                                            /
+                                              with( df, tapply( doublon , list(ansor), sum, na.rm=T ) )
+  ) ) ) )
+  
+  tdb[['gh']] <- cbind( tdb[['gh']] , tmp[ , - 1 ] )
+  
+  #Nombre de journnées
+  #------------------------------------------------------------
   
   tdb[['services']] <-   cbind( tdb[['services']] , get_diff( round( with( df, tapply( dureesejpart, list(service,ansor), sum, na.rm=T ) ) ) )[, -1 ] )
   tdb[['poles']] <-  cbind( tdb[['poles']] , get_diff( round( with( df, tapply( dureesejpart, list(pole,ansor), sum, na.rm=T ) ) ) )[, -1 ] )
   tdb[['hopitaux']] <-  cbind( tdb[['hopitaux']] , get_diff( round( with( df, tapply( dureesejpart, list(hopital,ansor), sum, na.rm=T ) ) ) )[, -1 ] )
+  tdb[['gh']] <-  cbind( tdb[['gh']] , get_diff( as.data.frame(t (round( with( df, tapply(  dureesejpart , list(ansor), sum, na.rm=T ) ) ) ) ) ) [ , -1 ] )
   
-  tmp <- round(with(df%>%filter(duree>0),
-                    tapply(dureesejpart, list(service,ansor), sum))/
-                 table(df%>%distinct(nofiness,cle_rsa,ansor,service,.keep_all = T)%>%select(service,ansor)),
+  
+  #Recettes journalieres
+  #------------------------------------------------------------
+ 
+  tmp <- round( with( df, tapply( valopmctmonotime1, list(service,ansor), sum , na.rm=T ) ) / with( df, tapply( dureesejpart , list(service,ansor), sum , na.rm=T ) ) )
+  tdb[['services']] <-   cbind( tdb[['services']] , round( get_diff( tmp ) , 1 ) [ , -1 ] ) 
+  
+  tmp <- round( with( df, tapply( valopmctmonotime1, list(pole,ansor), sum , na.rm=T ) ) / with( df, tapply( dureesejpart , list(pole,ansor), sum , na.rm=T ) ) )
+  tdb[['poles']] <-   cbind( tdb[['poles']] , round( get_diff( tmp ) , 1 ) [ , -1 ] )
+  
+  tmp <- round( with( df, tapply( valopmctmonotime1, list(hopital,ansor), sum , na.rm=T ) ) / with( df, tapply( dureesejpart , list(hopital,ansor), sum , na.rm=T ) ) )
+  tdb[['hopitaux']] <-   cbind( tdb[['hopitaux']] , round( get_diff( tmp ) , 1 ) [ , -1 ] )
+  
+  tmp <- get_diff( as.data.frame( t( round( with( df, tapply(  valopmctmonotime1 , list(ansor), sum, na.rm=T ) )
+                                            /
+                                              with( df, tapply( dureesejpart , list(ansor), sum, na.rm=T ) )
+  ) ) ) )
+  
+  tdb[['gh']] <- cbind( tdb[['gh']] , tmp[ , - 1 ] )
+  
+  
+  #DMR
+  #------------------------------------------------------------
+  
+  tmp <- round( with( df %>% filter( duree > 0 ), tapply( dureesejpart, list( service, ansor ), sum ) )/
+                 table( df %>% filter( duree>0 ) %>% distinct( nofiness, cle_rsa, ansor, service, .keep_all = T )%>%select( service, ansor ) ),
                1) %>% get_diff(.)
   
   tdb[['services']] <- cbind( tdb[['services']] , tmp[ , - 1 ] )
   
-  tmp <- round(with(df%>%filter(duree>0),
-                    tapply(dureesejpart, list(pole,ansor), sum))/
-                 table(df%>%distinct(nofiness,cle_rsa,ansor,service,.keep_all = T)%>%select(pole,ansor)),
+  tmp <- round( with( df %>% filter( duree > 0 ), tapply( dureesejpart, list( pole, ansor ), sum ) )/
+                 table( df %>% filter( duree>0 ) %>% distinct( nofiness, cle_rsa, ansor, service, .keep_all = T ) %>% select( pole, ansor ) ),
                1) %>% get_diff(.)
   
   tdb[['poles']] <- cbind( tdb[['poles']] , tmp[ , - 1 ] )
   
-  tmp <- round(with(df%>%filter(duree>0),
-                    tapply(dureesejpart, list(hopital,ansor), sum))/
-                 table(df%>%distinct(nofiness,cle_rsa,ansor,service,.keep_all = T)%>%select(hopital,ansor)),
-               1) %>% get_diff(.)
+  tmp <- round( with( df %>% filter( duree > 0 ), tapply( dureesejpart, list( hopital, ansor ), sum ) )/
+                 table( df %>% filter( duree > 0 ) %>% distinct( nofiness, cle_rsa, ansor, service, .keep_all = T ) %>% select( hopital, ansor ) ),
+               1 ) %>% get_diff(.)
   
   tdb[['hopitaux']] <- cbind( tdb[['hopitaux']] , tmp[ , - 1 ] )
   
   
-  tmp <-  get_diff( round(with(df%>%filter(duree>0)%>%distinct(nofiness,ansor,cle_rsa,.keep_all = TRUE),
-                               tapply(duree, list(service,ansor), mean)),1) )
+  tmp <- get_diff( as.data.frame( t( round( with( df %>% filter( duree>0 ), tapply(  dureesejpart , list(ansor), sum, na.rm=T ) )
+                                                          /
+                                              with( df %>% filter( duree>0 ), tapply(  doublon , list(ansor), sum, na.rm=T ) )
+                                          ) ) ) )
+                                                        
+  tdb[['gh']] <- cbind( tdb[['gh']] , tmp[ , - 1 ] )
+  
+  
+  #DMS
+  #------------------------------------------------------------
+  
+  tmp <-  get_diff( round( with( df %>% filter( duree>0, doublon == 1 ), tapply( duree, list( service , ansor ), mean ) ) , 1 ) )
   tdb[['services']] <-    cbind( tdb[['services']] ,  tmp[ , - 1 ] )
   
-  tmp <-  get_diff( round(with(df%>%filter(duree>0)%>%distinct(nofiness,ansor,cle_rsa,.keep_all = TRUE),
-                               tapply(duree, list(pole,ansor), mean)),1) )
+  tmp <-  get_diff( round(with(df%>%filter( duree>0, doublon == 1 ), tapply( duree, list( pole, ansor ), mean ) ), 1 ) )
   tdb[['poles']] <-    cbind( tdb[['poles']] ,  tmp[ , - 1 ] )
   
-  tmp <-  get_diff( round(with(df%>%filter(duree>0)%>%distinct(nofiness,ansor,cle_rsa,.keep_all = TRUE),
-                               tapply(duree, list(hopital,ansor), mean)),1) )
+  tmp <-  get_diff( round( with( df %>% filter( duree>0, doublon == 1 ), tapply( duree, list( hopital, ansor ), mean ) ), 1 ) )
   tdb[['hopitaux']] <-    cbind( tdb[['hopitaux']] ,  tmp[ , - 1 ] )
+  
+  tmp <- get_diff( as.data.frame( t( round( with( df %>% filter( duree>0, doublon == 1 ), tapply(  duree , list(ansor), mean, na.rm=T ) ) ) ) ) )
+  
+  tdb[['gh']] <- cbind( tdb[['gh']] , tmp[ , - 1 ] )
   
   
   
@@ -1854,12 +1913,46 @@ get_tdb_detail_recettes <- function( a, m ){
   tmp <- with( df, tapply(dureesejpart, list(hopital,ansor), sum , na.rm=T ) ) / with( df, tapply( dms_n*coeftime , list(hopital,ansor), sum , na.rm=T ) )
   tdb[['hopitaux']] <-   cbind( tdb[['hopitaux']] , round( get_diff( tmp ) , 1 ) [ , -1 ] )
   
+  tmp <- get_diff( as.data.frame( t( round( with( df, tapply(  dureesejpart , list(ansor), sum, na.rm=T ) )
+                                            /
+                                              with( df, tapply(  dms_n*coeftime , list(ansor), sum, na.rm=T ) )
+  ) ) ) )
+  
+  tdb[['gh']] <- cbind( tdb[['gh']] , tmp[ , - 1 ] )
+  
+  services = unique( structures%>%filter(service%in%dimnames(tdb$services)[[1]])%>%select(service) )$service
+  poles = unique(  structures%>%filter(pole%in%dimnames(tdb$poles)[[1]])%>%select(pole) )$pole
+  
+  tdb_ind <- rbind("Groupe Hospitalier" = NA, tdb$hopitaux, "Total GH" = tdb$gh )
   
   
-  tdb[['services']] <-   cbind( tdb[['services']] , get_diff( round( with( df, tapply( valopmctmonotime1, list(service,ansor), sum, na.rm=T ) ) ) )[, -1 ] )
-  tdb[['poles']] <-  cbind( tdb[['poles']] , get_diff( round( with( df, tapply( valopmctmonotime1, list(pole,ansor), sum, na.rm=T ) ) ) )[, -1 ] )
-  tdb[['hopitaux']] <-  cbind( tdb[['hopitaux']] , get_diff( round( with( df, tapply( valopmctmonotime1, list(hopital,ansor), sum, na.rm=T ) ) ) )[, -1 ] )
-  
+  for (p in poles){
+    
+    serv =services[services%in%structures$service[structures$pole==p]&
+                     services%in%row.names(tdb$services)]
+    
+    tdb_ind<-rbind(tdb_ind,NA,NA)
+    
+    row.names(tdb_ind)[nrow(tdb_ind)]<-p
+    
+    
+    tdb_ind = rbind(tdb_ind,tdb$services[serv,], "Total pole" = tdb$poles[p,])
+    
+    if(length(serv)==1){
+      row.names(tdb_ind)[nrow(tdb_ind)-1]<-serv
+      
+    }
+    
+    
+    
+  }
+  return(tdb_ind)
+}
+
+get_tdb_detail_recettes <- function( df, resume = TRUE ){
+  #####################################################################################################################
+  #Prération tarifs et tarif année antiérieure
+  #####################################################################################################################
   
   
 
@@ -2240,10 +2333,10 @@ get_tdb_detail_recettes <- function( a, m ){
     
   }
   
-  if(res){
+  if(resume){
     return(tdb_res_)
   }else{
-    return(tdb_res_)
+    return(tdb_)
   }
   
 }
@@ -2386,7 +2479,7 @@ make_tdb <- function( val, niveau, annee, mois ){
   
   #Données utiles pour la valorisation
   df<-dplyr::left_join( df %>% mutate(  anseqta = as.character(anseqta) ),
-                        referentiel_ghm_tarfis%>%rename( noghs = ghs, bb = borne_basse, bh = borne_haute )%>%select( anseqta, ghm, noghs, bb, bh ) )
+                        tarifs_mco_ghs%>%rename( noghs = ghs, bb = borne_basse, bh = borne_haute )%>%select( anseqta, ghm, noghs, bb, bh ) )
   
   
   
@@ -2400,7 +2493,7 @@ make_tdb <- function( val, niveau, annee, mois ){
     
     tdb[[nom_tableau]][['cum']]<-get_tdb(df=df,indicateurs=inds)
     
-    write.table(tdb[[nom_tableau]][['cum']],file = paste0(path_res,'/',annee,'/',nom_tableau,prep_string(val),annee,stringr::str_pad(mois,2,"left","0"),'cum.xls'),sep='\t',row.names=F,na='')
+    write.table(tdb[[nom_tableau]][['cum']],file = file.path(getOption('dimRactivite.path_tdb_files'),annee,paste0(nom_tableau,prep_string(val),annee,stringr::str_pad(mois,2,"left","0"),'cum.xls')),sep='\t',row.names=F,na='')
     
     
   }
@@ -2423,7 +2516,7 @@ make_tdb <- function( val, niveau, annee, mois ){
     
     tdb[[nom_tableau]][['mens']]<-get_tdb(df=df,indicateurs=inds)
     
-    write.table(tdb[[nom_tableau]][['mens']],file = paste0(path_res,'/',annee,'/',nom_tableau,prep_string(val),annee,stringr::str_pad(mois,2,"left","0"),'mens.xls'),sep='\t',row.names=F,na='')
+    write.table(tdb[[nom_tableau]][['mens']],file = file.path(getOption('dimRactivite.path_tdb_files'),annee,paste0(nom_tableau,prep_string(val),annee,stringr::str_pad(mois,2,"left","0"),'mens.xls')),sep='\t',row.names=F,na='')
   }
   
   

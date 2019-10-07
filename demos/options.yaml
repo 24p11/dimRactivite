@@ -1,5 +1,6 @@
-path: "path"
-path_tdb_files: "path"
+path: "~/GH_PMSI/DATA/GENRSA"
+
+path_tdb_files: "demos"
 
 extensions:
   - rum
@@ -33,19 +34,8 @@ services_exclus:
   - titi
   - rea chir
 
-fichier_strucure:
-  nom :
-   - structure.xlsx
-  colonnes :
-   - nofiness
-   - site
-   - cdurm
-   - code_um1
-   - code_um2
-   - libelle_um
-   - service
-   - regroupement2
-   - pole
+fichier_strucure: "structures.xlsx"
+
 
 gestion_doublons_rum:
     service: service

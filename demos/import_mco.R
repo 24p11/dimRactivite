@@ -5,10 +5,12 @@ library(referentiels)
 library(nomensland)
 library(dimRactivite)
 
+dimRactivite::update_options(file.path("demos","options.yaml"))
+
 #####################################################################################################################
 ##Paramètre des imports
 #####################################################################################################################
-profondeur_imports = 6
+profondeur_imports = 2
 
 
 #####################################################################################################################
@@ -37,26 +39,28 @@ remontees_dispo <- save_remontees( remontees_dispo )
 
 sel_remontees_import<-remontees_dispo%>%filter( as.numeric(annee) > max( as.numeric(remontees_dispo$annee) ) - profondeur_imports, RData == 1 )%>%
   mutate( mois  =  as.numeric(mois) )%>%
-  group_by( finess, annee )%>% filter( mois == max(mois) )
+  group_by( finess, annee )%>% filter( mois == max(mois) )%>% mutate(mois = ifelse(annee == 2019,7,mois ))
 
 
 #import des remontées
-load_RData( sel_remontees_import )
+load_RData( sel_remontees_import, extra = TRUE )
 load_med( sel_remontees_import, fichiers_genrsa )
 load_dmi( sel_remontees_import, fichiers_genrsa )
 
 
 # ajout des structures dans les rum
-fichier_structure <- readxl::read_excel(getOption("dimRactivite.structures")$fichier,
-                                        col_types = c( "text" , "text" , "text" , "text" ,"text" ,
-                                                       "text" , "text" , "text" , "text" ),
-                                        col_names = getOption("dimRactivite.structures")$colonnes,
-                                        skip = 1
+structures <- readxl::read_excel(file.path("demos","structures.xlsx"),
+                                 col_types = c( "text" , "text" , "text" , "text", "text" ),
+                                 col_names = c('hopital','cdurm','libelle_um','service','pole'),
+                                 skip = 1
 )
 
-#vérification que toutes les UMA sont bien renseignées dans le fichier structure
-verif_structure(rum,fichier_structure)
 
-rum <- rum %>% left_join( ., fichier_structure ) %>%
+#vérification que toutes les UMA sont bien renseignées dans le fichier structure
+#verif_structure(rum,fichier_structure)
+
+rum <- rum %>% inner_join( ., structures ) %>%
           mutate( pole = ifelse(is.na(pole), 'Erreurs', pole ),
                   service = ifelse(is.na(service), 'Erreur service non renseigné', service ) )
+
+rum <- rum[sample(1:nrow(rum),10000),]

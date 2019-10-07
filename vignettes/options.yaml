@@ -34,7 +34,7 @@ services_exclus:
   - titi
   - rea chir
 
-structures: structures.xlsx
+structures: "structures.xlsx"
 
 gestion_doublons_rum:
     service: service

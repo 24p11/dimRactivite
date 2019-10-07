@@ -402,10 +402,9 @@ selection_cancer_diag<-function( diagnostics ){
 #' @examples
 #'
 
-selection_cancer_pat<-function( df, df_ano ){
+selection_cancer_pat<-function( df ){
   
   df%>%mutate(score_confiance_diag_cancer = dplyr::if_else(position==5,1,10))%>%
-    inner_join(., df_ano )%>%
     group_by(noanon,diag,appareil,organe)%>%
     summarise(score_confiance_diag_cancer = sum(score_confiance_diag_cancer))%>%
     ungroup()%>%

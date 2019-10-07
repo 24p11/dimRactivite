@@ -65,7 +65,7 @@ Par défaut, l'option ```option recent = TRUE``` induit la création du .RData p
 
 
 ```{r save_remontee}
-#remontees_dispo <- dimRactivite::save_remontees( remontees_dispo )
+remontees_dispo <- dimRactivite::save_remontees( remontees_dispo )
 ```
 
 
@@ -81,17 +81,20 @@ sel_remontees_import<-remontees_dispo%>%filter( as.numeric(annee) > max( as.nume
   mutate( mois  =  as.numeric(mois) )%>%
   group_by( finess, annee )%>% filter( mois == max(mois) )
 
-sel_remontees_import
 ```
-Le df ```sel_remontees_import``` est passé en argument de la fonction ```load_all()``` qui permet le chargment des données.
+Le df ```sel_remontees_import``` est passé en argument de la fonction ```load_all()``` qui permet le chargment des données. Le paramètre ```extra = TRUE``` permet de charger des tableaux de données complémentaires utiles pour l'analyse :
+- rsa_v_nonconsol et rum_v_nonconsol : données non consolidées à la date de la remontée pour l'année N-1 (vs M12 classiquement utilisées dans les analyses)
+- rsa_v_tarifsante, rum_v_tarifsante : données N valorisées avec les tarifs de l'année N-1
 
-```{r load_all}
-dimRactivite::load_RData( sel_remontees_import )
+```{r load_sejours}
+dimRactivite::load_RData( sel_remontees_import, extra = TRUE  )
 ```
 
 #### Import des fichiers MO et DMI
-
-
+```{r load_med_dmi}
+load_med( sel_remontees_import )
+load_dmi( sel_remontees_import )
+```
 #### Ajout des données de struture
 
 Différentes données complémentaires peuvent ensuite être ajoutées aux données PMSI standardisées. L'ajout d'élements descriptifs des uma (leur libellé, services et pôles de rattachement) sera probablement le plus important d'entre eux. L'ajout des structures se fait grâce à un fichier de paramètres ```structure.xls``` (cf exemple).
@@ -101,19 +104,23 @@ La fonction ```verif_structure()``` permet de s'assurer que l'ensemble des uma p
 ```{r Chargement du fichier structure}
 
 # ajout des structures dans les rum
-fichier_structure <- readxl::read_excel(getOption("dimRactivite.structures"),
-                                        col_types = c( "text" , "text" , "text" , "text" ,"text" ,
-                                                       "text" , "text" , "text" , "text" ),
-                                        col_names = c('nofiness','hopital','cdurm','uma_locale','uma_locale2',
-                                                      'libelle_um','service','regroupement1','pole'),
+structures <- readxl::read_excel(getOption("dimRactivite.structures"),
+                                        col_types = c( "text" , "text" , "text" , "text" , "text", "text" ),
+                                        col_names = c('nofiness','hopital','cdurm','libelle_um','service','pole'),
                                         skip = 1
 )
 #vérification que toutes les UMA sont bien renseignées dans le fichier structure
-dimRactivite::verif_structure(rum,fichier_structure)
+#dimRactivite::verif_structure(rum,fichier_structure)
 
-rum <- rum %>% left_join( ., fichier_structure ) %>%
+rum <- rum%>%select(-nofiness) %>% # pour simulation structures fictives avec finess ficitif
+  left_join( ., structures ) %>%
           mutate( pole = ifelse(is.na(pole), 'Erreurs', pole ),
                   service = ifelse(is.na(service), 'Erreur service non renseigné', service ) )
+
+```
+
+```{r Echantillon}
+rum <- rum  %>% sample_n(., 10000, replace = FALSE)
 
 ```
 
@@ -197,7 +204,9 @@ cancer_rsa <- dplyr::inner_join(cancer_pat,
 
 
 ```
-
+```{r test}
+table(rum$service)
+```
 
 ### Génération des tableaux de bord synthétiques
 
@@ -206,22 +215,22 @@ cancer_rsa <- dplyr::inner_join(cancer_pat,
 df<-dimRactivite::get_data(inner_join(rum,rum_v), a =(annee-profondeur_tdb):annee, m = 1:mois )
 
 
-tdb <- dimRactivite::get_activite_sejours( df, structure )
+tdb <- dimRactivite::get_activite_sejours( df, structures )
 path_file=paste0('TableauDeBordGeneral',annee,stringr::str_pad(mois,2,"left","0"),'cum.xls')  
 write.table( tdb, file=path_file, sep='\t', row.names=T, col.names=NA, na='' , fileEncoding = "utf-8" )
 
-tdb <- dimRactivite::get_activite_recettes( df, structure )
+tdb <- dimRactivite::get_activite_recettes( df, structures )
 path_file=paste0('TableauDeBordValorisation',annee,stringr::str_pad(mois,2,"left","0"),'cum.xls')  
 write.table( tdb, file=path_file, sep='\t', row.names=T, col.names=NA, na='' , fileEncoding = "utf-8" )
 
 
 df <- df %>% filter( as.numeric(moissor) == mois )
 
-tdb <- dimRactivite::get_activite_sejours( df, structure )
+tdb <- dimRactivite::get_activite_sejours( df, structures )
 path_file=paste0('TableauDeBordGeneral',annee,stringr::str_pad(mois,2,"left","0"),'mens.xls')  
 write.table( tdb, file=path_file, sep='\t', row.names=T, col.names=NA, na='' , fileEncoding = "utf-8" )
 
-tdb <- dimRactivite::get_activite_recettes( df, structure )
+tdb <- dimRactivite::get_activite_recettes( df, structures )
 path_file=paste0('TableauDeBordValorisation',annee,stringr::str_pad(mois,2,"left","0"),'mens.xls')  
 write.table( tdb, file=path_file, sep='\t', row.names=T, col.names=NA, na='' , fileEncoding = "utf-8" )
 
@@ -241,7 +250,7 @@ vals = fichier_structure%>%select(!!niveau)%>%unique()%>%flatten_chr()
 
 for (val in vals ){
   
-  #tdb[[val]]<-dimRactivite::make_tdb( val, niveau, annee, mois )
+  tdb[[val]]<-dimRactivite::make_tdb( val, niveau, annee, mois )
   
 }
 
@@ -251,7 +260,7 @@ vals = fichier_structure%>%select(!!niveau)%>%unique()%>%flatten_chr()
 
 for (val in vals ){
   
-  #tdb[[val]]<-dimRactivite::make_tdb( val, niveau, annee, mois )
+  tdb[[val]]<-dimRactivite::make_tdb( val, niveau, annee, mois )
   
 }
 
@@ -261,7 +270,7 @@ vals = fichier_structure%>%select(!!niveau)%>%unique()%>%flatten_chr()
 
 for ( val in vals ){
   
-#  tdb[[val]]<-dimRactivite::make_tdb( val, niveau, annee, mois )
+  tdb[[val]]<-dimRactivite::make_tdb( val, niveau, annee, mois )
   
 }
 
