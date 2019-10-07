@@ -4,14 +4,14 @@
 ################################################
 
 #Génération de tableaux de bord d'activité après chargement des données pmeasyr
-#si besoin :
-load("~/GH_PMSI/DATA/WD/Rpmsi_pmeasyr.RData")
+
 
 library(tidyverse)
 library (RCurl)
 library(jsonlite)
 library(referentiels)
-library(referime); library(nomensland)
+library(referime);
+library(nomensland)
 library(dimRactivite)
 
 
