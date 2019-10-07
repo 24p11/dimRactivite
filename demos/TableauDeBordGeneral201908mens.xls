@@ -1,0 +1,24 @@
+""	"2018"	"2019"	"diff"	"p_diff"	""	"2018"	"2019"	"diff"	"p_diff"
+""									
+"Groupe Hospitalier"									
+"Hôpital Galien"	147	0	-147	-100		128	0	-128	-100
+"Hôpital Hippocrate"	155	0	-155	-100		4	0	-4	-100
+"Total GH"	302	0	-302	-100		132	0	-132	-100
+""									
+"Chirurgie"									
+"Chirurgie digestive"	59	0	-59	-100		11	0	-11	-100
+"Orthopédie"	45	0	-45	-100		13	0	-13	-100
+"Total pole"	104	0	-104	-100		24	0	-24	-100
+""									
+"Médecine"									
+"Pneumologie"	33	0	-33	-100		4	0	-4	-100
+"Médecine interne"	22	0	-22	-100		0	0	0	
+"Neurologie"	10	0	-10	-100		0	0	0	
+"Cancérologie"	35	0	-35	-100		104	0	-104	-100
+"Total pole"	100	0	-100	-100		108	0	-108	-100
+""									
+"Urgences - Réanimation"									
+"Réanimation médicale"	19	0	-19	-100		0	0	0	
+"Réanimation chirurgicale"	15	0	-15	-100		0	0	0	
+"UHCD"	75	0	-75	-100		0	0	0	
+"Total pole"	109	0	-109	-100		0	0	0	

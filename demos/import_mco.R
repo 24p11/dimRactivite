@@ -20,7 +20,7 @@ profondeur_imports = 2
 #Liste des fichiers présents dans le dossier racine
 #Analyse des fichiers et vérification de la présence des fichiers en fonction de leur extentions (ext imco + .zip + .RData)
 #Par défaut (option maj_dernier_mois =TRUE) les fichiers .RData de la remontée la plus récente est considéré comme manquant
-remontees_dispo<-analyse_dossier_remontees()
+remontees_dispo<-analyse_dossier_remontees( maj_dernier_mois = FALSE )
 View(remontees_dispo)
 
 #Voir la liste des fichiers RData non disponibles qui seront générés à l'étape suivante
@@ -63,4 +63,4 @@ rum <- rum %>% inner_join( ., structures ) %>%
           mutate( pole = ifelse(is.na(pole), 'Erreurs', pole ),
                   service = ifelse(is.na(service), 'Erreur service non renseigné', service ) )
 
-rum <- rum[sample(1:nrow(rum),10000),]
+rum <- rum%>%filter(as.numeric(moissor)%in% 1:mois)%>% dplyr::sample_n(.,10000,replace = FALSE)
