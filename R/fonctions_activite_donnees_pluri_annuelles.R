@@ -1642,6 +1642,53 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
 }
 
 
+
+racine_diff_recettes <- function( df ) {
+  
+  annee_ = max(as.numeric(df$ansor))
+  
+  
+  giac1 <- df %>%
+    dplyr::mutate( racine = substr( cdghm, 1, 5) ) %>%
+    dplyr::group_by( ansor, racine ) %>%
+    dplyr::summarise( sej_racine = n_distinct(cle_rsa,nofiness,cle_rsa), 
+                      nb_journees = sum(dureesejpart),
+                      dmr = round( sum(dureesejpart) / sej_racine,1),
+                      coef_racine = sum( coefpmctmonotime1 ),
+                      rec_base_racine = sum( tarif_base * coefpmctmonotime1 ),
+                      rec_totale_racine = round( sum( rec_totale * coefpmctmonotime1 ) ) ,
+                      rec_moy_racine = round( rec_base_racine/sej_racine ),
+                      rec_supp_racine = round( sum ( rec_sup_repa  ) ),
+                      rec_ex_racine =  round( sum( rec_exbh * coeftime ) ),
+                      diff_tarifs_racine = round(sum(diff_t * coefpmctmonotime1) ) ) %>% 
+    dplyr::ungroup(.)
+  
+  
+  
+  giac <- dplyr::full_join( giac1 %>% filter( as.numeric( ansor ) == annee_-1 )%>% dplyr::select( -ansor ),
+                            giac1 %>% filter( as.numeric( ansor ) == annee_ ) %>%  dplyr::select( -ansor ),
+                          suffix = c( "_n_1", "_n" ),
+                          by = c( "racine" )  )%>%
+    replace(., is.na(.), 0)%>%
+    
+    mutate( diff_sej = sej_racine_n - sej_racine_n_1,
+            diff_journnees = nb_journees_n - nb_journees_n_1,
+            diff_dmr = dmr_n - dmr_n_1,
+            diff_recettes = round ( rec_totale_racine_n - rec_totale_racine_n_1 ),
+            diff_ns = ( sej_racine_n * rec_moy_racine_n ) - ( sej_racine_n * rec_moy_racine_n_1 ),
+            diff_supp = rec_supp_racine_n - rec_supp_racine_n_1,
+            diff_ex = rec_ex_racine_n - rec_ex_racine_n_1,
+            diff_tarifs = diff_tarifs_racine_n)%>%
+    
+    mutate(diff_ns = ifelse ( sej_racine_n < 5 | sej_racine_n_1 < 5 , 0, diff_ns), 
+           diff_activite = diff_recettes - diff_ns - diff_supp - diff_ex - diff_tarifs
+  )
+
+
+  return(giac)
+  
+}
+
 #' Calcul de la part liée à la variation de la répartition dans les niveaux de sévérité
 #' dans l'évolution des recettes T2A entre 2 années.
 #'
@@ -1654,97 +1701,86 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
 #' @examples
 detail_diff_recettes <- function( df, pivot ) {
   
+  annee_ = max(as.numeric(df$ansor))
   
   df<-df%>%mutate(pivot:=!!sym(pivot))
   
-  annee_ = max(as.numeric(df$ansor))
-  
-  
-  giac1 <- dplyr::filter(df) %>%
-    dplyr::group_by( nas, pivot ) %>% 
-    dplyr::summarise( ghm = first(cdghm),
-                      ghs = first(ghs),
-                      tarif_base = first( tarif_base ),
-                      coefpmctmonotime1 = sum( coefpmctmonotime1 ),
-                      ansor = first( ansor ) ) %>%
-    dplyr::ungroup(.) %>%
-    dplyr::mutate( racine = substr( ghm, 1, 5) ) %>%
-    dplyr::group_by( ansor, pivot, racine ) %>%
-    dplyr::mutate( nrac_sej = length(ghs), 
-                   nrac_coef = sum( coefpmctmonotime1 ) ,
-                   rec_base = sum( tarif_base * coefpmctmonotime1 )
-    ) %>% 
-    dplyr::ungroup(.) %>%
-    dplyr::group_by( ansor, pivot, racine, ghs ) %>%
-    dplyr::mutate( nghs = length(ghs), 
-                   repanum = length(ghs) / nrac_sej * tarif_base ) %>% 
-    dplyr::ungroup(.) %>%
-    dplyr::distinct( ansor, pivot, ghm, ghs, .keep_all=TRUE ) %>%
-    dplyr::group_by( ansor, pivot, racine ) %>%
-    dplyr::summarise( repanum_rac = sum(repanum),
-                      nrac_sej = dplyr::first(nrac_sej),
-                      nrac_coef = dplyr::first(nrac_coef),
-                      rec_base = first(rec_base)
-    ) %>% dplyr::ungroup(.) 
+  giac1 <- df %>%
+    dplyr::mutate( racine = substr( cdghm, 1, 5) ) %>%
+    dplyr::group_by( pivot, ansor, racine ) %>%
+    dplyr::summarise( sej_racine = n_distinct(cle_rsa,nofiness,cle_rsa), 
+                      nb_journees = sum(dureesejpart),
+                      coef_racine = sum( coefpmctmonotime1 ) ,
+                      rec_base_racine = sum( tarif_base * coefpmctmonotime1 ),
+                      rec_totale_racine = round( sum( rec_totale * coefpmctmonotime1 ) ) ,
+                      rec_moy_racine = round( rec_base_racine/sej_racine ),
+                      rec_supp_racine = round( sum ( rec_sup_repa  ) ),
+                      rec_ex_racine =  round( sum( rec_exbh * coeftime ) ),
+                      diff_tarifs_racine = round(sum(diff_t * coefpmctmonotime1) ) ) %>% 
+    dplyr::ungroup(.)
   
   
   
-  giac<-dplyr::full_join( giac1%>%filter( as.numeric(ansor) == annee_-1 )%>%select( -ansor ),
-                          giac1%>%filter( as.numeric(ansor) == annee_ )%>%dplyr::select( -ansor ),
-                          suffix = c( "_n_1", "_n" ),
-                          by = c( "racine", "pivot" )
-  )
-  ##Resultats differents pour giac1 et pour giac??? --> je n'ai pas trouvé de différence cf ci dessous
+  giac <- dplyr::full_join( giac1 %>% filter( as.numeric( ansor ) == annee_-1 )%>% dplyr::select( -ansor ),
+                            giac1 %>% filter( as.numeric( ansor ) == annee_ ) %>%  dplyr::select( -ansor ),
+                            suffix = c( "_n_1", "_n" ),
+                            by = c( "pivot", "racine" )  )%>%
+    replace(., is.na(.), 0)
   
-  # a <- tapply(giac1$repanum_rac,list(giac1$pivot,giac1$ansor),sum,na.rm=T)
-  # b <- tapply(giac1$nrac_sej,list(giac1$pivot,giac1$ansor),sum,na.rm=T)  
+  res <- giac%>% group_by(pivot)%>%
+    
+    dplyr::summarise( sej_n = sum (sej_racine_n),
+                      diff_sej = sum(sej_racine_n - sej_racine_n_1),
+                      nb_journees = sum(nb_journees_n),
+                      diff_nb_journees = nb_journees - sum(nb_journees_n_1),
+                      dmr = round( nb_journees / sej_n, 1 ),
+                      diff_dmr = dmr - round( sum(nb_journees_n_1) / sej_n_1, 1 ),
+                      recettes_n = sum (rec_totale_racine_n),
+                      diff_recettes = round ( sum( rec_totale_racine_n - rec_totale_racine_n_1 ) ),
+                      diff_supp = round( sum( rec_supp_racine_n - rec_supp_racine_n_1 ) ),
+                      diff_ex = round( sum (rec_ex_racine_n - rec_ex_racine_n_1) ),
+                      diff_tarifs = sum (diff_tarifs_racine_n) )
   
-  
-  # a_ <- cbind(tapply(giac$repanum_rac_n_1,giac$pivot,sum,na.rm=T),tapply(giac$repanum_rac_n,giac$pivot,sum,na.rm=T))
-  # b_ <- cbind(tapply(giac$nrac_sej_n_1,giac$pivot,sum,na.rm=T),tapply(giac$nrac_sej_n,giac$pivot,sum,na.rm=T))
-  
-  # a - a_
-  # b - b_
-  
-  
-  #res2<-giac%>%
-  # group_by( pivot ) %>% summarise( "rec_base" = sum( rec_base_n, na.rm=T ),
-  #                                  "sum_coeff" = sum(nrac_coef_n,na.rm=T) ,
-  #                                  "nb_sej" = sum(nrac_sej_n,na.rm=T) ) 
-  
-  #df2%>%  dplyr::mutate( racine = substr( cdghm, 1, 5) ) %>%
-  #  dplyr::group_by( ansor, pivot, racine ) %>%
-  #  dplyr::distinct(nas,.keep_all=TRUE)%>%
-  #  dplyr::summarise( nrac_sej = length(nas), 
-  #                    nrac_coef = sum( coefpmctmonotime1 ) ,
-  #                   rec_base = sum( tarif_base )
-  # )->tmp2
-  
-  #tdb_v[['services']] <- round( with( df, tapply(  tarif_base * coefpmctmonotime1 , list(pivot,ansor), sum, na.rm=T ) ) )
-  
-  #tdb_v[['sej']] <- round( with( df2, tapply(  nas , list(pivot,ansor), function(x) length( unique(x) ) ) ) )
-  
-  #tdb_v[['coef']] <- with( df2, tapply(  coefpmctmonotime1 , list(pivot,ansor), sum, na.rm=T ) ) 
-  
-  
-  pc<-giac%>%group_by(pivot)%>%mutate( s_nrac = sum(nrac_sej_n, na.rm=T) )%>%ungroup()%>%filter(is.na(nrac_sej_n) | is.na(nrac_sej_n_1) | nrac_sej_n_1 < 5 )%>%
+  pc<-giac%>%group_by(pivot)%>%mutate( s_nrac = sum(sej_racine_n, na.rm=T) )%>%ungroup()%>%
+    filter( sej_racine_n < 5 | sej_racine_n_1 < 5 )%>%
     group_by(pivot)%>%
-    mutate(p_calc = round( (1-sum(nrac_sej_n,na.rm=T)/s_nrac )*100, 1 ) ) %>% dplyr::distinct(pivot, p_calc)  %>% ungroup(.)
+    mutate(p_calc = round( (1-sum(sej_racine_n,na.rm=T)/s_nrac )*100, 1 ) ) %>% dplyr::distinct(pivot, p_calc)  %>% ungroup(.)
+  
+  res2<-giac%>%dplyr::filter(sej_racine_n >= 5 & sej_racine_n_1 >= 5 ) %>%
+    dplyr::mutate( diff = ( sej_racine_n * rec_moy_racine_n ) - ( sej_racine_n * rec_moy_racine_n_1 ) )%>%
+    dplyr::group_by( pivot ) %>% dplyr::summarise( diff_ns = round( sum( diff, na.rm=T )  ) ) %>% dplyr::ungroup(.) %>%
+    dplyr::left_join(.,pc)
+  
+  res <- dplyr::left_join(res,res2)%>% replace(., is.na(.), 0)%>%
+    mutate(diff_activite = diff_recettes - diff_ns - diff_supp - diff_ex - diff_tarifs )
+  
+
   
   
-  res<-giac%>%filter( ! is.na(nrac_sej_n) ,  ! is.na(nrac_sej_n_1) , nrac_sej_n_1 > 4 ) %>%
-    mutate( diff = ( nrac_coef_n * repanum_rac_n ) - ( nrac_coef_n * repanum_rac_n_1 ) )%>%
-    group_by( pivot ) %>% summarise( "part_ns" = round( sum( diff, na.rm=T )  ) ) %>% ungroup(.)
+  return(res)
   
-  res2 <- dplyr::full_join( pc , res )
+}
+
+diff_sej_recettes<-function( df, pivot ){
   
-  row_n <- res2$pivot
+  df<-df%>%mutate(pivot:=!!sym(pivot))
   
-  res2 <- as.data.frame( res2 %>% select( - pivot ) )
+  #Diférentiel séjours
+  tmp <- round( with( df, tapply(  doublon , list(pivot,ansor), sum , na.rm =T ) ) )
+  tmp[which(is.na(tmp))]<- 0
+  tmp <- get_diff( tmp )
+  dimnames(tmp)[[2]]<-paste0("nb_sej_",dimnames(tmp)[[2]])
+  res <- tmp [ , -c(1,4) ]
   
-  row.names(res2) <-   row_n
+  #Différentiels recettes
+  tmp <-  round( with( df, tapply( valopmctmonotime1, list( pivot, ansor ), sum, na.rm=T ) ) ) 
+  tmp[which(is.na(tmp))]<- 0
+  tmp <- get_diff( tmp ) 
+  dimnames(tmp)[[2]]<-paste0("recettes_totales_",dimnames(tmp)[[2]])
+  res<-   cbind( res , tmp[, -c(1,4) ]  )
   
-  return(res2)
+  return(res)
+  
   
 }
 

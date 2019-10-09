@@ -101,28 +101,29 @@ Différentes données complémentaires peuvent ensuite être ajoutées aux donn�
 
 La fonction ```verif_structure()``` permet de s'assurer que l'ensemble des uma présentes dans les fichiers GENRSA sont bien renseignées dans le fichier structure.
 
+Il s'agit ici d'un exemple non réel.
+
 ```{r Chargement du fichier structure}
 
-# ajout des structures dans les rum
-structures <- readxl::read_excel(getOption("dimRactivite.structures"),
-                                        col_types = c( "text" , "text" , "text" , "text" , "text", "text" ),
-                                        col_names = c('nofiness','hopital','cdurm','libelle_um','service','pole'),
-                                        skip = 1
-)
-#vérification que toutes les UMA sont bien renseignées dans le fichier structure
-#dimRactivite::verif_structure(rum,fichier_structure)
 
-rum <- rum%>%select(-nofiness) %>% # pour simulation structures fictives avec finess ficitif
-  left_join( ., structures ) %>%
+# ajout des structures dans les rum
+structures <- readxl::read_excel(getOption('dimRactivite.structures'),
+                                 col_types = c( "text" , "text" , "text" , "text", "text" ),
+                                 col_names = c('hopital','cdurm','libelle_um','service','pole'),
+                                 skip = 1
+)
+
+
+#vérification que toutes les UMA sont bien renseignées dans le fichier structure
+#verif_structure(rum,fichier_structure)
+
+rum <- rum %>% inner_join( ., structures ) %>%
           mutate( pole = ifelse(is.na(pole), 'Erreurs', pole ),
                   service = ifelse(is.na(service), 'Erreur service non renseigné', service ) )
 
-```
-
-```{r Echantillon}
-rum <- rum  %>% sample_n(., 10000, replace = FALSE)
 
 ```
+
 
 On pourrait à cet endroit, vouloir également ajouter d'autres informations sur les RUM comme par exemple l'identité des patients.
 
@@ -152,6 +153,10 @@ annee=as.numeric(format(Sys.Date()-55,'%Y'))
 #Profondeur de calcul
 profondeur_tdb = 2
 
+#Tarifs MCO
+tarifs_mco_ghs <- nomensland::get_table("tarifs_mco_ghs")
+
+
 #### Import des paramètres des tableaux 
 ghm_dms_nationales<-nomensland::get_table("ghm_dms_nationales")
 
@@ -171,12 +176,8 @@ rm( rsa_dms1, rsa_dms2 )
 
 
 #### Import des paramètres (liste des indicateurs à calculer pour chaque niveau du fichier structure)
-references<-read.table('indicateurs.xls',
-                       sep='\t',
-                       header=F,fill=T,
-                       na.strings = c("NA",""),stringsAsFactor=F,fileEncoding = 'latin1')
-
-names(references)<-dimRactivite:::prep_string(references[1,])
+references<-readxl::read_excel('indicateurs.xlsx',col_names = F)
+names(references)<-prep_string(references[1,])
 references<-references[-1,]%>%as_tibble(.)
 #labels = df simple avec les légendes
 labels<-as.data.frame(references[!duplicated(references$var),c('var','libelle','niv')])
@@ -204,13 +205,17 @@ cancer_rsa <- dplyr::inner_join(cancer_pat,
 
 
 ```
-```{r test}
-table(rum$service)
-```
-
 ### Génération des tableaux de bord synthétiques
 
+Les données sont tirées au sort pour réaliser des tableaux de bord exemples.
+```{r Echantillon}
+rum <- rum%>%filter(as.numeric(moissor)%in% 1:mois)%>% dplyr::sample_n(.,10000,replace = FALSE)
+
+```
+
 ```{r tableaux de bord synthetiques }
+
+
 
 df<-dimRactivite::get_data(inner_join(rum,rum_v), a =(annee-profondeur_tdb):annee, m = 1:mois )
 
@@ -245,8 +250,13 @@ tdb<-list()
 #######################################################################################################################
 #Tableaux de bords thématiques
 #######################################################################################################################
+
+val = "GH"
+tdb[[val]]<-make_tdb( val , niveau = NULL, annee, mois )
+
+
 niveau = "hopital"
-vals = fichier_structure%>%select(!!niveau)%>%unique()%>%flatten_chr()
+vals = structures%>%select(!!niveau)%>%unique()%>%flatten_chr()
 
 for (val in vals ){
   
@@ -256,7 +266,7 @@ for (val in vals ){
 
 
 niveau = "pole"
-vals = fichier_structure%>%select(!!niveau)%>%unique()%>%flatten_chr()
+vals = structures%>%select(!!niveau)%>%unique()%>%flatten_chr()
 
 for (val in vals ){
   
@@ -266,7 +276,7 @@ for (val in vals ){
 
 
 #niveau = "service"
-vals = fichier_structure%>%select(!!niveau)%>%unique()%>%flatten_chr()
+vals = structures%>%select(!!niveau)%>%unique()%>%flatten_chr()
 
 for ( val in vals ){
   

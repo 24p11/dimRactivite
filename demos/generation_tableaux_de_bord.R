@@ -113,7 +113,7 @@ val = "GH"
 tdb[[val]]<-make_tdb( val , niveau = NULL, annee, mois )
 
 niveau = "hopital"
-vals = fichier_structure%>%select(!!niveau)%>%unique()%>%flatten_chr()
+vals = structures%>%select(!!niveau)%>%unique()%>%flatten_chr()
 
 for (val in vals ){
   
@@ -123,7 +123,7 @@ for (val in vals ){
 
 
 niveau = "pole"
-vals = fichier_structure%>%select(!!niveau)%>%unique()%>%flatten_chr()
+vals = structures%>%select(!!niveau)%>%unique()%>%flatten_chr()
 
 for (val in vals ){
   
@@ -133,7 +133,7 @@ for (val in vals ){
 
 
 niveau = "service"
-vals = fichier_structure%>%select(!!niveau)%>%unique()%>%flatten_chr()
+vals = structures%>%select(!!niveau)%>%unique()%>%flatten_chr()
 
 for ( val in vals ){
   

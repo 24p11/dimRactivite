@@ -404,14 +404,14 @@ selection_cancer_diag<-function( diagnostics ){
 
 selection_cancer_pat<-function( df, df_ano ){
   
-  df%>%mutate(score_confiance_diag_cancer = dplyr::if_else(position==5,1,10))%>%
-    inner_join(., df_ano )%>%
-    group_by(noanon,diag,appareil,organe)%>%
-    summarise(score_confiance_diag_cancer = sum(score_confiance_diag_cancer))%>%
-    ungroup()%>%
-    group_by(noanon)%>%
-    filter(score_confiance_diag_cancer == max(score_confiance_diag_cancer))%>%
-    distinct(noanon, .keep_all= TRUE)
+  df%>%dplyr::mutate(score_confiance_diag_cancer = dplyr::if_else(position==5,1,10))%>%
+    dplyr::inner_join(., df_ano )%>%
+    dplyr::group_by(noanon,diag,appareil,organe)%>%
+    dplyr::summarise(score_confiance_diag_cancer = sum(score_confiance_diag_cancer))%>%
+    dplyr::ungroup()%>%
+    dplyr::group_by(noanon)%>%
+    dplyr::filter(score_confiance_diag_cancer == max(score_confiance_diag_cancer))%>%
+    dplyr::distinct(noanon, .keep_all= TRUE)
 }
 
 

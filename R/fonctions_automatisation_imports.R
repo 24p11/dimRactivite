@@ -530,7 +530,7 @@ save_remontees<-function(remontees){
 
 #' charge en mémoire les objets définitifs rum,rum_v,rsa,rsa_v,diagnostics, actes, vano préparé dans le RData
 #'
-#' @param remontees_sel tibble de type analyse_remontee avec l'ensemble des années à charger
+#' @param sel_remontees_import tibble de type analyse_remontee avec l'ensemble des années à charger
 #' @param extra logical, si TRUE importe également les données de valorisation non consolidée de l'année antérieure, 
 #' et les données de l'année valorisées avec les tarifs de l'année antérieure
 #'
@@ -538,14 +538,14 @@ save_remontees<-function(remontees){
 #' @examples
 #' \dontrun{
 #' 
-#'    load_RData( remontees_sel )
+#'    load_RData( sel_remontees_import )
 #'    
 #' }
 #' 
 #' @export load_RData
-#' @usage load_RData( remontees_sel )
+#' @usage load_RData( sel_remontees_import )
 #' @export 
-load_RData<- function( remontees_sel, extra = FALSE ){
+load_RData<- function( sel_remontees_import, extra = FALSE ){
   
 
   
@@ -571,11 +571,11 @@ load_RData<- function( remontees_sel, extra = FALSE ){
     a_max <- as.numeric( max( sel_remontees_import$annee ) )
     m_min <- min( sel_remontees_import$mois )
     
-    for(i in 1:nrow(remontees_sel)){
+    for(i in 1:nrow(sel_remontees_import)){
       
-      p= pmeasyr::noyau_pmeasyr(finess = remontees_sel$finess[i] ,
-                                annee = remontees_sel$annee[i],
-                                mois = remontees_sel$mois[i],
+      p= pmeasyr::noyau_pmeasyr(finess = sel_remontees_import$finess[i] ,
+                                annee = sel_remontees_import$annee[i],
+                                mois = sel_remontees_import$mois[i],
                                 path   = getOption("dimRactivite.path")
       )
       
@@ -602,48 +602,68 @@ load_RData<- function( remontees_sel, extra = FALSE ){
       
       if( extra == TRUE & p$annee == a_max-1 & m_min != 12 ){
         
-        load(paste0(getOption("dimRactivite.path"),'/',p$finess,'.',p$annee,'.',m_min,'.RData'))
+        file_to_load = paste0(getOption("dimRactivite.path"),'/',p$finess,'.',p$annee,'.',m_min,'.RData')
+         
+        if(file.exists(file_to_load)){
         
-        tmp1 <-  get(paste0('rum','_',p$annee,'_',m_min))
-        tmp2 <- get(paste0('rum_v','_',p$annee,'_',m_min))
-
-        tmp<- inner_join( tmp1$rum %>% dplyr::select( nofiness, cle_rsa, nas, norum, ansor, moissor, cdghm, das, das, actes ),
-                          tmp2 )%>%select(-cle_rsa)
-      
-        rum_v_nonconsol <<- bind_rows( rum_v_nonconsol, tmp )
+          load(file_to_load)
+          
+          tmp1 <-  get(paste0('rum','_',p$annee,'_',m_min))
+          tmp2 <- get(paste0('rum_v','_',p$annee,'_',m_min))
+  
+          tmp<- inner_join( tmp1$rum %>% dplyr::select( nofiness, cle_rsa, nas, norum, ansor, moissor, cdghm, das, das, actes ),
+                            tmp2 )%>%select(-cle_rsa)
         
-        tmp1 <-  get(paste0('rsa','_',p$annee,'_',m_min))
-        tmp2 <- get(paste0('rsa_v','_',p$annee,'_',m_min))
-        
-        tmp <- inner_join(tmp1%>%unite(cdghm,gpcmd,gptype,gpnum,sep="")%>%select(nofiness,cle_rsa,nas,ansor,moissor,cdghm,noghs),
-                         tmp2)
-        
-        rsa_v_nonconsol <<- bind_rows( rsa_v_nonconsol, tmp )
-        
-        vano_nonconsol <<- bind_rows( vano_nonconsol, get(paste0('vano','_',p$annee,'_',m_min)) )
-        
+          rum_v_nonconsol <<- bind_rows( rum_v_nonconsol, tmp )
+          
+          tmp1 <-  get(paste0('rsa','_',p$annee,'_',m_min))
+          tmp2 <- get(paste0('rsa_v','_',p$annee,'_',m_min))
+          
+          tmp <- inner_join(tmp1%>%unite(cdghm,gpcmd,gptype,gpnum,sep="")%>%select(nofiness,cle_rsa,nas,ansor,moissor,cdghm,noghs),
+                           tmp2)
+          
+          rsa_v_nonconsol <<- bind_rows( rsa_v_nonconsol, tmp )
+          
+          vano_nonconsol <<- bind_rows( vano_nonconsol, get(paste0('vano','_',p$annee,'_',m_min)) )
+          
+                                  
+          rm(list=c(paste0('rum','_',p$annee,'_',m_min),
+                    paste0('rum_v_',p$annee,'_',m_min),
+                    paste0('rsa_',p$annee,'_',m_min),
+                    paste0('rsa_v_',p$annee,'_',m_min),
+                    paste0('vano_',p$annee,'_',m_min),
+                    paste0('pmctmono_',p$annee,'_',m_min))
+          )
                                 
-        rm(list=c(paste0('rum','_',p$annee,'_',m_min),
-                  paste0('rum_v_',p$annee,'_',m_min),
-                  paste0('rsa_',p$annee,'_',m_min),
-                  paste0('rsa_v_',p$annee,'_',m_min),
-                  paste0('vano_',p$annee,'_',m_min),
-                  paste0('pmctmono_',p$annee,'_',m_min))
-        )
-                                
+        }
+        
+        msg_non_cons = "rum_v et rsa_v nonconsol importés"
+      }else{
+        msg_non_cons = "rum_v et rsa_v nonconsol non importés (fichier n-1 absent)" 
       }
       
       if( extra == TRUE & p$annee == a_max ){
         
-        load(paste0(getOption("dimRactivite.path"),'/',p$finess,'.',p$annee,'.',p$mois,'.tarifs_anterieurs.RData'))
+        file_to_load = paste0(getOption("dimRactivite.path"),'/',p$finess,'.',p$annee,'.',p$mois,'.tarifs_anterieurs.RData')
         
-        rum_v_tarifsante <<-  bind_rows( rum_v_tarifsante, get(paste0('rum_v','_tarifs_anterieurs_',p$annee,'_',p$mois)) )
-        
-        rsa_v_tarifsante <<- bind_rows( rsa_v_tarifsante, get(paste0('rsa_v','_tarifs_anterieurs_',p$annee,'_',p$mois))  )                               
-                                                          
-        rm(list=c(paste0('rum_v_','_tarifs_anterieurs_',p$annee,'_',p$mois),
-                  paste0('rsa_v_','_tarifs_anterieurs_',p$annee,'_',p$mois))
-        )
+        if(file.exists(file_to_load)){
+          
+          load(file_to_load)
+          
+          rum_v_tarifsante <<-  bind_rows( rum_v_tarifsante, get(paste0('rum_v','_tarifs_anterieurs_',p$annee,'_',p$mois)) )
+          
+          rsa_v_tarifsante <<- bind_rows( rsa_v_tarifsante, get(paste0('rsa_v','_tarifs_anterieurs_',p$annee,'_',p$mois))  )                               
+                                                            
+          rm(list=c(paste0('rum_v','_tarifs_anterieurs_',p$annee,'_',p$mois),
+                    paste0('rsa_v','_tarifs_anterieurs_',p$annee,'_',p$mois))
+          )
+          
+          msg_tarifs_ant = "rum_v et rsa_v tarifs_anterieurs importés"
+          
+        }else{
+          msg_tarifs_ant = "rum_v et rsa_v tarifs_anterieurs non importés (fichier n-1 absent)"
+
+        }
                                                           
       }
       
@@ -653,9 +673,12 @@ load_RData<- function( remontees_sel, extra = FALSE ){
     
     
     
-    msg_for_extra = ""
-    if(extra){
-      msg_for_extra = "rum_v et rsa_v tarifsante , rum_v et rsa_v nonconsol"
+
+    if(!extra){
+      
+      msg_tarifs_ant = ""
+      
+      msg_non_cons = ""
     }
     
     message(
@@ -663,7 +686,8 @@ load_RData<- function( remontees_sel, extra = FALSE ){
       "annees : ", toString(paste(unique(rsa$ansor),collapse = '/')) , "\n",
       "rsa, rsa_v  : ",  toString(nrow(rsa)) , " lignes \n",
       "rum, rum_v :", toString(nrow(rum)), " lignes \n",
-      msg_for_extra
+      msg_tarifs_ant,'\n',
+      msg_non_cons
     )
   
 }

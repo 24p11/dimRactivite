@@ -56,6 +56,12 @@
 <li>
       <a href="../articles/generation-tableaux-de-bord-pmsi.html">Import des archives GENSRA et génération de tableaux de bord</a>
     </li>
+    <li>
+      <a href="../articles/indicateurs.html">indicateurs</a>
+    </li>
+    <li>
+      <a href="../articles/methodes.html">Méthodes</a>
+    </li>
   </ul>
 </li>
       </ul>
@@ -84,12 +90,12 @@
     
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(pmeasyr)
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(tidyverse)
-<span class="co">#&gt; ── Attaching packages ────────────────────────────────────────────────────────────────────────────────────────────── tidyverse 1.2.1 ──</span>
+<span class="co">#&gt; ── Attaching packages ───────────────────────────────────────────────────────────────────────────────────────────────────────────── tidyverse 1.2.1 ──</span>
 <span class="co">#&gt; ✔ ggplot2 3.2.1.9000     ✔ purrr   0.3.2     </span>
 <span class="co">#&gt; ✔ tibble  2.1.3          ✔ dplyr   0.8.3     </span>
 <span class="co">#&gt; ✔ tidyr   1.0.0          ✔ stringr 1.4.0     </span>
 <span class="co">#&gt; ✔ readr   1.3.1          ✔ forcats 0.4.0</span>
-<span class="co">#&gt; ── Conflicts ───────────────────────────────────────────────────────────────────────────────────────────────── tidyverse_conflicts() ──</span>
+<span class="co">#&gt; ── Conflicts ──────────────────────────────────────────────────────────────────────────────────────────────────────────────── tidyverse_conflicts() ──</span>
 <span class="co">#&gt; ✖ dplyr::filter() masks stats::filter()</span>
 <span class="co">#&gt; ✖ dplyr::lag()    masks stats::lag()</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span> (RCurl)
@@ -107,7 +113,8 @@
 <span class="co">#&gt;     flatten</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(referentiels)
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(nomensland)
-<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(readxl)</code></pre></div>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(readxl)
+<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(dimRactivite)</code></pre></div>
 <p>Les fonctions d’imports et d’analyses sont construites sur le principe que chaque établissement produit tous les mois des fichiers de données de facturation mis en entrée du logiciel ATIH GENRSA utilisé pour transmettre les données PMSI aux tutelles. L’analyse de ces fichiers par GENRSA produit 2 types d’archives (.zip) le in (les fichiers d’entrée) et le out (fichiers préparés pour être envoyés). Le package généralise l’import des fichiers zippés en sortie de GENRSA (in et out) dans un environnement de travail R permettant l’analyse des données et la production de tableaux de bord automatiques.</p>
 <div id="import-des-donnees-dans-r" class="section level1">
 <h1 class="hasAnchor">
@@ -117,7 +124,7 @@
 <a href="#parametre-des-imports" class="anchor"></a>Paramètre des imports</h3>
 <p>Le paramètres nécessaires pour les imports se trouvent dans un le fichier options.yaml (cf exemple) en particulier la variable <code>path</code> qui donne le chemin du dossier racine dans le quel se trouve les archives PMSI en sortie de GENRSA.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">
-dimRactivite<span class="op">:::</span><span class="kw"><a href="../reference/update_options.html">update_options</a></span>(<span class="st">'options.yaml'</span>)
+dimRactivite<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/dimRactivite/man/update_options.html">update_options</a></span>(<span class="st">'options.yaml'</span>)
 
 profondeur_imports =<span class="st"> </span><span class="dv">2</span></code></pre></div>
 </div>
@@ -129,7 +136,7 @@ profondeur_imports =<span class="st"> </span><span class="dv">2</span></code></p
 <a href="#analyse-des-fichiers-en-fonction-de-leur-extentions-ext-imco--zip-et-verification-de-la-presence-des--rdata" class="anchor"></a>Analyse des fichiers en fonction de leur extentions (ext imco + .zip) et vérification de la présence des .RData</h4>
 <p>La première étape consiste à scanner le dossier contenant les archives afin de dresser la liste de remontées disponibles ce qui produit un tableaux de données référençant l’ensemble des informations utiles sur les archives et leur contenu. Ce tableau appelé <code>fichiers_genrsa</code> sera utilisé par les autres fonctions d’imports comme reférentiel pour décrire les données disponibles. Il est sauvegardé dans les options.</p>
 <p>Les fichiers sont ensuite analysés afin de préparer la création (ou non) des fichiers .RData. On vérifie la présence dans les fichiers zippés en entrée et en sortie de GENRSA de l’ensemble des fichiers nécessaires à la facturation et à l’analyse de l’activité en lisant l’extension des fichiers de l’archive. La (sous) fonction <code>analyse_fichiers_remontees</code> produit un dataframe <code>remontees_dispo</code> de synthèse où pour chaque remontée on liste l’absence (0) ou la présence (1) des fichiers qui seront utilisés. Ce dataframe sera également utilisé pour les autres fonctions.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">remontees_dispo &lt;-<span class="st"> </span>dimRactivite<span class="op">:::</span><span class="kw"><a href="../reference/analyse_dossier_remontees.html">analyse_dossier_remontees</a></span>( <span class="dt">maj_dernier_mois =</span> <span class="ot">FALSE</span> )
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">remontees_dispo &lt;-<span class="st"> </span>dimRactivite<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/dimRactivite/man/analyse_dossier_remontees.html">analyse_dossier_remontees</a></span>( <span class="dt">maj_dernier_mois =</span> <span class="ot">FALSE</span> )
 <span class="co">#Voir la liste des fichiers RData non disponibles qui seront générés à l'étape suivante</span>
 <span class="kw"><a href="https://rdrr.io/r/base/print.html">print</a></span>( remontees_dispo <span class="op">%&gt;%</span><span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span>( RData <span class="op">!=</span><span class="st"> </span><span class="dv">1</span> ) )
 <span class="co">#&gt; # A tibble: 0 x 13</span>
@@ -142,7 +149,7 @@ profondeur_imports =<span class="st"> </span><span class="dv">2</span></code></p
 <a href="#creation-et-sauvegarde-des--rdata-de-remontee-si-manquant-et-mise-a-jour-de-la-liste-des-remontees-disponibles" class="anchor"></a>Création et sauvegarde des .RData de remontée (si manquant) et mise à jour de la liste des remontées disponibles</h4>
 <p>La fonction <code>save_remontee</code> prend comme argument le tableau de synthèse des fichiers diponibles dans le dossier racine (<code>remontees_dispo</code>) et produit un fichier .RData pour chaque remontée, qui est enregisté dans le dossier racine. Pour être importée, une remontée doit comprendre le in et le out de GENRSA. Les fichiers indispensables sont le .rss et le .rsa. S’ils ne sont pas présents dans l’archive les autres fichiers servant à la facturation seront générés automatiquement (fichier vide). Les remontées pour lequelles un fichier .RData est disponible ne seront pas ré-importés.</p>
 <p>Par défaut, l’option <code>option recent = TRUE</code> induit la création du .RData pour la dernière remontée disponible en forçant la variable .RData du tableau de données <code>remontees_dispo</code> à 0 (même si un fichier .RData est disponible pour cette remontée dans le dossier racine).</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#remontees_dispo &lt;- dimRactivite:::save_remontees( remontees_dispo )</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">remontees_dispo &lt;-<span class="st"> </span>dimRactivite<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/dimRactivite/man/save_remontees.html">save_remontees</a></span>( remontees_dispo )</code></pre></div>
 </div>
 </div>
 <div id="import-dans-lenvironement-de-travail" class="section level3">
@@ -155,51 +162,177 @@ profondeur_imports =<span class="st"> </span><span class="dv">2</span></code></p
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">
 sel_remontees_import&lt;-remontees_dispo<span class="op">%&gt;%</span><span class="kw"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span>( <span class="kw"><a href="https://rdrr.io/r/base/numeric.html">as.numeric</a></span>(annee) <span class="op">&gt;</span><span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/Extremes.html">max</a></span>( <span class="kw"><a href="https://rdrr.io/r/base/numeric.html">as.numeric</a></span>(remontees_dispo<span class="op">$</span>annee) ) <span class="op">-</span><span class="st"> </span>profondeur_imports, RData <span class="op">==</span><span class="st"> </span><span class="dv">1</span> )<span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw">mutate</span>( <span class="dt">mois  =</span>  <span class="kw"><a href="https://rdrr.io/r/base/numeric.html">as.numeric</a></span>(mois) )<span class="op">%&gt;%</span>
-<span class="st">  </span><span class="kw">group_by</span>( finess, annee )<span class="op">%&gt;%</span><span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span>( mois <span class="op">==</span><span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/Extremes.html">max</a></span>(mois) )
-
-sel_remontees_import
-<span class="co">#&gt; # A tibble: 4 x 13</span>
-<span class="co">#&gt; # Groups:   finess, annee [4]</span>
-<span class="co">#&gt;   finess annee  mois   rss   rsa   tra   ano   ium  diap  porg   pie</span>
-<span class="co">#&gt;   &lt;chr&gt;  &lt;chr&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;</span>
-<span class="co">#&gt; 1 75010… 2018     12     1     1     1     1     1     1     1     0</span>
-<span class="co">#&gt; 2 75010… 2019      7     1     1     1     1     1     1     1     0</span>
-<span class="co">#&gt; 3 75010… 2018     12     1     1     1     1     1     1     1     0</span>
-<span class="co">#&gt; 4 75010… 2019      7     1     1     1     1     1     1     1     0</span>
-<span class="co">#&gt; # … with 2 more variables: manquants &lt;dbl&gt;, RData &lt;dbl&gt;</span></code></pre></div>
-<p>Le df <code>sel_remontees_import</code> est passé en argument de la fonction <code>load_all()</code> qui permet le chargment des données.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">dimRactivite<span class="op">:::</span><span class="kw"><a href="../reference/load_RData.html">load_RData</a></span>( sel_remontees_import )
+<span class="st">  </span><span class="kw">group_by</span>( finess, annee )<span class="op">%&gt;%</span><span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span>( mois <span class="op">==</span><span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/Extremes.html">max</a></span>(mois) )</code></pre></div>
+<p>Le df <code>sel_remontees_import</code> est passé en argument de la fonction <code>load_all()</code> qui permet le chargment des données. Le paramètre <code>extra = TRUE</code> permet de charger des tableaux de données complémentaires utiles pour l’analyse : - rsa_v_nonconsol et rum_v_nonconsol : données non consolidées à la date de la remontée pour l’année N-1 (vs M12 classiquement utilisées dans les analyses) - rsa_v_tarifsante, rum_v_tarifsante : données N valorisées avec les tarifs de l’année N-1</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">dimRactivite<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/dimRactivite/man/load_RData.html">load_RData</a></span>( sel_remontees_import, <span class="dt">extra =</span> <span class="ot">TRUE</span>  )
+<span class="co">#&gt; Joining, by = c("nofiness", "cle_rsa", "nas", "norum", "ansor", "moissor")</span>
+<span class="co">#&gt; Joining, by = c("cle_rsa", "nas", "ansor", "moissor")</span>
+<span class="co">#&gt; Joining, by = c("nofiness", "cle_rsa", "nas", "norum", "ansor", "moissor")</span>
+<span class="co">#&gt; Joining, by = c("cle_rsa", "nas", "ansor", "moissor")</span>
 <span class="co">#&gt; </span>
-<span class="co">#&gt;  Importés dans l'espace de travail :annees : 2018/2019rsa, rsa_v  : 243934 lignes </span>
-<span class="co">#&gt; rum, rum_v :275414 lignes</span></code></pre></div>
+<span class="co">#&gt;  Importés dans l'espace de travail : </span>
+<span class="co">#&gt; annees : 2018/2019</span>
+<span class="co">#&gt; rsa, rsa_v  : 254262 lignes </span>
+<span class="co">#&gt; rum, rum_v :287080 lignes </span>
+<span class="co">#&gt; rum_v et rsa_v tarifsante , rum_v et rsa_v nonconsol</span></code></pre></div>
 </div>
 <div id="import-des-fichiers-mo-et-dmi" class="section level4">
 <h4 class="hasAnchor">
 <a href="#import-des-fichiers-mo-et-dmi" class="anchor"></a>Import des fichiers MO et DMI</h4>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="../reference/load_med.html">load_med</a></span>( sel_remontees_import )
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Dézippage de l'archive MCO_IN_00047_201812.zip</span>
+<span class="co">#&gt; Taille    : 18 Mo</span>
+<span class="co">#&gt; Type      : </span>
+<span class="co">#&gt; Finess    : </span>
+<span class="co">#&gt; Période   :  M</span>
+<span class="co">#&gt; Date prod : </span>
+<span class="co">#&gt; Fichiers  : med.txt</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Dézippage de l'archive MCO_OUT_00047_201812.zip</span>
+<span class="co">#&gt; Taille    : 21 Mo</span>
+<span class="co">#&gt; Type      : </span>
+<span class="co">#&gt; Finess    : </span>
+<span class="co">#&gt; Période   :  M</span>
+<span class="co">#&gt; Date prod : </span>
+<span class="co">#&gt; Fichiers  : med, medatu</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Dézippage de l'archive MCO_IN_00047_201908.zip</span>
+<span class="co">#&gt; Taille    : 12 Mo</span>
+<span class="co">#&gt; Type      : </span>
+<span class="co">#&gt; Finess    : </span>
+<span class="co">#&gt; Période   :  M</span>
+<span class="co">#&gt; Date prod : </span>
+<span class="co">#&gt; Fichiers  : med.txt</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Dézippage de l'archive MCO_OUT_00047_201908.zip</span>
+<span class="co">#&gt; Taille    : 15 Mo</span>
+<span class="co">#&gt; Type      : </span>
+<span class="co">#&gt; Finess    : </span>
+<span class="co">#&gt; Période   :  M</span>
+<span class="co">#&gt; Date prod : </span>
+<span class="co">#&gt; Fichiers  : med, medatu</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Dézippage de l'archive MCO_IN_00076_201812.zip</span>
+<span class="co">#&gt; Taille    : 18 Mo</span>
+<span class="co">#&gt; Type      : </span>
+<span class="co">#&gt; Finess    : </span>
+<span class="co">#&gt; Période   :  M</span>
+<span class="co">#&gt; Date prod : </span>
+<span class="co">#&gt; Fichiers  : med.txt</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Dézippage de l'archive MCO_OUT_00076_201812.zip</span>
+<span class="co">#&gt; Taille    : 41 Mo</span>
+<span class="co">#&gt; Type      : </span>
+<span class="co">#&gt; Finess    : </span>
+<span class="co">#&gt; Période   :  M</span>
+<span class="co">#&gt; Date prod : </span>
+<span class="co">#&gt; Fichiers  : med, medatu</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Dézippage de l'archive MCO_IN_00076_201908.zip</span>
+<span class="co">#&gt; Taille    : 12 Mo</span>
+<span class="co">#&gt; Type      : </span>
+<span class="co">#&gt; Finess    : </span>
+<span class="co">#&gt; Période   :  M</span>
+<span class="co">#&gt; Date prod : </span>
+<span class="co">#&gt; Fichiers  : med.txt</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Dézippage de l'archive MCO_OUT_00076_201908.zip</span>
+<span class="co">#&gt; Taille    : 28 Mo</span>
+<span class="co">#&gt; Type      : </span>
+<span class="co">#&gt; Finess    : </span>
+<span class="co">#&gt; Période   :  M</span>
+<span class="co">#&gt; Date prod : </span>
+<span class="co">#&gt; Fichiers  : med, medatu</span>
+<span class="kw"><a href="../reference/load_dmi.html">load_dmi</a></span>( sel_remontees_import )
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Dézippage de l'archive MCO_IN_00047_201812.zip</span>
+<span class="co">#&gt; Taille    : 18 Mo</span>
+<span class="co">#&gt; Type      : </span>
+<span class="co">#&gt; Finess    : </span>
+<span class="co">#&gt; Période   :  M</span>
+<span class="co">#&gt; Date prod : </span>
+<span class="co">#&gt; Fichiers  : dmi.txt</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Dézippage de l'archive MCO_OUT_00047_201812.zip</span>
+<span class="co">#&gt; Taille    : 21 Mo</span>
+<span class="co">#&gt; Type      : </span>
+<span class="co">#&gt; Finess    : </span>
+<span class="co">#&gt; Période   :  M</span>
+<span class="co">#&gt; Date prod : </span>
+<span class="co">#&gt; Fichiers  : dmip</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Dézippage de l'archive MCO_IN_00047_201908.zip</span>
+<span class="co">#&gt; Taille    : 12 Mo</span>
+<span class="co">#&gt; Type      : </span>
+<span class="co">#&gt; Finess    : </span>
+<span class="co">#&gt; Période   :  M</span>
+<span class="co">#&gt; Date prod : </span>
+<span class="co">#&gt; Fichiers  : dmi.txt</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Dézippage de l'archive MCO_OUT_00047_201908.zip</span>
+<span class="co">#&gt; Taille    : 15 Mo</span>
+<span class="co">#&gt; Type      : </span>
+<span class="co">#&gt; Finess    : </span>
+<span class="co">#&gt; Période   :  M</span>
+<span class="co">#&gt; Date prod : </span>
+<span class="co">#&gt; Fichiers  : dmip</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Dézippage de l'archive MCO_IN_00076_201812.zip</span>
+<span class="co">#&gt; Taille    : 18 Mo</span>
+<span class="co">#&gt; Type      : </span>
+<span class="co">#&gt; Finess    : </span>
+<span class="co">#&gt; Période   :  M</span>
+<span class="co">#&gt; Date prod : </span>
+<span class="co">#&gt; Fichiers  : dmi.txt</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Dézippage de l'archive MCO_OUT_00076_201812.zip</span>
+<span class="co">#&gt; Taille    : 41 Mo</span>
+<span class="co">#&gt; Type      : </span>
+<span class="co">#&gt; Finess    : </span>
+<span class="co">#&gt; Période   :  M</span>
+<span class="co">#&gt; Date prod : </span>
+<span class="co">#&gt; Fichiers  : dmip</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Dézippage de l'archive MCO_IN_00076_201908.zip</span>
+<span class="co">#&gt; Taille    : 12 Mo</span>
+<span class="co">#&gt; Type      : </span>
+<span class="co">#&gt; Finess    : </span>
+<span class="co">#&gt; Période   :  M</span>
+<span class="co">#&gt; Date prod : </span>
+<span class="co">#&gt; Fichiers  : dmi.txt</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Dézippage de l'archive MCO_OUT_00076_201908.zip</span>
+<span class="co">#&gt; Taille    : 28 Mo</span>
+<span class="co">#&gt; Type      : </span>
+<span class="co">#&gt; Finess    : </span>
+<span class="co">#&gt; Période   :  M</span>
+<span class="co">#&gt; Date prod : </span>
+<span class="co">#&gt; Fichiers  : dmip</span></code></pre></div>
 </div>
 <div id="ajout-des-donnees-de-struture" class="section level4">
 <h4 class="hasAnchor">
 <a href="#ajout-des-donnees-de-struture" class="anchor"></a>Ajout des données de struture</h4>
 <p>Différentes données complémentaires peuvent ensuite être ajoutées aux données PMSI standardisées. L’ajout d’élements descriptifs des uma (leur libellé, services et pôles de rattachement) sera probablement le plus important d’entre eux. L’ajout des structures se fait grâce à un fichier de paramètres <code>structure.xls</code> (cf exemple).</p>
 <p>La fonction <code><a href="../reference/verif_structure.html">verif_structure()</a></code> permet de s’assurer que l’ensemble des uma présentes dans les fichiers GENRSA sont bien renseignées dans le fichier structure.</p>
+<p>Il s’agit ici d’un exemple non réel.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">
-<span class="co"># ajout des structures dans les rum</span>
-fichier_structure &lt;-<span class="st"> </span>readxl<span class="op">::</span><span class="kw"><a href="https://readxl.tidyverse.org/reference/read_excel.html">read_excel</a></span>(<span class="kw"><a href="https://rdrr.io/r/base/options.html">getOption</a></span>(<span class="st">"dimRactivite.structures"</span>),
-                                        <span class="dt">col_types =</span> <span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>( <span class="st">"text"</span> , <span class="st">"text"</span> , <span class="st">"text"</span> , <span class="st">"text"</span> ,<span class="st">"text"</span> ,
-                                                       <span class="st">"text"</span> , <span class="st">"text"</span> , <span class="st">"text"</span> , <span class="st">"text"</span> ),
-                                        <span class="dt">col_names =</span> <span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">'nofiness'</span>,<span class="st">'hopital'</span>,<span class="st">'cdurm'</span>,<span class="st">'uma_locale'</span>,<span class="st">'uma_locale2'</span>,
-                                                      <span class="st">'libelle_um'</span>,<span class="st">'service'</span>,<span class="st">'regroupement1'</span>,<span class="st">'pole'</span>),
-                                        <span class="dt">skip =</span> <span class="dv">1</span>
-)
-<span class="co">#vérification que toutes les UMA sont bien renseignées dans le fichier structure</span>
-dimRactivite<span class="op">:::</span><span class="kw"><a href="../reference/verif_structure.html">verif_structure</a></span>(rum,fichier_structure)
-<span class="co">#&gt; </span>
-<span class="co">#&gt; Toutes les UMA sont renseignées dans le fichier structure</span>
 
-rum &lt;-<span class="st"> </span>rum <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">left_join</span>( ., fichier_structure ) <span class="op">%&gt;%</span>
+<span class="co"># ajout des structures dans les rum</span>
+structures &lt;-<span class="st"> </span>readxl<span class="op">::</span><span class="kw"><a href="https://readxl.tidyverse.org/reference/read_excel.html">read_excel</a></span>(<span class="kw"><a href="https://rdrr.io/r/base/options.html">getOption</a></span>(<span class="st">'dimRactivite.structures'</span>),
+                                 <span class="dt">col_types =</span> <span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>( <span class="st">"text"</span> , <span class="st">"text"</span> , <span class="st">"text"</span> , <span class="st">"text"</span>, <span class="st">"text"</span> ),
+                                 <span class="dt">col_names =</span> <span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">'hopital'</span>,<span class="st">'cdurm'</span>,<span class="st">'libelle_um'</span>,<span class="st">'service'</span>,<span class="st">'pole'</span>),
+                                 <span class="dt">skip =</span> <span class="dv">1</span>
+)
+
+
+<span class="co">#vérification que toutes les UMA sont bien renseignées dans le fichier structure</span>
+<span class="co">#verif_structure(rum,fichier_structure)</span>
+
+rum &lt;-<span class="st"> </span>rum <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">inner_join</span>( ., structures ) <span class="op">%&gt;%</span>
 <span class="st">          </span><span class="kw">mutate</span>( <span class="dt">pole =</span> <span class="kw"><a href="https://rdrr.io/r/base/ifelse.html">ifelse</a></span>(<span class="kw"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span>(pole), <span class="st">'Erreurs'</span>, pole ),
                   <span class="dt">service =</span> <span class="kw"><a href="https://rdrr.io/r/base/ifelse.html">ifelse</a></span>(<span class="kw"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span>(service), <span class="st">'Erreur service non renseigné'</span>, service ) )
-<span class="co">#&gt; Joining, by = c("nofiness", "cdurm")</span></code></pre></div>
+<span class="co">#&gt; Joining, by = "cdurm"</span></code></pre></div>
 <p>On pourrait à cet endroit, vouloir également ajouter d’autres informations sur les RUM comme par exemple l’identité des patients.</p>
 </div>
 </div>
@@ -207,7 +340,7 @@ rum &lt;-<span class="st"> </span>rum <span class="op">%&gt;%</span><span class=
 <div id="generation-des-tableaux-de-bord" class="section level1">
 <h1 class="hasAnchor">
 <a href="#generation-des-tableaux-de-bord" class="anchor"></a>Génération des tableaux de bord</h1>
-<p>Deux types de tableaux de bord peuvent être générés (les exemples donnés ici ne sont accéssibles que sur l’intranet de l’APHP) : - des tableaux synthétiques permettant une vue de l’évolution temporelle d’un indicateur pour l’ensemble de l’établissement ou du groupe hospitalier (ex : <a href="http://msi.sls.aphp.fr/tdb/index.php?_tbl=TableauDeBordGeneral&amp;_mois=07&amp;_annee=2019&amp;_type=mens">intranet aphp</a> ), des recettes avec une répartition par service (ex : [intranet aphp]<a href="http://msi.sls.aphp.fr/tdb/index.php?_tbl=TableauDeBordValorisation&amp;_mois=07&amp;_annee=2019&amp;_type=mens" class="uri">http://msi.sls.aphp.fr/tdb/index.php?_tbl=TableauDeBordValorisation&amp;_mois=07&amp;_annee=2019&amp;_type=mens</a>) - des tableaux détaillés pour chaque niveau du fichier structure permettant de suivre l’évolution temporelle pour ce niveau d’un ensemble d’indicateurs prédéfinis (ex <a href="http://msi.sls.aphp.fr/tdb/index.php?_tbl=TableauDeBordActivite&amp;_service=Lariboisiere&amp;_mois=07&amp;_annee=2019&amp;_type=mens">intranet aphp</a>).</p>
+<p>Deux types de tableaux de bord peuvent être générés (les exemples donnés ici ne sont accéssibles que sur l’intranet de l’APHP) : - des tableaux synthétiques permettant une vue de l’évolution temporelle d’un indicateur pour l’ensemble de l’établissement ou du groupe hospitalier (ex : <a href="http://msi.sls.aphp.fr/tdb/index.php?_tbl=TableauDeBordGeneral&amp;_mois=07&amp;_annee=2019&amp;_type=mens">intranet aphp</a> ), des recettes avec une répartition par service (ex : <a href="http://msi.sls.aphp.fr/tdb/index.php?_tbl=TableauDeBordValorisation&amp;_mois=07&amp;_annee=2019&amp;_type=mens">intranet aphp</a> ) - des tableaux détaillés pour chaque niveau du fichier structure permettant de suivre l’évolution temporelle pour ce niveau d’un ensemble d’indicateurs prédéfinis (ex <a href="http://msi.sls.aphp.fr/tdb/index.php?_tbl=TableauDeBordActivite&amp;_service=Lariboisiere&amp;_mois=07&amp;_annee=2019&amp;_type=mens">intranet aphp</a>).</p>
 <p>Pour l’ensemble de ces tableaux on produit une version mensuelle et une version cumulée. La fonction <code><a href="../reference/get_data.html">get_data()</a></code> permet de préparer les données.</p>
 <div id="parametres-des-tableaux-de-bord" class="section level3">
 <h3 class="hasAnchor">
@@ -224,6 +357,10 @@ annee=<span class="kw"><a href="https://rdrr.io/r/base/numeric.html">as.numeric<
 
 <span class="co">#Profondeur de calcul</span>
 profondeur_tdb =<span class="st"> </span><span class="dv">2</span>
+
+<span class="co">#Tarifs MCO</span>
+tarifs_mco_ghs &lt;-<span class="st"> </span>nomensland<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/nomensland/man/get_table.html">get_table</a></span>(<span class="st">"tarifs_mco_ghs"</span>)
+
 
 #### Import des paramètres des tableaux 
 ghm_dms_nationales&lt;-nomensland<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/nomensland/man/get_table.html">get_table</a></span>(<span class="st">"ghm_dms_nationales"</span>)
@@ -246,12 +383,15 @@ rsa_dms &lt;-<span class="st"> </span>dplyr<span class="op">::</span><span class
 
 
 #### Import des paramètres (liste des indicateurs à calculer pour chaque niveau du fichier structure)
-references&lt;-<span class="kw"><a href="https://rdrr.io/r/utils/read.table.html">read.table</a></span>(<span class="st">'indicateurs.xls'</span>,
-                       <span class="dt">sep=</span><span class="st">'</span><span class="ch">\t</span><span class="st">'</span>,
-                       <span class="dt">header=</span>F,<span class="dt">fill=</span>T,
-                       <span class="dt">na.strings =</span> <span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"NA"</span>,<span class="st">""</span>),<span class="dt">stringsAsFactor=</span>F,<span class="dt">fileEncoding =</span> <span class="st">'latin1'</span>)
-
-<span class="kw"><a href="https://rdrr.io/r/base/names.html">names</a></span>(references)&lt;-dimRactivite<span class="op">:::</span><span class="kw"><a href="../reference/prep_string.html">prep_string</a></span>(references[<span class="dv">1</span>,])
+references&lt;-readxl<span class="op">::</span><span class="kw"><a href="https://readxl.tidyverse.org/reference/read_excel.html">read_excel</a></span>(<span class="st">'indicateurs.xlsx'</span>,<span class="dt">col_names =</span> F)
+<span class="co">#&gt; New names:</span>
+<span class="co">#&gt; * `` -&gt; ...1</span>
+<span class="co">#&gt; * `` -&gt; ...2</span>
+<span class="co">#&gt; * `` -&gt; ...3</span>
+<span class="co">#&gt; * `` -&gt; ...4</span>
+<span class="co">#&gt; * `` -&gt; ...5</span>
+<span class="co">#&gt; * … and 17 more problems</span>
+<span class="kw"><a href="https://rdrr.io/r/base/names.html">names</a></span>(references)&lt;-<span class="kw"><a href="../reference/prep_string.html">prep_string</a></span>(references[<span class="dv">1</span>,])
 references&lt;-references[<span class="op">-</span><span class="dv">1</span>,]<span class="op">%&gt;%</span><span class="kw">as_tibble</span>(.)
 <span class="co">#labels = df simple avec les légendes</span>
 labels&lt;-<span class="kw"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span>(references[<span class="op">!</span><span class="kw"><a href="https://rdrr.io/r/base/duplicated.html">duplicated</a></span>(references<span class="op">$</span>var),<span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">'var'</span>,<span class="st">'libelle'</span>,<span class="st">'niv'</span>)])
@@ -284,27 +424,31 @@ cancer_rsa &lt;-<span class="st"> </span>dplyr<span class="op">::</span><span cl
 <div id="generation-des-tableaux-de-bord-synthetiques" class="section level3">
 <h3 class="hasAnchor">
 <a href="#generation-des-tableaux-de-bord-synthetiques" class="anchor"></a>Génération des tableaux de bord synthétiques</h3>
+<p>Les données sont tirées au sort pour réaliser des tableaux de bord exemples.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">rum &lt;-<span class="st"> </span>rum<span class="op">%&gt;%</span><span class="kw"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span>(<span class="kw"><a href="https://rdrr.io/r/base/numeric.html">as.numeric</a></span>(moissor)<span class="op">%in%</span><span class="st"> </span><span class="dv">1</span><span class="op">:</span>mois)<span class="op">%&gt;%</span><span class="st"> </span>dplyr<span class="op">::</span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/sample.html">sample_n</a></span>(.,<span class="dv">10000</span>,<span class="dt">replace =</span> <span class="ot">FALSE</span>)</code></pre></div>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">
-df&lt;-dimRactivite<span class="op">:::</span><span class="kw"><a href="../reference/get_data.html">get_data</a></span>(<span class="kw">inner_join</span>(rum,rum_v), <span class="dt">a =</span>(annee<span class="op">-</span>profondeur_tdb)<span class="op">:</span>annee, <span class="dt">m =</span> <span class="dv">1</span><span class="op">:</span>mois )
+
+
+df&lt;-dimRactivite<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/dimRactivite/man/get_data.html">get_data</a></span>(<span class="kw">inner_join</span>(rum,rum_v), <span class="dt">a =</span>(annee<span class="op">-</span>profondeur_tdb)<span class="op">:</span>annee, <span class="dt">m =</span> <span class="dv">1</span><span class="op">:</span>mois )
 <span class="co">#&gt; Joining, by = c("nofiness", "nas", "norum", "cle_rsa", "ansor", "moissor")</span>
 
 
-tdb &lt;-<span class="st"> </span>dimRactivite<span class="op">:::</span><span class="kw"><a href="../reference/get_activite_sejours.html">get_activite_sejours</a></span>( df, structure )
+tdb &lt;-<span class="st"> </span>dimRactivite<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/dimRactivite/man/get_activite_sejours.html">get_activite_sejours</a></span>( df, structures )
 path_file=<span class="kw"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span>(<span class="st">'TableauDeBordGeneral'</span>,annee,stringr<span class="op">::</span><span class="kw"><a href="https://stringr.tidyverse.org/reference/str_pad.html">str_pad</a></span>(mois,<span class="dv">2</span>,<span class="st">"left"</span>,<span class="st">"0"</span>),<span class="st">'cum.xls'</span>)  
 <span class="kw"><a href="https://rdrr.io/r/utils/write.table.html">write.table</a></span>( tdb, <span class="dt">file=</span>path_file, <span class="dt">sep=</span><span class="st">'</span><span class="ch">\t</span><span class="st">'</span>, <span class="dt">row.names=</span>T, <span class="dt">col.names=</span><span class="ot">NA</span>, <span class="dt">na=</span><span class="st">''</span> , <span class="dt">fileEncoding =</span> <span class="st">"utf-8"</span> )
 
-tdb &lt;-<span class="st"> </span>dimRactivite<span class="op">:::</span><span class="kw"><a href="../reference/get_activite_recettes.html">get_activite_recettes</a></span>( df, structure )
+tdb &lt;-<span class="st"> </span>dimRactivite<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/dimRactivite/man/get_activite_recettes.html">get_activite_recettes</a></span>( df, structures )
 path_file=<span class="kw"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span>(<span class="st">'TableauDeBordValorisation'</span>,annee,stringr<span class="op">::</span><span class="kw"><a href="https://stringr.tidyverse.org/reference/str_pad.html">str_pad</a></span>(mois,<span class="dv">2</span>,<span class="st">"left"</span>,<span class="st">"0"</span>),<span class="st">'cum.xls'</span>)  
 <span class="kw"><a href="https://rdrr.io/r/utils/write.table.html">write.table</a></span>( tdb, <span class="dt">file=</span>path_file, <span class="dt">sep=</span><span class="st">'</span><span class="ch">\t</span><span class="st">'</span>, <span class="dt">row.names=</span>T, <span class="dt">col.names=</span><span class="ot">NA</span>, <span class="dt">na=</span><span class="st">''</span> , <span class="dt">fileEncoding =</span> <span class="st">"utf-8"</span> )
 
 
 df &lt;-<span class="st"> </span>df <span class="op">%&gt;%</span><span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span>( <span class="kw"><a href="https://rdrr.io/r/base/numeric.html">as.numeric</a></span>(moissor) <span class="op">==</span><span class="st"> </span>mois )
 
-tdb &lt;-<span class="st"> </span>dimRactivite<span class="op">:::</span><span class="kw"><a href="../reference/get_activite_sejours.html">get_activite_sejours</a></span>( df, structure )
+tdb &lt;-<span class="st"> </span>dimRactivite<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/dimRactivite/man/get_activite_sejours.html">get_activite_sejours</a></span>( df, structures )
 path_file=<span class="kw"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span>(<span class="st">'TableauDeBordGeneral'</span>,annee,stringr<span class="op">::</span><span class="kw"><a href="https://stringr.tidyverse.org/reference/str_pad.html">str_pad</a></span>(mois,<span class="dv">2</span>,<span class="st">"left"</span>,<span class="st">"0"</span>),<span class="st">'mens.xls'</span>)  
 <span class="kw"><a href="https://rdrr.io/r/utils/write.table.html">write.table</a></span>( tdb, <span class="dt">file=</span>path_file, <span class="dt">sep=</span><span class="st">'</span><span class="ch">\t</span><span class="st">'</span>, <span class="dt">row.names=</span>T, <span class="dt">col.names=</span><span class="ot">NA</span>, <span class="dt">na=</span><span class="st">''</span> , <span class="dt">fileEncoding =</span> <span class="st">"utf-8"</span> )
 
-tdb &lt;-<span class="st"> </span>dimRactivite<span class="op">:::</span><span class="kw"><a href="../reference/get_activite_recettes.html">get_activite_recettes</a></span>( df, structure )
+tdb &lt;-<span class="st"> </span>dimRactivite<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/dimRactivite/man/get_activite_recettes.html">get_activite_recettes</a></span>( df, structures )
 path_file=<span class="kw"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span>(<span class="st">'TableauDeBordValorisation'</span>,annee,stringr<span class="op">::</span><span class="kw"><a href="https://stringr.tidyverse.org/reference/str_pad.html">str_pad</a></span>(mois,<span class="dv">2</span>,<span class="st">"left"</span>,<span class="st">"0"</span>),<span class="st">'mens.xls'</span>)  
 <span class="kw"><a href="https://rdrr.io/r/utils/write.table.html">write.table</a></span>( tdb, <span class="dt">file=</span>path_file, <span class="dt">sep=</span><span class="st">'</span><span class="ch">\t</span><span class="st">'</span>, <span class="dt">row.names=</span>T, <span class="dt">col.names=</span><span class="ot">NA</span>, <span class="dt">na=</span><span class="st">''</span> , <span class="dt">fileEncoding =</span> <span class="st">"utf-8"</span> )</code></pre></div>
 </div>
@@ -315,34 +459,174 @@ path_file=<span class="kw"><a href="https://rdrr.io/r/base/paste.html">paste0</a
 #######################################################################################################################
 <span class="co">#Tableaux de bords thématiques</span>
 #######################################################################################################################
+
+val =<span class="st"> "GH"</span>
+tdb[[val]]&lt;-<span class="kw"><a href="../reference/make_tdb.html">make_tdb</a></span>( val , <span class="dt">niveau =</span> <span class="ot">NULL</span>, annee, mois )
+<span class="co">#&gt; Joining, by = c("nofiness", "nas", "norum", "cle_rsa", "ansor", "moissor")</span>
+<span class="co">#&gt; Joining, by = c("cle_rsa", "moissor", "ansor", "anseqta", "nas")</span>
+<span class="co">#&gt; Joining, by = c("nofiness", "cle_rsa", "ansor", "nbrum")</span>
+<span class="co">#&gt; Joining, by = c("nofiness", "cle_rsa", "ansor")</span>
+<span class="co">#&gt; Joining, by = c("nofiness", "cle_rsa", "ansor")</span>
+<span class="co">#&gt; Joining, by = "nas"</span>
+<span class="co">#&gt; Joining, by = c("noghs", "anseqta", "ghm")</span>
+<span class="co">#&gt; [1] "GH TableauDeBordActivite"</span>
+<span class="co">#&gt; [1] "GH TableauDeBordDIM"</span>
+<span class="co">#&gt; [1] "GH TableauDeBordMedical"</span>
+<span class="co">#&gt; Adding missing grouping variables: `noanon`</span>
+<span class="co">#&gt; Joining, by = c("nofiness", "cle_rsa", "ansor", "moissor", "noanon")</span>
+<span class="co">#&gt; [1] "GH TableauDeBordCaseMix"</span>
+<span class="co">#&gt; Adding missing grouping variables: `noanon`</span>
+<span class="co">#&gt; Joining, by = c("nofiness", "cle_rsa", "ansor", "moissor", "noanon")</span>
+
+
 niveau =<span class="st"> "hopital"</span>
-vals =<span class="st"> </span>fichier_structure<span class="op">%&gt;%</span><span class="kw">select</span>(<span class="op">!!</span>niveau)<span class="op">%&gt;%</span><span class="kw"><a href="https://rdrr.io/r/base/unique.html">unique</a></span>()<span class="op">%&gt;%</span><span class="kw">flatten_chr</span>()
+vals =<span class="st"> </span>structures<span class="op">%&gt;%</span><span class="kw">select</span>(<span class="op">!!</span>niveau)<span class="op">%&gt;%</span><span class="kw"><a href="https://rdrr.io/r/base/unique.html">unique</a></span>()<span class="op">%&gt;%</span><span class="kw">flatten_chr</span>()
 
 <span class="cf">for</span> (val <span class="cf">in</span> vals ){
   
-  <span class="co">#tdb[[val]]&lt;-dimRactivite:::make_tdb( val, niveau, annee, mois )</span>
+  tdb[[val]]&lt;-dimRactivite<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/dimRactivite/man/make_tdb.html">make_tdb</a></span>( val, niveau, annee, mois )
   
 }
+<span class="co">#&gt; Joining, by = c("nofiness", "nas", "norum", "cle_rsa", "ansor", "moissor")</span>
+<span class="co">#&gt; Joining, by = c("cle_rsa", "moissor", "ansor", "anseqta", "nas")</span>
+<span class="co">#&gt; Joining, by = c("nofiness", "cle_rsa", "ansor", "nbrum")</span>
+<span class="co">#&gt; Joining, by = c("nofiness", "cle_rsa", "ansor")</span>
+<span class="co">#&gt; Joining, by = c("nofiness", "cle_rsa", "ansor")</span>
+<span class="co">#&gt; Joining, by = "nas"</span>
+<span class="co">#&gt; Joining, by = c("noghs", "anseqta", "ghm")</span>
+<span class="co">#&gt; [1] "Hôpital Galien TableauDeBordActivite"</span>
+<span class="co">#&gt; [1] "Hôpital Galien TableauDeBordDIM"</span>
+<span class="co">#&gt; [1] "Hôpital Galien TableauDeBordMedical"</span>
+<span class="co">#&gt; Adding missing grouping variables: `noanon`</span>
+<span class="co">#&gt; Joining, by = c("nofiness", "cle_rsa", "ansor", "moissor", "noanon")</span>
+<span class="co">#&gt; [1] "Hôpital Galien TableauDeBordCaseMix"</span>
+<span class="co">#&gt; Adding missing grouping variables: `noanon`</span>
+<span class="co">#&gt; Joining, by = c("nofiness", "cle_rsa", "ansor", "moissor", "noanon")</span>
+<span class="co">#&gt; Joining, by = c("nofiness", "nas", "norum", "cle_rsa", "ansor", "moissor")</span>
+<span class="co">#&gt; Joining, by = c("cle_rsa", "moissor", "ansor", "anseqta", "nas")</span>
+<span class="co">#&gt; Joining, by = c("nofiness", "cle_rsa", "ansor", "nbrum")</span>
+<span class="co">#&gt; Joining, by = c("nofiness", "cle_rsa", "ansor")</span>
+<span class="co">#&gt; Joining, by = c("nofiness", "cle_rsa", "ansor")</span>
+<span class="co">#&gt; Joining, by = "nas"</span>
+<span class="co">#&gt; Joining, by = c("noghs", "anseqta", "ghm")</span>
+<span class="co">#&gt; [1] "Hôpital Hippocrate TableauDeBordActivite"</span>
+<span class="co">#&gt; [1] "Hôpital Hippocrate TableauDeBordDIM"</span>
+<span class="co">#&gt; [1] "Hôpital Hippocrate TableauDeBordMedical"</span>
+<span class="co">#&gt; Adding missing grouping variables: `noanon`</span>
+<span class="co">#&gt; Joining, by = c("nofiness", "cle_rsa", "ansor", "moissor", "noanon")</span>
+<span class="co">#&gt; [1] "Hôpital Hippocrate TableauDeBordCaseMix"</span>
+<span class="co">#&gt; Adding missing grouping variables: `noanon`</span>
+<span class="co">#&gt; Joining, by = c("nofiness", "cle_rsa", "ansor", "moissor", "noanon")</span>
 
 
 niveau =<span class="st"> "pole"</span>
-vals =<span class="st"> </span>fichier_structure<span class="op">%&gt;%</span><span class="kw">select</span>(<span class="op">!!</span>niveau)<span class="op">%&gt;%</span><span class="kw"><a href="https://rdrr.io/r/base/unique.html">unique</a></span>()<span class="op">%&gt;%</span><span class="kw">flatten_chr</span>()
+vals =<span class="st"> </span>structures<span class="op">%&gt;%</span><span class="kw">select</span>(<span class="op">!!</span>niveau)<span class="op">%&gt;%</span><span class="kw"><a href="https://rdrr.io/r/base/unique.html">unique</a></span>()<span class="op">%&gt;%</span><span class="kw">flatten_chr</span>()
 
 <span class="cf">for</span> (val <span class="cf">in</span> vals ){
   
-  <span class="co">#tdb[[val]]&lt;-dimRactivite:::make_tdb( val, niveau, annee, mois )</span>
+  tdb[[val]]&lt;-dimRactivite<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/dimRactivite/man/make_tdb.html">make_tdb</a></span>( val, niveau, annee, mois )
   
 }
+<span class="co">#&gt; Joining, by = c("nofiness", "nas", "norum", "cle_rsa", "ansor", "moissor")</span>
+<span class="co">#&gt; Joining, by = c("cle_rsa", "moissor", "ansor", "anseqta", "nas")</span>
+<span class="co">#&gt; Joining, by = c("nofiness", "cle_rsa", "ansor", "nbrum")</span>
+<span class="co">#&gt; Joining, by = c("nofiness", "cle_rsa", "ansor")</span>
+<span class="co">#&gt; Joining, by = c("nofiness", "cle_rsa", "ansor")</span>
+<span class="co">#&gt; Joining, by = "nas"</span>
+<span class="co">#&gt; Joining, by = c("noghs", "anseqta", "ghm")</span>
+<span class="co">#&gt; [1] "Chirurgie TableauDeBordActivite"</span>
+<span class="co">#&gt; [1] "Chirurgie TableauDeBordDIM"</span>
+<span class="co">#&gt; [1] "Chirurgie TableauDeBordMedical"</span>
+<span class="co">#&gt; Adding missing grouping variables: `noanon`</span>
+<span class="co">#&gt; Joining, by = c("nofiness", "cle_rsa", "ansor", "moissor", "noanon")</span>
+<span class="co">#&gt; [1] "Chirurgie TableauDeBordCaseMix"</span>
+<span class="co">#&gt; Adding missing grouping variables: `noanon`</span>
+<span class="co">#&gt; Joining, by = c("nofiness", "cle_rsa", "ansor", "moissor", "noanon")</span>
+<span class="co">#&gt; Joining, by = c("nofiness", "nas", "norum", "cle_rsa", "ansor", "moissor")</span>
+<span class="co">#&gt; Joining, by = c("cle_rsa", "moissor", "ansor", "anseqta", "nas")</span>
+<span class="co">#&gt; Joining, by = c("nofiness", "cle_rsa", "ansor", "nbrum")</span>
+<span class="co">#&gt; Joining, by = c("nofiness", "cle_rsa", "ansor")</span>
+<span class="co">#&gt; Joining, by = c("nofiness", "cle_rsa", "ansor")</span>
+<span class="co">#&gt; Joining, by = "nas"</span>
+<span class="co">#&gt; Joining, by = c("noghs", "anseqta", "ghm")</span>
+<span class="co">#&gt; [1] "Médecine TableauDeBordActivite"</span>
+<span class="co">#&gt; [1] "Médecine TableauDeBordDIM"</span>
+<span class="co">#&gt; [1] "Médecine TableauDeBordMedical"</span>
+<span class="co">#&gt; Adding missing grouping variables: `noanon`</span>
+<span class="co">#&gt; Joining, by = c("nofiness", "cle_rsa", "ansor", "moissor", "noanon")</span>
+<span class="co">#&gt; [1] "Médecine TableauDeBordCaseMix"</span>
+<span class="co">#&gt; Adding missing grouping variables: `noanon`</span>
+<span class="co">#&gt; Joining, by = c("nofiness", "cle_rsa", "ansor", "moissor", "noanon")</span>
+<span class="co">#&gt; Joining, by = c("nofiness", "nas", "norum", "cle_rsa", "ansor", "moissor")</span>
+<span class="co">#&gt; Joining, by = c("cle_rsa", "moissor", "ansor", "anseqta", "nas")</span>
+<span class="co">#&gt; Joining, by = c("nofiness", "cle_rsa", "ansor", "nbrum")</span>
+<span class="co">#&gt; Joining, by = c("nofiness", "cle_rsa", "ansor")</span>
+<span class="co">#&gt; Joining, by = c("nofiness", "cle_rsa", "ansor")</span>
+<span class="co">#&gt; Joining, by = "nas"</span>
+<span class="co">#&gt; Joining, by = c("noghs", "anseqta", "ghm")</span>
+<span class="co">#&gt; [1] "Urgences - Réanimation TableauDeBordActivite"</span>
+<span class="co">#&gt; [1] "Urgences - Réanimation TableauDeBordDIM"</span>
+<span class="co">#&gt; [1] "Urgences - Réanimation TableauDeBordMedical"</span>
+<span class="co">#&gt; Adding missing grouping variables: `noanon`</span>
+<span class="co">#&gt; Joining, by = c("nofiness", "cle_rsa", "ansor", "moissor", "noanon")</span>
+<span class="co">#&gt; [1] "Urgences - Réanimation TableauDeBordCaseMix"</span>
+<span class="co">#&gt; Adding missing grouping variables: `noanon`</span>
+<span class="co">#&gt; Joining, by = c("nofiness", "cle_rsa", "ansor", "moissor", "noanon")</span>
 
 
 <span class="co">#niveau = "service"</span>
-vals =<span class="st"> </span>fichier_structure<span class="op">%&gt;%</span><span class="kw">select</span>(<span class="op">!!</span>niveau)<span class="op">%&gt;%</span><span class="kw"><a href="https://rdrr.io/r/base/unique.html">unique</a></span>()<span class="op">%&gt;%</span><span class="kw">flatten_chr</span>()
+vals =<span class="st"> </span>structures<span class="op">%&gt;%</span><span class="kw">select</span>(<span class="op">!!</span>niveau)<span class="op">%&gt;%</span><span class="kw"><a href="https://rdrr.io/r/base/unique.html">unique</a></span>()<span class="op">%&gt;%</span><span class="kw">flatten_chr</span>()
 
 <span class="cf">for</span> ( val <span class="cf">in</span> vals ){
   
-<span class="co">#  tdb[[val]]&lt;-make_tdb( val, niveau, annee, mois )</span>
+  tdb[[val]]&lt;-dimRactivite<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/dimRactivite/man/make_tdb.html">make_tdb</a></span>( val, niveau, annee, mois )
   
-}</code></pre></div>
+}
+<span class="co">#&gt; Joining, by = c("nofiness", "nas", "norum", "cle_rsa", "ansor", "moissor")</span>
+<span class="co">#&gt; Joining, by = c("cle_rsa", "moissor", "ansor", "anseqta", "nas")</span>
+<span class="co">#&gt; Joining, by = c("nofiness", "cle_rsa", "ansor", "nbrum")</span>
+<span class="co">#&gt; Joining, by = c("nofiness", "cle_rsa", "ansor")</span>
+<span class="co">#&gt; Joining, by = c("nofiness", "cle_rsa", "ansor")</span>
+<span class="co">#&gt; Joining, by = "nas"</span>
+<span class="co">#&gt; Joining, by = c("noghs", "anseqta", "ghm")</span>
+<span class="co">#&gt; [1] "Chirurgie TableauDeBordActivite"</span>
+<span class="co">#&gt; [1] "Chirurgie TableauDeBordDIM"</span>
+<span class="co">#&gt; [1] "Chirurgie TableauDeBordMedical"</span>
+<span class="co">#&gt; Adding missing grouping variables: `noanon`</span>
+<span class="co">#&gt; Joining, by = c("nofiness", "cle_rsa", "ansor", "moissor", "noanon")</span>
+<span class="co">#&gt; [1] "Chirurgie TableauDeBordCaseMix"</span>
+<span class="co">#&gt; Adding missing grouping variables: `noanon`</span>
+<span class="co">#&gt; Joining, by = c("nofiness", "cle_rsa", "ansor", "moissor", "noanon")</span>
+<span class="co">#&gt; Joining, by = c("nofiness", "nas", "norum", "cle_rsa", "ansor", "moissor")</span>
+<span class="co">#&gt; Joining, by = c("cle_rsa", "moissor", "ansor", "anseqta", "nas")</span>
+<span class="co">#&gt; Joining, by = c("nofiness", "cle_rsa", "ansor", "nbrum")</span>
+<span class="co">#&gt; Joining, by = c("nofiness", "cle_rsa", "ansor")</span>
+<span class="co">#&gt; Joining, by = c("nofiness", "cle_rsa", "ansor")</span>
+<span class="co">#&gt; Joining, by = "nas"</span>
+<span class="co">#&gt; Joining, by = c("noghs", "anseqta", "ghm")</span>
+<span class="co">#&gt; [1] "Médecine TableauDeBordActivite"</span>
+<span class="co">#&gt; [1] "Médecine TableauDeBordDIM"</span>
+<span class="co">#&gt; [1] "Médecine TableauDeBordMedical"</span>
+<span class="co">#&gt; Adding missing grouping variables: `noanon`</span>
+<span class="co">#&gt; Joining, by = c("nofiness", "cle_rsa", "ansor", "moissor", "noanon")</span>
+<span class="co">#&gt; [1] "Médecine TableauDeBordCaseMix"</span>
+<span class="co">#&gt; Adding missing grouping variables: `noanon`</span>
+<span class="co">#&gt; Joining, by = c("nofiness", "cle_rsa", "ansor", "moissor", "noanon")</span>
+<span class="co">#&gt; Joining, by = c("nofiness", "nas", "norum", "cle_rsa", "ansor", "moissor")</span>
+<span class="co">#&gt; Joining, by = c("cle_rsa", "moissor", "ansor", "anseqta", "nas")</span>
+<span class="co">#&gt; Joining, by = c("nofiness", "cle_rsa", "ansor", "nbrum")</span>
+<span class="co">#&gt; Joining, by = c("nofiness", "cle_rsa", "ansor")</span>
+<span class="co">#&gt; Joining, by = c("nofiness", "cle_rsa", "ansor")</span>
+<span class="co">#&gt; Joining, by = "nas"</span>
+<span class="co">#&gt; Joining, by = c("noghs", "anseqta", "ghm")</span>
+<span class="co">#&gt; [1] "Urgences - Réanimation TableauDeBordActivite"</span>
+<span class="co">#&gt; [1] "Urgences - Réanimation TableauDeBordDIM"</span>
+<span class="co">#&gt; [1] "Urgences - Réanimation TableauDeBordMedical"</span>
+<span class="co">#&gt; Adding missing grouping variables: `noanon`</span>
+<span class="co">#&gt; Joining, by = c("nofiness", "cle_rsa", "ansor", "moissor", "noanon")</span>
+<span class="co">#&gt; [1] "Urgences - Réanimation TableauDeBordCaseMix"</span>
+<span class="co">#&gt; Adding missing grouping variables: `noanon`</span>
+<span class="co">#&gt; Joining, by = c("nofiness", "cle_rsa", "ansor", "moissor", "noanon")</span></code></pre></div>
 </div>
 </div>
   </div>

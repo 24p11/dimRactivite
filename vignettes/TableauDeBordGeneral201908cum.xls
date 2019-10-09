@@ -1,102 +1,24 @@
 ""	"2017"	"2018"	"2019"	"diff"	"p_diff"	""	"2017"	"2018"	"2019"	"diff"	"p_diff"
 ""											
 "Groupe Hospitalier"											
-"Lariboisière"	0	21507	19480	-2027	-9.4		0	9220	8526	-694	-7.5
-"Saint Louis"	0	15454	13942	-1512	-9.8		0	56105	48507	-7598	-13.5
-"Total GH"	0	36961	33422	-3539	-9.6		0	65325	57033	-8292	-12.7
+"Hôpital Galien"	0	1517	1376	-141	-9.3		0	1374	1331	-43	-3.1
+"Hôpital Hippocrate"	0	1615	1898	283	17.5		0	272	232	-40	-14.7
+"Total GH"	0	3132	3274	142	4.5		0	1646	1563	-83	-5
 ""											
-"B2P"											
-"Biologie cellulaire & cinétique"	0	0	0	0			0	441	402	-39	-8.8
-"Physiologie EF"	0	0	0	0			0	636	357	-279	-43.9
-"Total pole"	0	0	0	0			0	1077	759	-318	-29.5
+"Chirurgie"											
+"Chirurgie digestive"	0	604	538	-66	-10.9		0	128	42	-86	-67.2
+"Orthopédie"	0	582	531	-51	-8.8		0	265	237	-28	-10.6
+"Total pole"	0	1186	1069	-117	-9.9		0	393	279	-114	-29
 ""											
-"Centre de Traitement des Brûlés"											
-"Réanimation Centre des brûlés"	0	66	60	-6	-9.1		0	0	0	0	
-"SC Centre des brûlés"	0	70	68	-2	-2.9		0	0	0	0	
-"HC Centre des brûlés"	0	28	8	-20	-71.4		0	0	0	0	
-"HdJ Centre des brûlés"	0	0	0	0			0	0	5	5	Inf
-"Total pole"	0	164	136	-28	-17.1		0	0	5	5	Inf
+"Médecine"											
+"Pneumologie"	0	229	284	55	24		0	159	149	-10	-6.3
+"Médecine interne"	0	264	227	-37	-14		0	0	0	0	
+"Neurologie"	0	141	117	-24	-17		0	113	83	-30	-26.5
+"Cancérologie"	0	254	222	-32	-12.6		0	981	1052	71	7.2
+"Total pole"	0	888	850	-38	-4.3		0	1253	1284	31	2.5
 ""											
-"DOREM"											
-"Chirurgie plastique & brûlés"	0	2666	2492	-174	-6.5		0	704	777	73	10.4
-"CMF stomatologie"	0	296	0	-296	-100		0	131	0	-131	-100
-"Dermatologie"	0	1009	885	-124	-12.3		0	2964	3166	202	6.8
-"Total pole"	0	3971	3377	-594	-15		0	3799	3943	144	3.8
-""											
-"DUNEGO"											
-"Chirurgie digestive"	0	1013	707	-306	-30.2		0	126	355	229	181.7
-"Chirurgie générale SLS"	0	1673	1334	-339	-20.3		0	392	118	-274	-69.9
-"Chirurgie mammaire"	0	459	442	-17	-3.7		0	275	245	-30	-10.9
-"CRN LRB"	0	0	0	0			0	715	184	-531	-74.3
-"CRN SLS"	0	0	0	0			0	476	331	-145	-30.5
-"Gastro-entérologie SLS"	0	634	531	-103	-16.2		0	4515	4027	-488	-10.8
-"Hépato-gastro-entérologie"	0	0	0	0			0	110	148	38	34.5
-"Néphrologie"	0	630	441	-189	-30		0	4549	4122	-427	-9.4
-"Urologie"	0	1245	1092	-153	-12.3		0	648	680	32	4.9
-"Gynécologie"	0	835	1204	369	44.2		0	611	569	-42	-6.9
-"Obstétrique"	0	3367	3069	-298	-8.9		0	0	0	0	
-"Néonatalogie"	0	284	328	44	15.5		0	0	0	0	
-"Total pole"	0	10140	9148	-992	-9.8		0	12417	10779	-1638	-13.2
-""											
-"HI-3RO"											
-"Centre des maladies du sein"	0	0	0	0			0	4875	4480	-395	-8.1
-"Hématologie greffe"	0	145	159	14	9.7		0	2144	1819	-325	-15.2
-"AJA - hématologie"	0	301	284	-17	-5.6		0	651	637	-14	-2.2
-"Hématologie adultes"	0	315	452	137	43.5		0	1525	1255	-270	-17.7
-"Hématologie sénior"	0	217	216	-1	-0.5		0	2172	1799	-373	-17.2
-"Hémato-oncologie"	0	771	601	-170	-22		0	3153	2433	-720	-22.8
-"Immuno-hématologie"	0	617	716	99	16		0	2198	2352	154	7
-"Immuno-pathologie clinique"	0	737	690	-47	-6.4		0	1036	1195	159	15.3
-"Oncologie médicale"	0	791	620	-171	-21.6		0	2976	2870	-106	-3.6
-"Neuro-oncologie"	0	286	244	-42	-14.7		0	477	424	-53	-11.1
-"Onco-radiothérapie"	0	717	354	-363	-50.6		0	17136	12843	-4293	-25.1
-"Pneumologie"	0	693	724	31	4.5		0	456	442	-14	-3.1
-"Réanimation médicale SLS"	0	554	547	-7	-1.3		0	0	0	0	
-"Aphérèse Thérapeutique"	0	0	0	0			0	793	760	-33	-4.2
-"Pharmacologie clinique"	0	0	0	0			0	0	51	51	Inf
-"Total pole"	0	6144	5607	-537	-8.7		0	39592	33360	-6232	-15.7
-""											
-"IMAGINE"											
-"Diabétologie et endocrinologie"	0	1025	939	-86	-8.4		0	1596	1857	261	16.4
-"Gériatrie"	0	316	305	-11	-3.5		0	0	0	0	
-"Maladies infectieuses SLS"	0	738	625	-113	-15.3		0	586	522	-64	-10.9
-"Médecine interne aval urgences et thérap"	0	857	721	-136	-15.9		0	0	0	0	
-"Médecine interne et immuno-clinique"	0	752	690	-62	-8.2		0	0	0	0	
-"Médecine interne et maladies infectieuses"	0	374	385	11	2.9		0	433	460	27	6.2
-"Médecine interne maladies auto imm et patho vasc"	0	257	224	-33	-12.8		0	184	181	-3	-1.6
-"Médecine interne maladies systémiques"	0	583	417	-166	-28.5		0	0	0	0	
-"Réanimation médicale & toxicologie"	0	589	501	-88	-14.9		0	0	0	0	
-"SC médicale et toxicologie"	0	311	296	-15	-4.8		0	0	0	0	
-"Total pole"	0	5802	5103	-699	-12		0	2799	3020	221	7.9
-""											
-"Locomoteur"											
-"Chirurgie Orthopédique"	0	1760	1509	-251	-14.3		0	814	626	-188	-23.1
-"Rhumatologie"	0	1402	1218	-184	-13.1		0	1022	1011	-11	-1.1
-"Total pole"	0	3162	2727	-435	-13.8		0	1836	1637	-199	-10.8
-""											
-"NTC"											
-"Céphalées"	0	0	0	0			0	143	118	-25	-17.5
-"Douleur"	0	101	72	-29	-28.7		0	213	206	-7	-3.3
-"Maladies rares"	0	91	84	-7	-7.7		0	183	148	-35	-19.1
-"Médecine addictologique"	0	584	538	-46	-7.9		0	917	794	-123	-13.4
-"MPR"	0	0	0	0			0	145	162	17	11.7
-"Neuro-vasculaire"	0	422	381	-41	-9.7		0	0	0	0	
-"Neuro-vasculaire USI"	0	571	472	-99	-17.3		0	0	0	0	
-"Neurochirurgie"	0	1238	1147	-91	-7.4		0	0	0	0	
-"Neurologie"	0	413	367	-46	-11.1		0	302	253	-49	-16.2
-"ORL"	0	1941	1636	-305	-15.7		0	569	629	60	10.5
-"Total pole"	0	5361	4697	-664	-12.4		0	2472	2310	-162	-6.6
-""											
-"Urgences"											
-"Cardiologie"	0	1486	1260	-226	-15.2		0	647	615	-32	-4.9
-"Cardiologie USI"	0	909	783	-126	-13.9		0	0	0	0	
-"Réanimation chirurgicale & HDJ KT"	0	346	400	54	15.6		0	648	571	-77	-11.9
-"Réanimation chirurgicale LRB"	0	647	548	-99	-15.3		0	0	0	0	
-"USC LRB"	0	240	206	-34	-14.2		0	0	0	0	
-"Urgences UHCD LRB"	0	4654	4369	-285	-6.1		0	0	0	0	
-"Urgences UHCD SLS"	0	2662	3180	518	19.5		0	0	0	0	
-"Total pole"	0	10944	10746	-198	-1.8		0	1295	1186	-109	-8.4
-""											
-"Imagerie"											
-"UCA Radio interventionnelle"	0	0	0	0			0	38	34	-4	-10.5
-"Total pole"	0	0	0	0			0	38	34	-4	-10.5
+"Urgences - Réanimation"											
+"Réanimation médicale"	0	181	220	39	21.5		0	0	0	0	
+"Réanimation chirurgicale"	0	136	166	30	22.1		0	0	0	0	
+"UHCD"	0	866	1127	261	30.1		0	0	0	0	
+"Total pole"	0	1183	1513	330	27.9		0	0	0	0	
