@@ -1,24 +1,24 @@
 ""	"2017"	"2018"	"2019"	"diff"	"p_diff"	""	"2017"	"2018"	"2019"	"diff"	"p_diff"
 ""											
 "Groupe Hospitalier"											
-"Hôpital Galien"	0	159	138	-21	-13.2		0	155	160	5	3.2
-"Hôpital Hippocrate"	0	167	180	13	7.8		0	4	2	-2	-50
-"Total GH"	0	326	318	-8	-2.5		0	159	162	3	1.9
+"Hôpital Galien"	0	164	156	-8	-4.9		0	161	131	-30	-18.6
+"Hôpital Hippocrate"	0	193	182	-11	-5.7		0	2	2	0	0
+"Total GH"	0	357	338	-19	-5.3		0	163	133	-30	-18.4
 ""											
 "Chirurgie"											
-"Chirurgie digestive"	0	67	52	-15	-22.4		0	10	4	-6	-60
-"Orthopédie"	0	55	48	-7	-12.7		0	10	22	12	120
-"Total pole"	0	122	100	-22	-18		0	20	26	6	30
+"Chirurgie digestive"	0	69	57	-12	-17.4		0	13	1	-12	-92.3
+"Orthopédie"	0	58	58	0	0		0	14	24	10	71.4
+"Total pole"	0	127	115	-12	-9.4		0	27	25	-2	-7.4
 ""											
 "Médecine"											
-"Pneumologie"	0	26	27	1	3.8		0	4	1	-3	-75
-"Médecine interne"	0	21	1	-20	-95.2		0	0	0	0	
-"Neurologie"	0	12	8	-4	-33.3		0	0	1	1	Inf
-"Cancérologie"	0	32	26	-6	-18.8		0	135	134	-1	-0.7
-"Total pole"	0	91	62	-29	-31.9		0	139	136	-3	-2.2
+"Pneumologie"	0	28	37	9	32.1		0	2	1	-1	-50
+"Médecine interne"	0	27	3	-24	-88.9		0	0	0	0	
+"Neurologie"	0	13	4	-9	-69.2		0	0	1	1	Inf
+"Cancérologie"	0	31	25	-6	-19.4		0	134	106	-28	-20.9
+"Total pole"	0	99	69	-30	-30.3		0	136	108	-28	-20.6
 ""											
 "Urgences - Réanimation"											
-"Réanimation médicale"	0	26	19	-7	-26.9		0	0	0	0	
-"Réanimation chirurgicale"	0	12	21	9	75		0	0	0	0	
-"UHCD"	0	89	131	42	47.2		0	0	0	0	
-"Total pole"	0	127	171	44	34.6		0	0	0	0	
+"Réanimation médicale"	0	31	18	-13	-41.9		0	0	0	0	
+"Réanimation chirurgicale"	0	12	27	15	125		0	0	0	0	
+"UHCD"	0	99	130	31	31.3		0	0	0	0	
+"Total pole"	0	142	175	33	23.2		0	0	0	0	
