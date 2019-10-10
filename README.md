@@ -86,13 +86,13 @@ NB : les lien donnés ici ne sont accéssibles que sur l'intranet de l'APHP. Des
 
 Ces tableaux permettent de suivre précisément les données d'activité pour chaque niveau de la structure du groupe ou de l'établissement. Il reposent donc beaucoup sur le fichier stucture qui est intégré à la fin des imports et qui permet de décrire selon plusieurs niveaux de regroupements les uma.
 
-On distingue un permier ensemble de tableaux de bord permettant de suivre l'évolution anuelle d'un seul indicateur sur l'ensemble des niveaux de structure, en prenant toujours le principe de distinguer hopsitalisation complète et hospitalisation partielle. On dispose de tableaux de suivi de l'activité (ex : [Tableau De Bord General](http://msi.sls.aphp.fr/tdb/index.php?_tbl=TableauDeBordGeneral&_mois=07&_annee=2019&_type=mens) ), des recettes avec une répartition par service (ex : [Tableau De Bord Valorisation](http://msi.sls.aphp.fr/tdb/index.php?_tbl=TableauDeBordValorisation&_mois=07&_annee=2019&_type=mens).
+On distingue un permier ensemble de tableaux de bord permettant de suivre l'évolution anuelle d'un seul indicateur sur l'ensemble des niveaux de structure, en prenant toujours le principe de distinguer hopsitalisation complète et hospitalisation partielle. On dispose de tableaux de suivi de l'activité (ex : [Tableau De Bord General](http://msi.sls.aphp.fr/tdb/index.php?_tbl=TableauDeBordGeneral&_mois=07&_annee=2019&_type=mens) ), des recettes avec une répartition par service (ex : [Tableau De Bord Valorisation](http://msi.sls.aphp.fr/tdb/index.php?_tbl=TableauDeBordValorisation&_mois=07&_annee=2019&_type=mens)).
 
 Un autre ensemble de tableaux permet de suivre l'évolution annuelle pour chaque niveau (groupe hospitalier, établissement, pole, service,...) d'un ensemble d'indicateurs. Le package permet de le calcul d'environ 200 indicateurs répartis dans tableaux de bord thématiques (activité, DIM, médical) (ex [Tableau De Bord Activite](http://msi.sls.aphp.fr/tdb/index.php?_tbl=TableauDeBordActivite&_service=Lariboisiere&_mois=07&_annee=2019&_type=mens)). 
 
-Ces tableaux sont donc produits à partir des données PMSI importées et des informations sur les structures. Pour les tablaux d'activité on utilise un fichier de paramètres afin  de lister précisément pour chaque niveau de structure et pour chaque tableau thématique l'ensemble des indicateurs qui devront être calculés. Ce porcessus permet de personnaliser les tableaux de bord en fonction du type d'activité de chaque service ou pôle.
+Ces tableaux sont donc produits à partir des données PMSI importées et des informations sur les structures. Pour les tableaux d'activité on utilise un fichier de paramètres afin  de lister précisément pour chaque niveau de structure et pour chaque tableau thématique l'ensemble des indicateurs qui devront être calculés. Ce processus permet de personnaliser les tableaux de bord en fonction du type d'activité de chaque service ou pôle. Vous trouverez plus de détail sur cette procédure dans le paragraphe [Paramètres](#détail-sur-la-valorisation-des-RUM).
 
-Des fichiers xls de sortie sans aucun formatage sont données à titre indicatif, ils ont été produits par les scripts de démonstration (```demos```, ```vignettes```) avec des données tirées au sort, et des structures fictives. Ces fichiers peuvent soit être mis en forme avec dans des template xlsx, intégrés par un site web, ou utilisé par une application shiny.
+Des exemples de tableaux de bord sont fournis sous forme de fichiers xls sans aucun formatage, ils ont été produits par les scripts de démonstration (```demos```, ```vignettes```) avec des données tirées au sort, et des structures fictives. Ces fichiers peuvent soit être mis en forme avec dans des templates xlsx, intégrés par un site web, ou utilisé par une application shiny.
 
 Paramètres
 ------------------
@@ -130,7 +130,7 @@ où option_name est le nom de l'option.
 
 - ```services_exclus``` = liste des services présents dans le fichier structure que l'on souhaite extraire de l'analyse pour les tableaux de bord (fonction ```get_data```)
 
-- ```fichier_structure``` = chemin vers le fichier structure (au format xlsx) et nom des colonnes. Le fichier doit contenir au moins une colonne cdurm (qui correspond au numéro d'UMA dans la nommenclature ```pmeasyr```) qui permettra le merge avec la table rum. Pour utiliser les tableaux de bord globaux, il sera nécessaire d'avoir également une colonne hopital, pole et service.
+- ```fichier_structure``` = chemin vers le fichier structure (au format xlsx). Le fichier doit contenir au moins une colonne cdurm (qui correspond au numéro d'UMA dans la nommenclature ```pmeasyr```) qui permettra la jointure avec la table rum. Pour utiliser les tableaux de bord globaux, il sera nécessaire d'avoir également une colonne ```hopital```, ```pole``` et ```service```.
 
 - ```gestion_doublons_rum ``` = règle de gestion des doublons pour compter les séjours dans les indicateurs d'activité
    * valeurs par défaut
@@ -148,17 +148,20 @@ Afin de générer les tableaux de bords de suivi d'indicateurs un fichier de par
 - les différents niveaux de structure en colonne.
 - la lettre ```o``` est ajoutée à l'intersection pour identifier le fait que tel indicateur doit être calculé
 
-Le fichier comprend également une colonne supplémentaire pour décrire les tableaux de bord auxquels appartient chaque indicateur. Un indicateur pouvant appartenir à différents tableaux de bords, il est possible de renseigné plusieurs nom de tableaux de bord séparé par des vigules.
+Le fichier comprend également une colonne supplémentaire pour décrire les tableaux de bord auxquels appartiennent chaque indicateur. Un indicateur pouvant appartenir à plusieurs tableaux de bords, il est possible de renseigner plusieurs nom de tableaux de bord séparé par des virgules ```,```.
 
 Enfin d'autres variables sont également utilisées.
 
-Au final il comprend les colonnes suivantes
-- niveau : variable numérique de 1 à 4 utilisée pour la mise en forme 
-- libellé de l'indicateur
-- indentifiant unique de l'indicateur (il n'est pas possible que 2 indicateurs aient le même identifiant)
-- variables nécessaires au calcul de l'indicateur
-- liste des tableaux de bord auxquel l'indicateur appartient séparé par des ``` , ``` .
-- les noms des colonnes suivantes sont liées au fichier strucutre et correspondent aux différents niveaux de l'établissement ou du groupe pour lequel des tableaux de suvis sont nécessaires. On peut également en ajouter de façon indépendante, dans le fichier donné à titre d'exemple un niveau GH a été ajouté qui n'est pas décrit dans le fichier structure.
+Au final il comprend les colonnes suivantes:
+- ```niv``` : variable numérique de 1 à 4 utilisée pour la mise en forme 
+- ```libelle``` : libellé de l'indicateur;
+- ```var``` : indentifiant unique de l'indicateur (il n'est pas possible que 2 indicateurs aient le même identifiant);
+- ```variable``` : variables nécessaires au calcul de l'indicateur;
+- ```dataframe```: sources de données nécessaire (dataframe dans lesquels se trouve les variables nécessaires), donné à titre indicatif;
+- ```referentiel``` : référentiels nécessaires au calcul de l'indicateur, donné à titre indicatif;
+- ```	tdb ``` : liste des tableaux de bord auxquel l'indicateur appartient séparé par des ``` , ``` ;
+- les noms des colonnes suivantes sont liées au fichier strucutre et correspondent aux différents niveaux de l'établissement ou du groupe pour lequel des tableaux de suvis sont nécessaires. On peut également ici ajouter de façon indépendante du fichier structure des nom de tableaux de bord que l'on souhaite calculer. Dans le fichier donné à titre d'exemple un niveau GH a été ajouté qui n'est pas décrit dans le fichier structure.
 
+Ce fichier est utilisé pour la génération des tableaux de bord par la fonction ```get_indicateurs()```qui prend comme argument le type du tableau de bord et le nom de la structure auquel il s'applique et qui renvoie la liste des indicateurs à calculer. Un exemple détaillé de construction d'un tableau de bord utilisant cette procédure est décrit dans le script  ```demos/exemple_tableaux_de_bord.R ``` .
 
 Ce fichier pivot est donc particulièrement sensible et à manier avec précaution. Un fichier exemple pouvant servir de caneva est fourni dans les dossiers ```demos``` et ```vignettes``` . Les différents scripts permettent de décrire leur utilisation pour produire des données de façon systématique (```generation_tableaux_de_bord```) ou à la demande (``` demos/exemple_tableaux_de_bord```)
