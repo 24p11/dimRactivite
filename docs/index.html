@@ -83,7 +83,7 @@
 <div class="page-header"><h1 class="hasAnchor">
 <a href="#dimractivite" class="anchor"></a>dimRactivite</h1></div>
 <p>L’objectif du package est de standardiser avec pmeasyr l’import dans R des données PMSI pour créer un environement de travail synthétique comprenant plusieurs années et plusieurs établissements. Une fois les données intégrées, des fonctions de générations automatiques de tableaux de bord sont disponibles permettant de suivre l’activté des établissements.</p>
-<p>Les fonctions d’imports et d’analyse sont construites sur le principe que chaque établissement produit tous les mois des fichiers de facturation mis en entrée du logiciel ATIH GENRSA utilisé pour transmettre les données PMSI aux tutelles (remontées mensuelles). L’analyse de ces fichiers par GENRSA produit 2 types d’archives (.zip) le in (les fichiers d’entrée) et le out (fichiers préparés pour être envoyés). Le package généralise l’import des fichiers zippés en sortie de GENRSA (in et out) dans un environnement de travail R. Au cours de cet import les RSA et les RUM sont valorisés permettant l’analyse de recettes T2A séjours des établissements.</p>
+<p>Les fonctions d’imports et d’analyse sont construites sur le principe que chaque établissement produit tous les mois des fichiers de facturation mis en entrée du logiciel ATIH GENRSA utilisé pour transmettre les données PMSI aux tutelles (remontées mensuelles). L’analyse de ces fichiers par GENRSA produit 2 types d’archives (.zip) le in (les fichiers d’entrée) et le out (fichiers préparés pour être envoyés). Le package généralise l’import des fichiers zippés en sortie de GENRSA (in et out) dans un environnement de travail R. Au cours de cet import les RSA et les RUM sont valorisés permettant l’analyse de recettes T2A des séjours des établissements.</p>
 <p>Des informations complèmentaires non contenues dans les formats officiels peuvent être intégrées, en particulier des informations sur les structures, permettant de générer des tableaux de bord compréhensibles et de décliner le calcul d’indicateurs sur les différents niveaux d’analyse d’un groupe hospitalier.</p>
 <div id="installation" class="section level4">
 <h4 class="hasAnchor">
@@ -104,7 +104,7 @@ devtools<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/
 <div id="organisation-du-file-system" class="section level2">
 <h2 class="hasAnchor">
 <a href="#organisation-du-file-system" class="anchor"></a>Organisation du file system</h2>
-<p>Comme préconisé par G.Pressiat dans la documentation du package pmeasyr <a href="https://guillaumepressiat.github.io/pmeasyr/archives.html">les archives PMSI</a>, dimRactivite utilisera un dossier unique comprenant l’ensemble des fichiers zippés en entrée et en sortie de GENRSA pour le MCO. Les fichiers contenus dans ce dossier seront analysés, un fichier .RData par remontée et par établissement sera crée s’il n’existe pas encore, puis les données seront automatiquement chargées dans R à partir des fichiers .RData (par défaut la remontée la plus récente est prise en compte).</p>
+<p>Comme préconisé par G.Pressiat dans la documentation du package pmeasyr concernant <a href="https://guillaumepressiat.github.io/pmeasyr/archives.html">les archives PMSI</a>, dimRactivite utilisera un dossier unique comprenant l’ensemble des fichiers zippés en entrée et en sortie de GENRSA pour le MCO. Les fichiers contenus dans ce dossier seront analysés, un fichier .RData par remontée et par établissement sera créé s’il n’existe pas encore, puis les données seront automatiquement chargées dans R à partir des fichiers .RData (par défaut la remontée la plus récente est prise en compte).</p>
 <p>L’adresse de ce dossier est renseigné dans l’option du fichier de configuration <code>path</code> .</p>
 </div>
 <div id="import-des-donnees-pmsi" class="section level2">
@@ -131,10 +131,10 @@ devtools<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/
 </ul>
 <p>La procédure réalise ensuite des opérations de transformation et de valorisation :</p>
 <ul>
-<li>intégration du tra (cf <a href="https://im-aphp.github.io/pmeasyr/reference/inner_tra.html"><code>inner_tra</code></a>)</li>
+<li>intégration du tra (cf <a href="https://im-aphp.github.io/pmeasyr/reference/inner_tra.html"><code>pemasyr::inner_tra</code></a>)</li>
 <li>ajout au rum des variables de fichier ium et de typologies des autorisations,</li>
 <li>valorisation des rsa ,</li>
-<li>valorisation des rum (cf fonction <a href="https://24p11.github.io/dimRactivite/reference/vvr_rum_repa.html"><code>vvr_rum_repa</code></a>)</li>
+<li>valorisation des rum (cf fonction <a href="https://24p11.github.io/dimRactivite/reference/vvr_rum_repa.html"><code><a href="reference/vvr_rum_repa.html">dimRactivite::vvr_rum_repa</a></code></a>)</li>
 <li>ajout des données de facturation à l’ano (vvr_ano_mco)</li>
 </ul>
 <p>Ces fonctions font appel aux données de référentiels suivantes (disponibles dans les packages <strong><em>nomensland</em></strong> et <strong><em>referentiels</em></strong>) ou dans les tableaux de données de dimRactive:</p>
@@ -147,7 +147,7 @@ devtools<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/
 <code>tarifs_mco_supplements</code> (nomensland)</li>
 </ul>
 <p>En complément, on calcule également les différents éléments de valorisation avec les tarifs de l’année antérieure peremttant de suivre l’impact du changement de version de tarifs sur la valorisation.</p>
-<p>Au moment de l’import des données dans l’environement de travail (cf fonction <code><a href="reference/load_RData.html">load_RData()</a></code>) on peut également importer les données de l’année n-1 produite à mois de la remontée (version non consolidées des données à n-1).</p>
+<p>Au moment de l’import des données dans l’environement de travail (cf fonction <a href="https://im-aphp.github.io/pmeasyr/reference/load_RData.html"><code><a href="reference/load_RData.html">load_RData()</a></code></a>) on peut également importer les données de l’année n-1 produite le mois de la remontée (version non consolidées des données à n-1).</p>
 <p>Pour plus d’information sur les données importées et les variables calculées vous pouvez vous reporter à la partie <a href="https://24p11.github.io/dimRactivite/articles/methodes.html">Méthodes</a> de la documentation du package</p>
 <p>A la suite de ces imports des informations complémentaires peuvent être nécessaires pour analyser les données et en particulier des informations descriptives des UMA permettant de les nommer et de les rattacher aux structures de l’établissement. Nous proposons l’utilisation d’un fichier xlsx comprenant comprenant les nom de colonnes suivants :</p>
 <ul>
@@ -163,12 +163,21 @@ devtools<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/
 <div id="generation-des-tableaux-de-bord" class="section level2">
 <h2 class="hasAnchor">
 <a href="#generation-des-tableaux-de-bord" class="anchor"></a>Génération des tableaux de bord</h2>
-<p>NB : les lien donnés ici ne sont accéssibles que sur l’intranet de l’APHP. Des exemples sous form de fichier xls sont fournis dans les dossiers <code>demos</code> et <code>vignettes</code> .</p>
+<p>NB : les lien donnés ici ne sont accéssibles que sur l’intranet de l’APHP. Des exemples sous forme de fichier xls sont fournis dans les dossiers <code>demos</code> et <code>vignettes</code> .</p>
 <p>Ces tableaux permettent de suivre précisément les données d’activité pour chaque niveau de la structure du groupe ou de l’établissement. Il reposent donc beaucoup sur le fichier stucture qui est intégré à la fin des imports et qui permet de décrire selon plusieurs niveaux de regroupements les uma.</p>
-<p>On distingue un permier ensemble de tableaux de bord permettant de suivre l’évolution anuelle d’un seul indicateur sur l’ensemble des niveaux de structure, en prenant toujours le principe de distinguer hopsitalisation complète et hospitalisation partielle. On dispose de tableaux de suivi de l’activité (ex : <a href="http://msi.sls.aphp.fr/tdb/index.php?_tbl=TableauDeBordGeneral&amp;_mois=07&amp;_annee=2019&amp;_type=mens">Tableau De Bord General</a> ), des recettes avec une répartition par service (ex : <a href="http://msi.sls.aphp.fr/tdb/index.php?_tbl=TableauDeBordValorisation&amp;_mois=07&amp;_annee=2019&amp;_type=mens">Tableau De Bord Valorisation</a>.</p>
+<p>On distingue un permier ensemble de tableaux de bord permettant de suivre l’évolution anuelle d’un seul indicateur sur l’ensemble des niveaux de structure, en prenant toujours le principe de distinguer hopsitalisation complète et hospitalisation partielle. On dispose de tableaux de suivi de l’activité (ex : <a href="http://msi.sls.aphp.fr/tdb/index.php?_tbl=TableauDeBordGeneral&amp;_mois=07&amp;_annee=2019&amp;_type=mens">Tableau De Bord General</a> ), des recettes avec une répartition par service (ex : <a href="http://msi.sls.aphp.fr/tdb/index.php?_tbl=TableauDeBordValorisation&amp;_mois=07&amp;_annee=2019&amp;_type=mens">Tableau De Bord Valorisation</a>).</p>
 <p>Un autre ensemble de tableaux permet de suivre l’évolution annuelle pour chaque niveau (groupe hospitalier, établissement, pole, service,…) d’un ensemble d’indicateurs. Le package permet de le calcul d’environ 200 indicateurs répartis dans tableaux de bord thématiques (activité, DIM, médical) (ex <a href="http://msi.sls.aphp.fr/tdb/index.php?_tbl=TableauDeBordActivite&amp;_service=Lariboisiere&amp;_mois=07&amp;_annee=2019&amp;_type=mens">Tableau De Bord Activite</a>).</p>
-<p>Ces tableaux sont donc produits à partir des données PMSI importées et des informations sur les structures. Pour les tablaux d’activité on utilise un fichier de paramètres afin de lister précisément pour chaque niveau de structure et pour chaque tableau thématique l’ensemble des indicateurs qui devront être calculés. Ce porcessus permet de personnaliser les tableaux de bord en fonction du type d’activité de chaque service ou pôle.</p>
-<p>Des fichiers xls de sortie sans aucun formatage sont données à titre indicatif, ils ont été produits par les scripts de démonstration (<code>demos</code>, <code>vignettes</code>) avec des données tirées au sort, et des structures fictives. Ces fichiers peuvent soit être mis en forme avec dans des template xlsx, intégrés par un site web, ou utilisé par une application shiny.</p>
+<p>Ces tableaux sont donc produits à partir des données PMSI importées et des informations sur les structures. Pour les tableaux d’activité on utilise un fichier de paramètres afin de lister précisément pour chaque niveau de structure et pour chaque tableau thématique l’ensemble des indicateurs qui devront être calculés. Ce processus permet de personnaliser les tableaux de bord en fonction du type d’activité de chaque service ou pôle. Vous trouverez plus de détail sur cette procédure dans le paragraphe <a href="#d%C3%A9tail-sur-la-valorisation-des-RUM">Paramètres</a>.</p>
+<p>Des exemples de tableaux de bord sont fournis sous forme de fichiers xls sans aucun formatage, ils ont été produits par les scripts de démonstration (<code>demos</code>, <code>vignettes</code>) avec des données tirées au sort, et des structures fictives. Ces fichiers peuvent soit être mis en forme avec dans des templates xlsx, intégrés par un site web, ou utilisé par une application shiny.</p>
+<p>En complément de ces formats standards, on peut imaginer de nombreux autres besoins. Nous proposons ici une tentative d’analyse des écarts de recettes totales entre l’année N et l’année N-1 dans un tableau de bord spécifique reposant sur une décomposition en 4 parties de cette différence de recettes :</p>
+<ul>
+<li>évolution des tarifs entre n et n-1</li>
+<li>modifications de répartition dans les niveau de sévérité au sein de chaque racine</li>
+<li>évolution des recettes liées aux suppléments</li>
+<li>évolution des recettes extrêmes hauts et extrêmes bas</li>
+<li>le reste que nous avons appelé activité et rend compte principalement de l’évolution du nombre de séjours et du casemix racine de ghm</li>
+</ul>
+<p>cf vignette <a href="https://24p11.github.io/dimRactivite/articles/generation-tableaux-de-bord-pmsi.html">Génération de tableaux de bord PMSI avec pmeasyr</a> .</p>
 </div>
 <div id="parametres" class="section level2">
 <h2 class="hasAnchor">
@@ -205,7 +214,7 @@ devtools<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/
 </ul>
 </li>
 <li><p><code>services_exclus</code> = liste des services présents dans le fichier structure que l’on souhaite extraire de l’analyse pour les tableaux de bord (fonction <code>get_data</code>)</p></li>
-<li><p><code>fichier_structure</code> = chemin vers le fichier structure (au format xlsx) et nom des colonnes. Le fichier doit contenir au moins une colonne cdurm (qui correspond au numéro d’UMA dans la nommenclature <code>pmeasyr</code>) qui permettra le merge avec la table rum. Pour utiliser les tableaux de bord globaux, il sera nécessaire d’avoir également une colonne hopital, pole et service.</p></li>
+<li><p><code>fichier_structure</code> = chemin vers le fichier structure (au format xlsx). Le fichier doit contenir au moins une colonne cdurm (qui correspond au numéro d’UMA dans la nommenclature <code>pmeasyr</code>) qui permettra la jointure avec la table rum. Pour utiliser les tableaux de bord globaux, il sera nécessaire d’avoir également une colonne <code>hopital</code>, <code>pole</code> et <code>service</code>.</p></li>
 <li>
 <code>gestion_doublons_rum</code> = règle de gestion des doublons pour compter les séjours dans les indicateurs d’activité</li>
 <li>valeurs par défaut
@@ -230,17 +239,27 @@ devtools<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/
 <li>les différents niveaux de structure en colonne.</li>
 <li>la lettre <code>o</code> est ajoutée à l’intersection pour identifier le fait que tel indicateur doit être calculé</li>
 </ul>
-<p>Le fichier comprend également une colonne supplémentaire pour décrire les tableaux de bord auxquels appartient chaque indicateur. Un indicateur pouvant appartenir à différents tableaux de bords, il est possible de renseigné plusieurs nom de tableaux de bord séparé par des vigules.</p>
+<p>Le fichier comprend également une colonne supplémentaire pour décrire les tableaux de bord auxquels appartiennent chaque indicateur. Un indicateur pouvant appartenir à plusieurs tableaux de bords, il est possible de renseigner plusieurs nom de tableaux de bord séparé par des virgules <code>,</code>.</p>
 <p>Enfin d’autres variables sont également utilisées.</p>
-<p>Au final il comprend les colonnes suivantes</p>
+<p>Au final il comprend les colonnes suivantes:</p>
 <ul>
-<li>niveau : variable numérique de 1 à 4 utilisée pour la mise en forme</li>
-<li>libellé de l’indicateur</li>
-<li>indentifiant unique de l’indicateur (il n’est pas possible que 2 indicateurs aient le même identifiant)</li>
-<li>variables nécessaires au calcul de l’indicateur</li>
-<li>liste des tableaux de bord auxquel l’indicateur appartient séparé par des <code>,</code> .</li>
-<li>les noms des colonnes suivantes sont liées au fichier strucutre et correspondent aux différents niveaux de l’établissement ou du groupe pour lequel des tableaux de suvis sont nécessaires. On peut également en ajouter de façon indépendante, dans le fichier donné à titre d’exemple un niveau GH a été ajouté qui n’est pas décrit dans le fichier structure.</li>
+<li>
+<code>niv</code> : variable numérique de 1 à 4 utilisée pour la mise en forme</li>
+<li>
+<code>libelle</code> : libellé de l’indicateur;</li>
+<li>
+<code>var</code> : indentifiant unique de l’indicateur (il n’est pas possible que 2 indicateurs aient le même identifiant);</li>
+<li>
+<code>variable</code> : variables nécessaires au calcul de l’indicateur;</li>
+<li>
+<code>dataframe</code>: sources de données nécessaire (dataframe dans lesquels se trouve les variables nécessaires), donné à titre indicatif;</li>
+<li>
+<code>referentiel</code> : référentiels nécessaires au calcul de l’indicateur, donné à titre indicatif;</li>
+<li>
+<code>tdb</code> : liste des tableaux de bord auxquel l’indicateur appartient séparé par des <code>,</code> ;</li>
+<li>les noms des colonnes suivantes sont liées au fichier strucutre et correspondent aux différents niveaux de l’établissement ou du groupe pour lequel des tableaux de suvis sont nécessaires. On peut également ici ajouter de façon indépendante du fichier structure des nom de tableaux de bord que l’on souhaite calculer. Dans le fichier donné à titre d’exemple un niveau GH a été ajouté qui n’est pas décrit dans le fichier structure.</li>
 </ul>
+<p>Ce fichier est utilisé pour la génération des tableaux de bord par la fonction <code><a href="reference/get_indicateurs.html">get_indicateurs()</a></code>qui prend comme argument le type du tableau de bord et le nom de la structure auquel il s’applique et qui renvoie la liste des indicateurs à calculer. Un exemple détaillé de construction d’un tableau de bord utilisant cette procédure est décrit dans le script <code>demos/exemple_tableaux_de_bord.R</code> .</p>
 <p>Ce fichier pivot est donc particulièrement sensible et à manier avec précaution. Un fichier exemple pouvant servir de caneva est fourni dans les dossiers <code>demos</code> et <code>vignettes</code> . Les différents scripts permettent de décrire leur utilisation pour produire des données de façon systématique (<code>generation_tableaux_de_bord</code>) ou à la demande (<code>demos/exemple_tableaux_de_bord</code>)</p>
 </div>
 </div>

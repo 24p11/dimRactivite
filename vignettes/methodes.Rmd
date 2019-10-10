@@ -78,7 +78,21 @@ Pour le niveau ```service```, les RUM sont dédoublonnés par service, et de la 
 
 L'index de performance de la durée moyenne de séjour (IP DMS) est calculé avec les DMS de référence de la base nationale PMSI de l'année précédente (en fonction de la date de mise à disposition par l'ATIH) selon la méthode mise au point la siège de l'APHP et présentée au congrès EMOIS 2014 (Le-Leplat 2014).
 
+##### Tableau de bord détail évolution recettes
 
+La procédure permet la production d'un tableau synthétique sur l'ensemble du groupe hospitalier visant à explorer les écarts de recettes : 
+
+- Nb séjours, différence et % de différence année N vs N-1
+- Recettes, différence et % de différence année N vs N-1
+- Différentiel des recettes N vs N-1 pour les 
+   * séjours dont la durée < 2j, 
+   * séjours dont la durée >=DMS+30 
+   * séjours dont la durée >= 2 jours et < DMS+30
+Pour dont les séjours durée >= 2 jours et < DMS+30 on essaye de décomposer la différentiel de recettes N vs N-1 en sous-parties :
+ - part liée à l'évolution N vs N-1 de la répartition en niveaux de sévérité au sein des racines : on applique pour l'année N le taux de répartition en niveaux de sévérité de chaque racine à l'année N-1, cela donne des recettes théoriques à niveau sévérité constant; la différence avec les recettes observées constitue la part attribuable à l'évolution de la répartition en niveaux de sévérité
+ - part liée aux suppléments
+ - part liée aux extrêmes haut et bas
+ - le reste qui correspond théoriquement aux variations d’activé : nb séjours * casemix racine
 
 Références
 -------------

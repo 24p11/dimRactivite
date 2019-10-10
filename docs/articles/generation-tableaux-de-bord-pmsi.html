@@ -174,7 +174,8 @@ sel_remontees_import&lt;-remontees_dispo<span class="op">%&gt;%</span><span clas
 <span class="co">#&gt; annees : 2018/2019</span>
 <span class="co">#&gt; rsa, rsa_v  : 254262 lignes </span>
 <span class="co">#&gt; rum, rum_v :287080 lignes </span>
-<span class="co">#&gt; rum_v et rsa_v tarifsante , rum_v et rsa_v nonconsol</span></code></pre></div>
+<span class="co">#&gt; rum_v et rsa_v tarifs_anterieurs importés</span>
+<span class="co">#&gt; rum_v et rsa_v nonconsol non importés (fichier n-1 absent)</span></code></pre></div>
 </div>
 <div id="import-des-fichiers-mo-et-dmi" class="section level4">
 <h4 class="hasAnchor">
@@ -455,6 +456,7 @@ path_file=<span class="kw"><a href="https://rdrr.io/r/base/paste.html">paste0</a
 <div id="generation-des-tableaux-de-bord-detailles" class="section level3">
 <h3 class="hasAnchor">
 <a href="#generation-des-tableaux-de-bord-detailles" class="anchor"></a>Génération des tableaux de bord détaillés</h3>
+<p>Un tableau par élément du fichier structure dont la génération fait appel au fichier <code>indicateurs.xlsx</code> mentionné dans la documentation du package.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">tdb&lt;-<span class="kw"><a href="https://rdrr.io/r/base/list.html">list</a></span>()
 #######################################################################################################################
 <span class="co">#Tableaux de bords thématiques</span>
@@ -627,6 +629,97 @@ vals =<span class="st"> </span>structures<span class="op">%&gt;%</span><span cla
 <span class="co">#&gt; [1] "Urgences - Réanimation TableauDeBordCaseMix"</span>
 <span class="co">#&gt; Adding missing grouping variables: `noanon`</span>
 <span class="co">#&gt; Joining, by = c("nofiness", "cle_rsa", "ansor", "moissor", "noanon")</span></code></pre></div>
+</div>
+<div id="autres-tableaux-de-bord" class="section level3">
+<h3 class="hasAnchor">
+<a href="#autres-tableaux-de-bord" class="anchor"></a>Autres tableaux de bord</h3>
+<p>En complément de ces formats standards, on peut imaginer de nombreux autres besoins. Nous proposons ici une tentative d’analyse des écarts de recettes totales entre l’année N et l’année N-1 dans un tableau de bord spécifique reposant sur une décomposition en 4 parties de cette différence de recettes : - évolution des tarifs entre n et n-1 - modifications de répartition dans les niveau de sévérité au sein de chaque racine - évolution des recettes liées aux suppléments - évolution des recettes extrêmes hauts et extrêmes bas - le reste que nous avons appelé activité et rend compte principalement de l’évolution du nombre de séjours et du casemix racine de ghm</p>
+<p>Ces écarts étant très différents entre les séjours très courts (0 et 1 nuit) et les séjours très longs, ces séjours ont été mis à part. Notre définition des séjours longs discutable est une durée de séjours &gt; dms dans la base nationale + 30j.</p>
+<p>La procédure suivante permet la production d’un tableau synthétique sur l’ensemble du groupe hospitalier visant à explorer ces écarts :</p>
+<ul>
+<li>Nb séjours, différence et % de différence année N vs N-1</li>
+<li>Recettes, différence et % de différence année N vs N-1</li>
+<li>Différentiel des recettes N vs N-1 pour les</li>
+<li>séjours dont la durée &lt; 2j,</li>
+<li>séjours dont la durée &gt;=DMS+30</li>
+<li>séjours dont la durée &gt;= 2 jours et &lt; DMS+30 Pour dont les séjours durée &gt;= 2 jours et &lt; DMS+30 on essaye de décomposer la différentiel de recettes N vs N-1 en sous-parties :</li>
+<li>part liée à l’évolution N vs N-1 de la répartition en niveaux de sévérité au sein des racines : on applique pour l’année N le taux de répartition en niveaux de sévérité de chaque racine à l’année N-1, cela donne des recettes théoriques à niveau sévérité constant; la différence avec les recettes observées constitue la part attribuable à l’évolution de la répartition en niveaux de sévérité</li>
+<li>part liée aux suppléments</li>
+<li>part liée aux extrêmes haut et bas</li>
+<li>le reste qui correspond théoriquement aux variations d’activé : nb séjours * casemix racine</li>
+</ul>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">
+### Préparation des référentiels pour permettre analyse des données avec tarifs identiques N et N-1
+tarifs_ghs&lt;-nomensland<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/nomensland/man/get_table.html">get_table</a></span>( <span class="st">"tarifs_mco_ghs"</span> )
+
+tarifs_ghs_n1&lt;-dplyr<span class="op">::</span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/join.html">full_join</a></span>(tarifs_ghs <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">distinct</span>( anseqta, ghs,<span class="dt">.keep_all =</span> <span class="ot">TRUE</span> ) <span class="op">%&gt;%</span><span class="kw">select</span>( anseqta, ghs, tarif_base ),
+                         tarifs_ghs <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">distinct</span>( anseqta, ghs,<span class="dt">.keep_all =</span> <span class="ot">TRUE</span> ) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">mutate</span>(<span class="dt">anseqta =</span> <span class="kw"><a href="https://rdrr.io/r/base/character.html">as.character</a></span>(<span class="kw"><a href="https://rdrr.io/r/base/numeric.html">as.numeric</a></span>(anseqta)<span class="op">-</span><span class="dv">1</span>)) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">select</span>( anseqta, ghs, tarif_base ),
+                         <span class="dt">by=</span><span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"ghs"</span>,<span class="st">"anseqta"</span>),<span class="dt">suffix =</span> <span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">''</span>,<span class="st">"_n_1"</span>)
+)
+
+tarifs_ghs_n1&lt;-tarifs_ghs_n1<span class="op">%&gt;%</span>dplyr<span class="op">::</span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span>(<span class="dt">tarif_base_n_1 =</span> <span class="kw">if_else</span>(<span class="kw"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span>(tarif_base_n_<span class="dv">1</span>),tarif_base,tarif_base_n_<span class="dv">1</span>))<span class="op">%&gt;%</span>
+<span class="st">  </span>dplyr<span class="op">::</span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span>(<span class="op">-</span>tarif_base)<span class="op">%&gt;%</span><span class="kw">rename</span>(<span class="dt">tarif_base =</span> tarif_base_n_<span class="dv">1</span> )
+
+t_replace =<span class="st"> ", niveau 1|en ambulatoire|, très courte durée|, sans complication significative|, sans problème significatif"</span>
+
+racines&lt;-tarifs_ghs<span class="op">%&gt;%</span>dplyr<span class="op">::</span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span>( anseqta <span class="op">%in%</span><span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">'2018'</span>,<span class="st">'2019'</span>) )<span class="op">%&gt;%</span>
+<span class="st">  </span>dplyr<span class="op">::</span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span>( <span class="dt">racine =</span> <span class="kw"><a href="https://rdrr.io/r/base/substr.html">substr</a></span>(ghm,<span class="dv">1</span>,<span class="dv">5</span>) ) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">arrange</span>( ghs ) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">distinct</span> (racine, <span class="dt">.keep_all =</span> T ) <span class="op">%&gt;%</span>
+<span class="st">  </span>dplyr<span class="op">::</span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/select.html">rename</a></span>( <span class="dt">libelle =</span> libelle_ghm ) <span class="op">%&gt;%</span>
+<span class="st">  </span>dplyr<span class="op">::</span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span>( <span class="dt">libelle =</span> <span class="kw">str_replace</span>(libelle, t_replace, <span class="st">''</span>) )<span class="op">%&gt;%</span>
+<span class="st">  </span>dplyr<span class="op">::</span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span>( racine, libelle )
+
+
+
+##Préparation des données
+df &lt;-<span class="st"> </span><span class="kw"><a href="../reference/get_data.html">get_data</a></span>( <span class="kw">inner_join</span>(rum,rum_v), <span class="dt">a =</span> (annee<span class="op">-</span><span class="dv">1</span>)<span class="op">:</span>annee, <span class="dt">m =</span> <span class="dv">1</span><span class="op">:</span>mois ) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">mutate</span>( <span class="dt">ansor =</span> <span class="kw"><a href="https://rdrr.io/r/base/character.html">as.character</a></span>(ansor))
+<span class="co">#&gt; Joining, by = c("nofiness", "nas", "norum", "cle_rsa", "ansor", "moissor")</span>
+
+df &lt;-<span class="st"> </span>dplyr<span class="op">::</span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/join.html">left_join</a></span>( df<span class="op">%&gt;%</span><span class="kw"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span>(typehosp <span class="op">==</span><span class="st"> "C"</span>),
+                        rum_v_tarifsante <span class="op">%&gt;%</span><span class="st"> </span>dplyr<span class="op">::</span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span>( ansor, nofiness, cle_rsa, nas, norum, valotime, valopmctmono, valopmctmonotime1, valopmctmonotime2 ), 
+                        <span class="dt">suffix =</span> <span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>( <span class="st">""</span>, <span class="st">"_tarifsante"</span> ),
+                        <span class="dt">by =</span> <span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"nofiness"</span>, <span class="st">"nas"</span>, <span class="st">"norum"</span>, <span class="st">"cle_rsa"</span>, <span class="st">"ansor"</span>) ) <span class="op">%&gt;%</span><span class="st"> </span>
+<span class="st">  </span>dplyr<span class="op">::</span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/join.html">left_join</a></span>( ., <span class="kw">inner_join</span>(rsa,rsa_v) <span class="op">%&gt;%</span><span class="st"> </span>dplyr<span class="op">::</span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span>( <span class="dt">rec_exbh =</span> rec_exh <span class="op">+</span><span class="st"> </span>rec_exb ) <span class="op">%&gt;%</span><span class="st"> </span>
+<span class="st">                      </span>dplyr<span class="op">::</span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span>( ansor, anseqta, nofiness, cle_rsa, nas, <span class="dt">ghs=</span>noghs, rec_totale, rec_base, rec_exbh, duree ) ) <span class="op">%&gt;%</span>
+<span class="st">  </span>dplyr<span class="op">::</span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/join.html">left_join</a></span>(.,rsa_dms)
+<span class="co">#&gt; Joining, by = c("cle_rsa", "moissor", "ansor", "anseqta", "nas")</span>
+<span class="co">#&gt; Joining, by = c("nofiness", "nas", "cle_rsa", "ansor")</span>
+<span class="co">#&gt; Joining, by = c("nofiness", "cle_rsa", "ansor")</span>
+
+df_n&lt;-<span class="st"> </span>df <span class="op">%&gt;%</span><span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span>( <span class="kw"><a href="https://rdrr.io/r/base/numeric.html">as.numeric</a></span>(ansor) <span class="op">==</span><span class="st"> </span>annee )
+df_n&lt;-<span class="st"> </span>df_n <span class="op">%&gt;%</span><span class="st"> </span>dplyr<span class="op">::</span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/join.html">left_join</a></span>( ., tarifs_ghs  <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">distinct</span>( anseqta, ghs,<span class="dt">.keep_all =</span> <span class="ot">TRUE</span> ) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">select</span>(anseqta, ghs, tarif_base ) )
+<span class="co">#&gt; Joining, by = c("anseqta", "ghs")</span>
+
+
+df_n1&lt;-<span class="st"> </span>df <span class="op">%&gt;%</span><span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span>( <span class="kw"><a href="https://rdrr.io/r/base/numeric.html">as.numeric</a></span>(ansor) <span class="op">==</span><span class="st"> </span>annee <span class="op">-</span><span class="dv">1</span> )
+df_n1 &lt;-<span class="st"> </span>df_n1 <span class="op">%&gt;%</span><span class="st"> </span>dplyr<span class="op">::</span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/join.html">left_join</a></span>( ., tarifs_ghs_n1  <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">distinct</span>( anseqta, ghs,<span class="dt">.keep_all =</span> <span class="ot">TRUE</span> ) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">select</span>(anseqta, ghs, tarif_base ) )
+<span class="co">#&gt; Joining, by = c("anseqta", "ghs")</span>
+
+
+df&lt;-<span class="kw">bind_rows</span>(df_n,df_n1)<span class="op">%&gt;%</span><span class="st"> </span>
+<span class="st">  </span>dplyr<span class="op">::</span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span>( <span class="dt">racine =</span> <span class="kw"><a href="https://rdrr.io/r/base/factor.html">factor</a></span>(<span class="kw"><a href="https://rdrr.io/r/base/substr.html">substr</a></span>( cdghm, <span class="dv">1</span>, <span class="dv">5</span>)) , 
+                 <span class="dt">diff_t =</span> valopmctmonotime1 <span class="op">-</span><span class="st"> </span>valopmctmonotime1_tarifsante )
+
+## Réalisation du tableau de bord
+
+res&lt;-<span class="st"> </span>dimRactivite<span class="op">:::</span><span class="kw">get_tdb_detail_recettes</span>( df<span class="op">%&gt;%</span><span class="kw"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span>(pole <span class="op">!=</span><span class="st"> "Erreurs"</span>) )
+<span class="co">#&gt; Joining, by = "pivot"</span>
+<span class="co">#&gt; Joining, by = "pivot"</span>
+<span class="co">#&gt; Joining, by = "pivot"</span>
+<span class="co">#&gt; Joining, by = "pivot"</span>
+<span class="co">#&gt; Joining, by = "pivot"</span>
+<span class="co">#&gt; Joining, by = "pivot"</span>
+<span class="co">#&gt; Joining, by = "pivot"</span>
+<span class="co">#&gt; Joining, by = "pivot"</span>
+<span class="co">#&gt; Joining, by = "pivot"</span>
+<span class="co">#&gt; Joining, by = "pivot"</span>
+<span class="co">#&gt; Joining, by = "pivot"</span>
+<span class="co">#&gt; Joining, by = "pivot"</span>
+<span class="co">#&gt; Joining, by = "pivot"</span>
+<span class="co">#&gt; Joining, by = "pivot"</span>
+<span class="co">#&gt; Joining, by = "pivot"</span>
+<span class="co">#&gt; Joining, by = "pivot"</span>
+<span class="kw"><a href="https://rdrr.io/r/utils/write.table.html">write.table</a></span>(res,<span class="dt">sep=</span><span class="st">'</span><span class="ch">\t</span><span class="st">'</span>,<span class="dt">file =</span> <span class="kw"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span>(<span class="kw"><a href="https://rdrr.io/r/base/options.html">getOption</a></span>(<span class="st">'dimRactivite.path_tdb_files'</span>),
+                                       <span class="st">"detail_diff_recettes"</span>,annee,stringr<span class="op">::</span><span class="kw"><a href="https://stringr.tidyverse.org/reference/str_pad.html">str_pad</a></span>(mois,<span class="dv">2</span>,<span class="st">"left"</span>,<span class="st">"0"</span>),<span class="st">'.xls'</span>))</code></pre></div>
 </div>
 </div>
   </div>

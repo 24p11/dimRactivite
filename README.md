@@ -4,7 +4,7 @@ dimRactivite
 
 L'objectif du package est de standardiser avec pmeasyr l'import dans R des données PMSI pour créer un environement de travail synthétique comprenant plusieurs années et plusieurs établissements. Une fois les données intégrées, des fonctions de générations automatiques de tableaux de bord sont disponibles permettant de suivre l'activté des établissements.
 
-Les fonctions d'imports et d'analyse sont construites sur le principe que chaque établissement produit tous les mois des fichiers de facturation mis en entrée du logiciel ATIH GENRSA utilisé pour transmettre les données PMSI aux tutelles (remontées mensuelles).  L’analyse de ces fichiers par GENRSA produit 2 types d’archives (.zip) le in (les fichiers d’entrée) et le out (fichiers préparés pour être envoyés). Le package généralise l’import des fichiers zippés en sortie de GENRSA (in et out) dans un environnement de travail R. Au cours de cet import les RSA et les RUM sont valorisés permettant l'analyse de recettes T2A séjours des établissements.
+Les fonctions d'imports et d'analyse sont construites sur le principe que chaque établissement produit tous les mois des fichiers de facturation mis en entrée du logiciel ATIH GENRSA utilisé pour transmettre les données PMSI aux tutelles (remontées mensuelles).  L’analyse de ces fichiers par GENRSA produit 2 types d’archives (.zip) le in (les fichiers d’entrée) et le out (fichiers préparés pour être envoyés). Le package généralise l’import des fichiers zippés en sortie de GENRSA (in et out) dans un environnement de travail R. Au cours de cet import les RSA et les RUM sont valorisés permettant l'analyse de recettes T2A des séjours des établissements.
 
 Des informations complèmentaires non contenues dans les formats officiels peuvent être intégrées, en particulier des informations sur les structures, permettant de générer des tableaux de bord compréhensibles et de décliner le calcul d'indicateurs sur les différents niveaux d'analyse d'un groupe hospitalier.
 
@@ -30,7 +30,7 @@ Un scénario complet d'import et de génération peut être trouvé dans la vign
 
 Organisation du file system
 ---------------------------
-Comme préconisé par G.Pressiat dans la documentation du package pmeasyr [les archives PMSI](https://guillaumepressiat.github.io/pmeasyr/archives.html), dimRactivite utilisera un dossier unique comprenant l'ensemble des fichiers zippés en entrée et en sortie de GENRSA pour le MCO. Les fichiers contenus dans ce dossier seront analysés, un fichier .RData par remontée et par établissement sera crée s'il n'existe pas encore, puis les données seront automatiquement chargées dans R à partir des fichiers .RData (par défaut la remontée la plus récente est prise en compte).
+Comme préconisé par G.Pressiat dans la documentation du package pmeasyr concernant [les archives PMSI](https://guillaumepressiat.github.io/pmeasyr/archives.html), dimRactivite utilisera un dossier unique comprenant l'ensemble des fichiers zippés en entrée et en sortie de GENRSA pour le MCO. Les fichiers contenus dans ce dossier seront analysés, un fichier .RData par remontée et par établissement sera créé s'il n'existe pas encore, puis les données seront automatiquement chargées dans R à partir des fichiers .RData (par défaut la remontée la plus récente est prise en compte).
 
 L'adresse de ce dossier est renseigné dans l'option du fichier de configuration ```path```  .
 
@@ -51,10 +51,10 @@ Cette procédure, qui procède par plusieurs étapes, utilise les fichiers GENRS
     * pie
 
 La procédure réalise ensuite des opérations de transformation et de valorisation : 
- - intégration du tra (cf [```inner_tra```](https://im-aphp.github.io/pmeasyr/reference/inner_tra.html))
+ - intégration du tra (cf [```pemasyr::inner_tra```](https://im-aphp.github.io/pmeasyr/reference/inner_tra.html))
  - ajout au rum des variables de fichier ium et de typologies des autorisations, 
  - valorisation des rsa ,
- - valorisation des rum (cf fonction [```vvr_rum_repa```](https://24p11.github.io/dimRactivite/reference/vvr_rum_repa.html))
+ - valorisation des rum (cf fonction [```dimRactivite::vvr_rum_repa```](https://24p11.github.io/dimRactivite/reference/vvr_rum_repa.html))
  - ajout des données de facturation à l'ano (vvr_ano_mco)
 
 Ces fonctions font appel aux données de référentiels suivantes (disponibles dans les packages ***nomensland*** et ***referentiels***) ou dans les tableaux de données de dimRactive:
@@ -64,7 +64,7 @@ Ces fonctions font appel aux données de référentiels suivantes (disponibles d
 
 En complément, on calcule également les différents éléments de valorisation avec les tarifs de l'année antérieure peremttant de suivre l'impact du changement de version de tarifs sur la valorisation.
 
-Au moment de l'import des données dans l'environement de travail (cf fonction ```load_RData()```) on peut également importer les données de l'année n-1 produite à mois de la remontée (version non consolidées des données à n-1).
+Au moment de l'import des données dans l'environement de travail (cf fonction [```load_RData()```](https://im-aphp.github.io/pmeasyr/reference/load_RData.html)) on peut également importer les données de l'année n-1 produite le mois de la remontée (version non consolidées des données à n-1).
 
 Pour plus d'information sur les données importées et les variables calculées vous pouvez vous reporter à la partie [Méthodes](https://24p11.github.io/dimRactivite/articles/methodes.html) de la documentation du package
 
@@ -82,7 +82,7 @@ D'autres niveaux de regroupement peuvent être ajoutés qui pourront être utili
 Génération des tableaux de bord
 -----------------------
 
-NB : les lien donnés ici ne sont accéssibles que sur l'intranet de l'APHP. Des exemples sous form de fichier xls sont fournis dans les dossiers ```demos``` et ```vignettes``` .
+NB : les lien donnés ici ne sont accéssibles que sur l'intranet de l'APHP. Des exemples sous forme de fichier xls sont fournis dans les dossiers ```demos``` et ```vignettes``` .
 
 Ces tableaux permettent de suivre précisément les données d'activité pour chaque niveau de la structure du groupe ou de l'établissement. Il reposent donc beaucoup sur le fichier stucture qui est intégré à la fin des imports et qui permet de décrire selon plusieurs niveaux de regroupements les uma.
 
@@ -93,6 +93,15 @@ Un autre ensemble de tableaux permet de suivre l'évolution annuelle pour chaque
 Ces tableaux sont donc produits à partir des données PMSI importées et des informations sur les structures. Pour les tableaux d'activité on utilise un fichier de paramètres afin  de lister précisément pour chaque niveau de structure et pour chaque tableau thématique l'ensemble des indicateurs qui devront être calculés. Ce processus permet de personnaliser les tableaux de bord en fonction du type d'activité de chaque service ou pôle. Vous trouverez plus de détail sur cette procédure dans le paragraphe [Paramètres](#détail-sur-la-valorisation-des-RUM).
 
 Des exemples de tableaux de bord sont fournis sous forme de fichiers xls sans aucun formatage, ils ont été produits par les scripts de démonstration (```demos```, ```vignettes```) avec des données tirées au sort, et des structures fictives. Ces fichiers peuvent soit être mis en forme avec dans des templates xlsx, intégrés par un site web, ou utilisé par une application shiny.
+
+En complément de ces formats standards, on peut imaginer de nombreux autres besoins. Nous proposons ici une tentative d'analyse des écarts de recettes totales entre l'année N et l'année N-1 dans un tableau de bord spécifique reposant sur une décomposition en 4 parties de cette différence de recettes  :
+- évolution des tarifs entre n et n-1
+- modifications de répartition dans les niveau de sévérité au sein de chaque racine
+- évolution des recettes liées aux suppléments
+- évolution des recettes extrêmes hauts et extrêmes bas
+- le reste que nous avons appelé activité et rend compte principalement de l'évolution du nombre de séjours et du casemix racine de ghm
+
+cf vignette [Génération de tableaux de bord PMSI avec pmeasyr](https://24p11.github.io/dimRactivite/articles/generation-tableaux-de-bord-pmsi.html) .
 
 Paramètres
 ------------------
