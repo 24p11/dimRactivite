@@ -88,7 +88,9 @@ La procédure permet la production d'un tableau synthétique sur l'ensemble du g
    * séjours dont la durée < 2j, 
    * séjours dont la durée >=DMS+30 
    * séjours dont la durée >= 2 jours et < DMS+30
+   
 Pour dont les séjours durée >= 2 jours et < DMS+30 on essaye de décomposer la différentiel de recettes N vs N-1 en sous-parties :
+
  - part liée à l'évolution N vs N-1 de la répartition en niveaux de sévérité au sein des racines : on applique pour l'année N le taux de répartition en niveaux de sévérité de chaque racine à l'année N-1, cela donne des recettes théoriques à niveau sévérité constant; la différence avec les recettes observées constitue la part attribuable à l'évolution de la répartition en niveaux de sévérité
  - part liée aux suppléments
  - part liée aux extrêmes haut et bas
