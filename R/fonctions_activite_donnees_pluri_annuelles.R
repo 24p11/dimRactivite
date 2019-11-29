@@ -40,8 +40,12 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
   #--------------------------------------------------------------------
   #Les bornes de dates pour chaque niveau de la variable pivot (ex : année 2014, borne inf = 01-01-2014, borne sup = 31-12-2014)
   df<-df%>%group_by(pivot)%>%mutate(date_min_pivot = as.Date(paste0(min(as.numeric(df$ansor)),'-', min(as.numeric(df$moissor)),'-01')),
-                                    date_max_pivot = as.Date(paste0(max(as.numeric(df$ansor)),'-', max(as.numeric(df$moissor))+1,'-01'))-1)%>%
-    ungroup()
+                                    date_max_pivot =  ifelse(max(as.numeric(df$moissor)) == 12,
+                                                            as.Date(paste0(max(as.numeric(df$ansor)),'-12-31'))+1,
+                                                            as.Date(paste0(max(as.numeric(df$ansor)),'-', max(as.numeric(df$moissor))+1,'-01'))))%>%
+
+        ungroup()%>%
+    mutate(date_max_pivot = as.Date(date_max_pivot,origin = "1970-01-01"))
 
   if( 'd8eeue' %in% names(df) ){
     df<-df%>%mutate(d8eeue2 = as.Date(ifelse(date_min_pivot < d8eeue,d8eeue,date_min_pivot),origin = '1970-01-01'),
@@ -139,8 +143,22 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
       dimnames( tb[['HC2det']])[[1]]<-paste('    - ',tolower(dimnames( tb[['HC2det']])[[1]]))
     }
   }
-      
 
+  
+  
+  ###########################################################################
+  #Séjours multi-UMA
+  ###########################################################################      
+  if('nb_sej_multi_uma'%in%indicateurs){
+    
+    tb[['nb_sej_multi_uma']]<-table(df %>% dplyr::filter(nbrum > 1 , doublon==1 ) %>%select(pivot) ) 
+  }
+  
+  if('p_sej_multi_uma'%in%indicateurs){
+    
+    tb[['p_sej_multi_uma']]<- round( table(df %>% dplyr::filter(nbrum > 1 , doublon==1 ) %>%select(pivot) ) *100 / tb[['HCtot']] )
+  }
+  
   ###########################################################################
   #Nb d'hosptialisations partielles
   ###########################################################################
@@ -250,9 +268,17 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
 
   #Pourcentage de séjours chirurgicaux
   ############################################################################
-  if('pSejChirHC'%in%indicateurs){
+  if('nb_sej_chir'%in%indicateurs){
+    
+    tb[['nb_sej_chir']]<-round(
+      table(df %>% dplyr::filter( substr(cdghm,3,3)=='C', doublon==1) %>% select(pivot) )
+    )
+  }
+  
 
-    tb[['pSejChirHC']]<-round(
+  if('p_sej_chir_hc'%in%indicateurs){
+
+    tb[['p_sej_chir_hc']]<-round(
       table(df %>% dplyr::filter(typehosp=="C", substr(cdghm,3,3)=='C', doublon==1) %>% select(pivot) )*100/
         tb[['HCtot']],1
     )
@@ -272,9 +298,16 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
   # uma à la place des UH ?
 
   #Pourcentage des sejours chirurgicaux en ambulatoire
-  if('pSejChir0j'%in%indicateurs){
+  if('nb_sej_chir_0j'%in%indicateurs){
 
-    tb[['pSejChir0j']]<-round(
+    tb[['nb_sej_chir_0j']]<-round(
+      table(df %>% dplyr::filter(duree==0, substr(cdghm,3,3)=='C', doublon==1) %>%  dplyr::select(pivot) )
+    )
+  }
+  
+  if('p_sej_chir_0j'%in%indicateurs){
+    
+    tb[['p_sej_chir_0j']]<-round(
       table(df %>% dplyr::filter(duree==0, substr(cdghm,3,3)=='C', doublon==1) %>%  dplyr::select(pivot) )*100/
         table(df %>% dplyr::filter( substr(cdghm,3,3)=='C', doublon==1)  %>%  dplyr::select(pivot)),1
     )
@@ -669,6 +702,12 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
   }
   
   if('rmct_repa_hc'%in%indicateurs){
+    
+    tb[['rec_totale_repa_hc']]<-
+      round(
+        with(df%>%filter(typehosp=="C"),tapply(valopmctmonotime1,pivot,sum,na.rm=T))
+        
+      )
     
     tb[['rmct_repa_hc']] <- round( tb[['rec_totale_repa_hc']] / tb[['HCtot']] )
     
@@ -1106,84 +1145,113 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
   if('SP'%in%indicateurs){
 
     df_sp <- df%>% filter( dp=='Z515'| dr=='Z515'| grepl('Z515',das) )
-
-    tb[['SejSp']] <- table( df_sp %>% filter(doublon==1) %>% select(pivot) )
-
-    tb[['JourneesSp']] <- with( df_sp, tapply( dureesejpart, pivot, sum, na.rm=T ) )
-
-    tb[['NbPatSP']] <- with( df_sp, tapply(noanon, pivot, nb_unique) )
-
-    tb[['SejSpGhmNonSP']]<-table( df_sp %>% filter( substr(cdghm,1,5)!='23Z02', doublon == 1 )%>% select(pivot) )
-
-    tb[['SejSpLitsStandards']]<-table( df_sp%>%filter( noghs%in%c('7991','7992') )%>% select(pivot) )
-    tb[['SejSpLitsDedies']]<-table( df_sp%>%filter(noghs%in%c('7993'))%>%select(pivot))
-    tb[['NbPatSpLitsDedies']]<-with(df_sp%>%filter(noghs%in%c('7993')),tapply(noanon,pivot,nb_unique))
-    tb[['NbLitsDediesUtilises']]<-round(with(df_sp,tapply(dureesejpart2,pivot,sum,na.rm=T))/
-                                          with(df_sp,tapply(date_max_pivot-date_min_pivot,pivot,min)),
-                                        1)
-
-    tb[['SejSpUsp']]<-table(df_sp%>%filter(noghs%in%c('7994'))%>%select(pivot))
-
-    tb[['JourneesSpLitsStandards']]<- with(df_sp%>%filter(noghs%in%c('7991','7992')),
-                                           tapply(dureesejpart,pivot,sum,na.rm=T))
-    tb[['JourneesSpLitsDedies']]<- with(df_sp%>%filter(noghs%in%c('7993')),
-                                        tapply(dureesejpart,pivot,sum,na.rm=T))
-
-    tb[['JourneesSpUsp']]<- with(df_sp%>%filter(noghs%in%c('7994')),
-                                 tapply(dureesejpart,pivot,sum,na.rm=T))
-
-    tb[['NbDCD']]<-table( df %>% filter( mdsoue == 9 ) %>%
-                            distinct( nas, .keep_all = T ) %>% select( pivot ) )
-
-    tb[['NbDCD_SP']]<-table( df_sp %>% filter( mdsoue == 9 ) %>% select( pivot ) )
-
-    tb[['NbDCDNonSP']]<-tb[['NbDCD']] -  tb[['NbDCD_SP']]
-
-    tb[['NbDCDcancer']]<-table(df_cancer%>%filter(mdsoue == 9) %>%select(pivot))
-
-    tb[['NbDCDspGhmNonSP']]<-table(df%>%filter(mdsoue == 9,substr(cdghm,1,5)!='23Z02') %>% select(pivot))
-
-    tb[['NbDCDspGhmSP']]<-table(df%>%filter(mdsoue == 9,substr(cdghm,1,5)=='23Z02') %>% distinct(nas,.keep_all = T)%>%select(pivot))
-
-    tb[['NbDCDspLitsStandards']]<-table( df%>% filter( mdsoue == 9, noghs %in% c('7991','7992')) %>% select(pivot) )
-
-    tb[['NbDCDspLitsDedies']]<-table( df %>% filter(mdsoue == 9 , noghs%in%c('7993') ) %>% select(pivot) )
-
-    tb[['NbDCDspUsp']]<-table( df %>% filter(mdsoue == 9, noghs%in%c('7994') ) %>% select(pivot) )
+    
+    if(nrow(df_sp)>10){
+    
+        tb[['SejSp']] <- table( df_sp %>% filter(doublon==1) %>% select(pivot) )
+    
+        tb[['JourneesSp']] <- with( df_sp, tapply( dureesejpart, pivot, sum, na.rm=T ) )
+    
+        tb[['NbPatSP']] <- with( df_sp, tapply(noanon, pivot, nb_unique) )
+    
+        tb[['SejSpGhmNonSP']]<-table( df_sp %>% filter( substr(cdghm,1,5)!='23Z02', doublon == 1 )%>% select(pivot) )
+    
+        tb[['SejSpLitsStandards']]<-table( df_sp%>%filter( noghs%in%c('7991','7992') )%>% select(pivot) )
+        tb[['SejSpLitsDedies']]<-table( df_sp%>%filter(noghs%in%c('7993'))%>%select(pivot))
+        tb[['NbPatSpLitsDedies']]<-with(df_sp%>%filter(noghs%in%c('7993')),tapply(noanon,pivot,nb_unique))
+        tb[['NbLitsDediesUtilises']]<-round(with(df_sp,tapply(dureesejpart2,pivot,sum,na.rm=T))/
+                                              with(df_sp,tapply(date_max_pivot-date_min_pivot,pivot,min)),
+                                            1)
+    
+        tb[['SejSpUsp']]<-table(df_sp %>% filter( noghs %in% c('7994') ) %>% select( pivot ) )
+    
+        tb[['JourneesSpLitsStandards']]<- with( df_sp %>% filter( noghs %in% c('7991','7992') ),
+                                               tapply( dureesejpart, pivot, sum, na.rm=T ) )
+        tb[['JourneesSpLitsDedies']]<- with( df_sp %>% filter( noghs %in% c('7993') ),
+                                            tapply( dureesejpart, pivot, sum, na.rm=T ) )
+    
+        tb[['JourneesSpUsp']]<- with( df_sp %>% filter( noghs %in% c('7994') ),
+                                     tapply( dureesejpart, pivot, sum, na.rm=T ) )
+    
+        tb[['NbDCD']]<-table( df %>% filter( mdsoue == 9 ) %>%
+                                distinct( nas, .keep_all = T ) %>% select( pivot ) )
+    
+        tb[['NbDCD_SP']]<-table( df_sp %>% filter( mdsoue == 9 ) %>% select( pivot ) )
+    
+        tb[['NbDCDNonSP']]<-tb[['NbDCD']] -  tb[['NbDCD_SP']]
+    
+        tb[['NbDCDcancer']]<-table(df_cancer%>%filter(mdsoue == 9) %>%select(pivot))
+    
+        tb[['NbDCDspGhmNonSP']]<-table(df%>%filter(mdsoue == 9,substr(cdghm,1,5)!='23Z02') %>% select(pivot))
+    
+        tb[['NbDCDspGhmSP']]<-table(df%>%filter(mdsoue == 9,substr(cdghm,1,5)=='23Z02') %>% distinct(nas,.keep_all = T)%>%select(pivot))
+    
+        tb[['NbDCDspLitsStandards']]<-table( df%>% filter( mdsoue == 9, noghs %in% c('7991','7992')) %>% select(pivot) )
+    
+        tb[['NbDCDspLitsDedies']]<-table( df %>% filter(mdsoue == 9 , noghs%in%c('7993') ) %>% select(pivot) )
+    
+        tb[['NbDCDspUsp']]<-table( df %>% filter(mdsoue == 9, noghs%in%c('7994') ) %>% select(pivot) )
+    
+    }
 
   }
 
   ######################################################################### 
   #####Case mix
   #########################################################################
-  if('TitreCaseMixCMD_HC'%in%indicateurs){
+  if('TitreCaseMixCMD'%in%indicateurs){
     
-    tmpHC <- df %>% dplyr::filter( typehosp=="C")
-    tmp<-tmpHC%>%mutate(cmd := substr(ghm,1,2))
-    nb<-table(tmp$cmd)
-    nb<-nb[order(nb,decreasing = T)]
-    nbc<-cumsum(nb[order(nb,decreasing = T)])*100/sum(nb)
+    if(!exists("cmd")){
+      cmd = get_cmd()
+    }
+
+    tmp <- df%>%mutate(cmd := substr(ghm,1,2)) %>% left_join(.,cmd)%>% unite(cmd, cmd, libelle_cmd)
+    nb <- table(tmp$cmd)
+    nb <- nb[order(nb,decreasing = T)]
+    nbc <- cumsum(nb[order(nb,decreasing = T)])*100/sum(nb)
 
     tmp<- tmp %>% mutate(cmd = ifelse(cmd %in% names(nbc[nbc<91]),cmd,'Autres'))%>%
       mutate(cmd = factor(cmd,levels= c(names(nbc[nbc<91]),'Autres')))
     
-    tb[['CaseMixCMD_HC']]<-with(tmp,tapply(doublon, list(cmd,pivot), sum))
+    res<-with(tmp,tapply(doublon, list(cmd,pivot), sum))
+    res2<-round(with(tmp,tapply(valopmctmonotime1, list(cmd,pivot), sum)))
     
-    if(length(dimnames( tb[['CaseMixCMD_HC']])[[1]])>0){
+    tb[['CaseMixCMD']] = NULL
+    for(i in dimnames(res)[[1]]){
       
-      dimnames( tb[['CaseMixCMD_HC']])[[1]]<-paste(' -',tolower(dimnames( tb[['CaseMixCMD_HC']])[[1]]))
+      tmp = rbind(res[i,],res2[i,])
+      dimnames(tmp)[[1]]<-c(paste(' -',i),"")
+      
+      tb[['CaseMixCMD']]<-rbind(tb[['CaseMixCMD']],tmp)
+    }
+
+    
+    tmp<-df%>%mutate(type := substr(ghm,3,3))%>%mutate(type = ifelse(type == 'C',"Chirurgie",
+                                                                        ifelse(type == "M", "Médecine",
+                                                                        ifelse(type == "K", "Médico_technique",
+                                                                        "Autres"))))
+    
+    res<-with(tmp,tapply(doublon, list(type,pivot), sum))
+    res2<-round(with(tmp,tapply(valopmctmonotime1, list(type,pivot), sum)))
+    
+    tb[['CaseMixType']]<-NULL
+    
+    for(i in dimnames(res)[[1]]){
+      
+      tmp = rbind(res[i,],res2[i,])
+      dimnames(tmp)[[1]]<-c(paste(' -',i),"")
+      
+      tb[['CaseMixType']]<-rbind(tb[['CaseMixType']],tmp)
     }
     
-    tmp<-tmpHC%>%mutate(type := substr(ghm,3,3))
-    
-    tb[['CaseMixType_HC']]<-with(tmp,tapply(doublon, list(type,pivot), sum))
-    
-    if(length(dimnames( tb[['CaseMixType_HC']])[[1]])>0){
+    if(!exists("racines")){
       
-      dimnames( tb[['CaseMixType_HC']])[[1]]<-paste(' -',dimnames( tb[['CaseMixType_HC']])[[1]])
+      racines = get_racines()
     }
     
-    tmp<-tmpHC%>%mutate(racine := substr(ghm,1,5))
+    tmp<-df%>%mutate(racine := substr(ghm,1,5))%>%left_join(.,racines)%>%
+      unite(racine,racine,libelle,sep = " ")%>%
+      mutate(racine = paste0(substr(racine,1,50),ifelse(nchar(racine)>51,"...","")))
     nb<-table(tmp$racine)
     nb<-nb[order(nb,decreasing = T)]
     nbc<-cumsum(nb[order(nb,decreasing = T)])*100/sum(nb)
@@ -1191,12 +1259,19 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
     tmp<- tmp %>% mutate(racine = ifelse(racine %in% names(nbc[nbc<91]),racine,'Autres'))%>%
       mutate(racine = factor(racine,levels= c(names(nbc[nbc<91]),'Autres')))
     
-    tb[['CaseMixGHM_HC']]<-with(tmp,tapply(doublon, list(racine,pivot), sum))
+    res<-with(tmp,tapply(doublon, list(racine,pivot), sum))
+    res2<-round(with(tmp,tapply(valopmctmonotime1, list(racine,pivot), sum)))
     
-    if(length(dimnames( tb[['CaseMixGHM_HC']])[[1]])>0){
+
+    tb[['CaseMixGHM']] = NULL
+    for(i in dimnames(res)[[1]]){
       
-      dimnames( tb[['CaseMixGHM_HC']])[[1]]<-paste(' -',tolower(dimnames( tb[['CaseMixGHM_HC']])[[1]]))
+      tmp = rbind(res[i,],res2[i,])
+      dimnames(tmp)[[1]]<-c(paste(' -',i),"")
+      
+      tb[['CaseMixGHM']]<-rbind(tb[['CaseMixGHM']],tmp)
     }
+
     
     
 
@@ -2000,6 +2075,92 @@ get_activite_recettes<-function( df, structures ){
 
 }
 
+
+get_actvite_racines<-function(df){
+  
+    tmp <- df%>%mutate(cmd := substr(ghm,1,2)) %>% left_join(.,cmd)%>% unite(cmd, cmd, libelle_cmd,sep= " ")
+
+    res<- get_diff( with(tmp,tapply(doublon, list(cmd,pivot), sum)) )
+    res2<-get_diff( round(with(tmp,tapply(valopmctmonotime1, list(cmd,pivot), sum))) )
+    res2 = res2[order(abs(res2[,'diff']),decreasing =T),]
+    
+    tb = NULL
+    for(i in dimnames(res2)[[1]]){
+      
+      tmp = rbind(res[i,],res2[i,])
+      dimnames(tmp)[[1]]<-c(paste(' -',i),"")
+      
+      tb <-rbind(tb,tmp)
+    }
+    
+    tb = rbind("Catégorie majeur de diagnostic" = NA,tb)
+    
+    
+    tmp<-df%>%mutate(type := substr(ghm,3,3))%>%mutate(type = ifelse(type == 'C',"Chirurgie",
+                                                                     ifelse(type == "M", "Médecine",
+                                                                            ifelse(type == "K", "Médico-technique",
+                                                                                   "Indifférenciés"))))
+    
+    res<- get_diff( with(tmp,tapply(doublon, list(type,pivot), sum)) )
+    res2<-get_diff( round(with(tmp,tapply(valopmctmonotime1, list(type,pivot), sum))) )
+    res2 = res2[order(abs(res2[,'diff']),decreasing =T),]
+    
+    tb = rbind(tb,"Type de GHM" = NA)
+
+
+    for(i in dimnames(res2)[[1]]){
+      
+      tmp = rbind(res[i,],res2[i,])
+      dimnames(tmp)[[1]]<-c(paste(' -',i),"")
+      
+      tb<-rbind(tb,tmp)
+    }
+    
+    if(!exists("racines")){
+      
+      racines = get_racines()
+    }
+    
+    tmp<-df%>%mutate(racine := substr(ghm,1,5))%>%left_join(.,racines)%>%
+      unite(racine,racine,libelle,sep = " ")%>%
+      mutate(racine = paste0(substr(racine,1,50),ifelse(nchar(racine)>51,"...","")))
+    nb<-table(tmp$racine)
+    nb<-nb[order(nb,decreasing = T)]
+    nbc<-cumsum(nb[order(nb,decreasing = T)]*100/sum(nb))
+    
+    nbc2<-nb[order(nb,decreasing = T)]*100/sum(nb)
+    
+    inner_join(as_tibble(cbind("racine" = names(nb),nb)),
+               as_tibble(cbind("racine" = names(nbc2),nbc2)))%>%
+      inner_join(as_tibble(cbind("racine" = names(nbc),nbc)))
+              
+    tmp<- tmp %>% mutate(racine = ifelse(racine %in% names(nbc[nbc<95]),racine,'Autres'))%>%
+      mutate(racine = factor(racine,levels= c(names(nbc[nbc<95]),'Autres')))
+    
+    res<- get_diff(with(tmp,tapply(doublon, list(racine,pivot), sum)))
+    res2<-get_diff(round(with(tmp,tapply(valopmctmonotime1, list(racine,pivot), sum))))
+   
+    res2<-cbind(res2,"diff2" = res2[,'diff'])
+    res2["Autres","diff2"]<-0
+    
+    res2 = res2[order(abs(res2[,'diff']),decreasing =T),]
+    tb = rbind(tb,"Racine de GHM" = NA)
+
+    for(i in dimnames(res2)[[1]]){
+      
+      tmp = rbind(res[i,],res2[i,])
+      dimnames(tmp)[[1]]<-c(paste(' -',i),"")
+      
+      tb<-rbind(tb,tmp)
+    }
+    
+
+    tb<-bind_cols("niveau"=rep(3,dim(tb)[[1]]),"nom"=dimnames(tb)[[1]],as_tibble(tb))%>%
+      mutate(niveau = ifelse(grepl("GHM|Catégorie",nom),1,niveau))
+    
+  
+  return(tb)
+}
 #' Création des tableaux de bord
 #'
 #' @param val 
@@ -2066,15 +2227,26 @@ make_tdb <- function( val, niveau, annee, mois ){
   
   for (nom_tableau in noms_tableaux){
     
+    
     tdb[[nom_tableau]]<-list()
     
     print(paste(val,nom_tableau))
     
-    inds=get_indicateurs(nom=nom_tableau,val=val)
+    if(nom_tableau == "TableauDeBordCaseMix"){
+      
+      tdb[[nom_tableau]][['cum']]<-get_actvite_racines(df)
+      
+      
+    }else{
+      
     
-    tdb[[nom_tableau]][['cum']]<-get_tdb(df=df,indicateurs=inds)
+      inds=get_indicateurs(nom=nom_tableau,val=val)
+      
+      tdb[[nom_tableau]][['cum']]<-get_tdb(df=df,indicateurs=inds)
     
-    write.table(tdb[[nom_tableau]][['cum']],file = file.path(getOption('dimRactivite.path_tdb_files'),annee,paste0(nom_tableau,prep_string(val),annee,stringr::str_pad(mois,2,"left","0"),'cum.xls')),sep='\t',row.names=F,na='')
+    }
+    
+    write.table(tdb[[nom_tableau]][['cum']],file = file.path(getOption('dimRactivite.path_tdb_files'),annee,paste0(nom_tableau,prep_string(val),annee,stringr::str_pad(mois,2,"left","0"),'cum.xls')),sep='\t',row.names=F,na='',fileEncoding = 'latin1')
     
     
   }
@@ -2093,11 +2265,22 @@ make_tdb <- function( val, niveau, annee, mois ){
   
   for (nom_tableau in noms_tableaux){
     
-    inds=get_indicateurs(nom=nom_tableau,val=val)
+    if(nom_tableau == "TableauDeBordCaseMix"){
+      
+      tdb[[nom_tableau]][['mens']]<-get_actvite_racines(df)
+      
+      
+    }else{
+      
+      
+      inds=get_indicateurs(nom=nom_tableau,val=val)
+      
+      tdb[[nom_tableau]][['mens']]<-get_tdb(df=df,indicateurs=inds)
+      
+    }
     
-    tdb[[nom_tableau]][['mens']]<-get_tdb(df=df,indicateurs=inds)
     
-    write.table(tdb[[nom_tableau]][['mens']],file = file.path(getOption('dimRactivite.path_tdb_files'),annee,paste0(nom_tableau,prep_string(val),annee,stringr::str_pad(mois,2,"left","0"),'mens.xls')),sep='\t',row.names=F,na='')
+    write.table(tdb[[nom_tableau]][['mens']],file = file.path(getOption('dimRactivite.path_tdb_files'),annee,paste0(nom_tableau,prep_string(val),annee,stringr::str_pad(mois,2,"left","0"),'mens.xls')),sep='\t',row.names=F,na='',fileEncoding = 'latin1')
   }
   
   

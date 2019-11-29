@@ -56,18 +56,26 @@ get_data<-function( DF, ref = 'ansor', m, a, val = NULL, niveau = NULL, opt = T 
 get_data_glissant<-function( DF, ref = 'ansor', m, a, val = NULL, niveau = NULL, opt = T ){
   #(Data,DateRef,Month,Years,val=NULL,niveau=NULL){
   
-  #if( ref == 'ansor' ){
+  if( ref == 'ansor' ){
     
-    DF <- DF  %>% mutate(ansor = if_else( as.numeric(moissor) > max(m), as.character( as.numeric(ansor) + 1 ), ansor ) ) %>%
-                  filter( as.numeric(ansor) %in% a ) %>%
-                  mutate(ansor = factor( ansor, levels = min(a):max(a) ) )
+    DF <- DF  %>% dplyr::mutate(ansor = if_else( as.numeric(moissor) > max(m), 
+                                          as.character( as.numeric(ansor) + 1 ),
+                                          ansor ) ) %>%
+      dplyr::filter( as.numeric(ansor) %in% a ) %>%
+      dplyr::mutate(ansor = factor( ansor, levels = min(a):max(a) ) )
+  
+  }else{
     
-  #}else{
+    DF <- DF  %>% dplyr::mutate(anref = as.numeric( format( !!sym(ref), '%Y')),
+                        moisref = as.numeric( format( !!sym(ref), '%m')))%>%
+      dplyr::mutate(anref = if_else( as.numeric(moisref) > max(m), 
+                               as.numeric(anref) + 1 , anref ) ) %>%
+      dplyr::filter( as.numeric(anref) %in% a )
     
   #  DF <- DF  %>% filter ( as.numeric( format( !!sym(ref), '%Y') ) %in% a,
   #                         as.numeric( format( !!sym(ref), '%m') ) %in% m )
   #  
-  #}
+  }
   
   #if(is.null(niveau)|is.null(val)){
     
@@ -78,14 +86,11 @@ get_data_glissant<-function( DF, ref = 'ansor', m, a, val = NULL, niveau = NULL,
     
   #}
   
-  #if(!is.null(niveau)&!is.null(val)){
+  if(!is.null(niveau)&!is.null(val)){
     
-  #  Data<-Data[   
-  #    Data[,DateRef]>=as.Date(paste(min(Years)-1,'-',Month+1,'-','01',sep=''))&
-  #      Data[,DateRef]<as.Date(paste(max(Years),'-',Month+1,'-','01',sep=''))&
-  #      Data[,niveau]%in%val,
-  #    ]
-  #}
+   DF <- DF%>%filter(!!sym(niveau) == val)
+   
+  }
   
   #Data$A<-as.numeric(format(Data[,DateRef],'%Y'))
   #Data$m<-factor(as.numeric(format(Data[,DateRef],'%m')))
@@ -272,8 +277,8 @@ diff_tb<-function(t){
 #'
 #' @examples
 IP_SERVICE<-function(df){
-  df%>%filter(noghs!=9999,duree>0,dms_n>0)%>%
-    distinct( nofiness,ansor,cle_rsa,service, .keep_all= TRUE)
+  
+  df%>%filter(noghs!=9999,duree>0,dms_n>0)
 
   NUMERATEUR<-sum(df$dureesejpart,na.rm=T)
   DENOMINATEUR<-sum(df$dms_n*df$coeftime,na.rm=T)
@@ -466,4 +471,70 @@ attribution_statut_nx_patient<-function(df){
   }
   
   return(df)
+}
+
+
+#' cmd et libellé
+#' retourne un tibble avec la liste des CMD et leur libellé
+#' @return tibble cmd
+#' @export get_cmd
+#'
+#' @examples get_cmd()
+get_cmd<-function(){
+  
+  cmd<-rbind(c('01',"affections du système nerveux"),
+             c("02","Affections de l'oeil"),
+             c("03","Affections des oreilles, du nez, de la gorge, de la bouche et des dents"),
+             c("04","Affections de l'appareil respiratoire"),
+             c("05","Affections de l'appareil circulatoire"),
+             c("06","Affections du tube digestif"),
+             c("07","Affections du système hépatobiliaire et du pancréas"),
+             c("08","Affections et traumatismes de l'appareil musculosquelettique et du tissu conjonctif"),
+             c("09","Affections de la peau, des tissus sous-cutanés et des seins"),
+             c("10","Affections endocriniennes, métaboliques et nutritionnelles"),
+             c("11","Affections du rein et des voies urinaires"),
+             c("12","Affections de l'appareil génital masculin"),
+             c("13","Affections de l'appareil génital féminin"),
+             c("14","Grossesses pathologiques, accouchements et affections du post-partum"),
+             c("15","Nouveau-nés, prématurés et affections de la période périnatale"),
+             c("16","Affections du sang et des organes hématopoïétiques"),
+             c("17","Affections myéloprolifératives et tumeurs de siège imprécis ou diffus"),
+             c("18","Maladies infectieuses et parasitaires"),
+             c("19","Maladies et troubles mentaux"),
+             c("20","Troubles mentaux organiques liés à l'absorption de drogues ou induits par celles-ci"),
+             c("21","Traumatismes, allergies et empoisonnements"),
+             c("22","Brûlures"),
+             c("23","Facteurs influant sur l'état de santé et autres motifs de recours aux services de santé"),
+             c("25","Maladies dues à une infection par le VIH"),
+             c("26","Traumatismes multiples graves"),
+             c("27","Transplantations d'organes"),
+             c("28","Séances"),
+             c("90","Erreurs et autres séjours inclassables"))
+  dimnames(cmd)[[2]]<-c('cmd','libelle_cmd')
+  cmd<-as_tibble(cmd)
+  
+  return(cmd)
+  
+}
+
+#' racines de ghm et libellé
+#' retourne un tibble avec la liste des CMD et leur libellé
+#' @return tibble racines
+#' @export get_racines
+#'
+#' @examples get_racines()
+get_racines<-function(){
+  
+  tarifs_mco_ghs <- referime::get_table("tarifs_mco_ghs")
+  
+  t_replace = ", niveau 1|en ambulatoire|, très courte durée|, sans complication significative|, sans problème significatif"
+  
+  racines<-tarifs_mco_ghs%>%
+    dplyr::mutate( racine = substr(ghm,1,5) ) %>% arrange( ghs ) %>% distinct (racine, .keep_all = T ) %>%
+    dplyr::rename( libelle = libelle_ghm ) %>%
+    dplyr::mutate( libelle = str_replace(libelle, t_replace, '') )%>%
+    dplyr::select( racine, libelle )
+  
+  return(racines)
+  
 }
