@@ -733,7 +733,11 @@ load_med<- function( remontees_sel ){
     
     adzipRemonteee( p, ext_to_import = c("med","medatu") )
     
-    med_t2a<<-dplyr::bind_rows(med_t2a, pmeasyr::imed_mco(p))
+    if(!is.na(file.info(paste0(getOption("dimRactivite.path"),"/",p$finess,'.',p$annee,'.',p$mois,".med"))$size)){
+    
+      med_t2a<<-dplyr::bind_rows(med_t2a, pmeasyr::imed_mco(p))
+    
+    }
     
     pmeasyr::adelete( p, 
                       liste = c("med","medatu"), 
