@@ -256,7 +256,7 @@ maj_variable_RData<-function( remontees, p = NULL ){
 #' @export adzipComplet
 #' @usage adzipComplet( zfichiers, ext_to_import )
 
-adzipComplet<-function(zfichiers, ext_to_import = NULL ){
+adzipComplet<-function( zfichiers, ext_to_import = NULL ){
 
   dz_fichiers<-NULL
 
@@ -267,6 +267,8 @@ adzipComplet<-function(zfichiers, ext_to_import = NULL ){
                                    view = F)$Name
 
     det_noms = unique(unlist(stringr::str_split(noms_fichiers,'\\.')))
+    
+    #Détermination du types de fichiers a extraire
     
     
     if(is.null(ext_to_import)){
@@ -288,54 +290,58 @@ adzipComplet<-function(zfichiers, ext_to_import = NULL ){
       
         types =  intersect ( ext_to_import , det_noms )   
     }
-
-
-    noms<-noms_fichiers[ sapply( noms_fichiers, function(n)grepl(paste(types,collapse = '|'), n ) ) ]
-
-    dz_fichiers<-c( dz_fichiers, noms )
-
-    pmeasyr::adezip2(path = getOption("dimRactivite.path"),
-                     file = zf,
-                     liste = types,
-                     pathto = getOption("dimRactivite.path") )
-
-
-  }
-
-  #Vérification si tous les fichiers nécessaires sont présents
-  det_noms = unique(unlist(stringr::str_split(dz_fichiers,'\\.')))
-  
-  if(is.null(ext_to_import)){
     
-    exts_m <- setdiff( getOption("dimRactivite.fichiers_imco")%>%purrr::flatten_chr(), det_noms )
-    
-  }else{
-    
-    exts_m <- setdiff( ext_to_import, det_noms )
-    
-  }
-  
-  #Creation des fichiers manaquants si besoin
-  if( length(exts_m) > 0 ){
-    
-    dz_fichiers<-c( dz_fichiers, exts_m )
 
-    #Récupératation nofiness,annee,mois avec le nom de fichier dans l'archive
-    refs<-unlist( stringr::str_split( dz_fichiers[1], '\\.' ) )[1:3]
-
-    for (ext_m in exts_m){
-      file.create( paste0(getOption("dimRactivite.path"), '/', paste( c(refs[1],refs[2],refs[3],ext_m), collapse = '.' ) ) )
-
+    if(length(types)>0){
       
-    }
-    message(
-      "\n",
-      'Fichiers créés : ', toString( exts_m )
-    )
-
+        noms<-noms_fichiers[ sapply( noms_fichiers, function(n)grepl(paste(types,collapse = '|'), n ) ) ]
+    
+        dz_fichiers<-c( dz_fichiers, noms )
+    
+        pmeasyr::adezip2(path = getOption("dimRactivite.path"),
+                         file = zf,
+                         liste = types,
+                         pathto = getOption("dimRactivite.path") )
+    
+    
+      }
+    
+      #Vérification si tous les fichiers nécessaires sont présents
+      det_noms = unique(unlist(stringr::str_split(dz_fichiers,'\\.')))
+      
+      if(is.null(ext_to_import)){
+        
+        exts_m <- setdiff( getOption("dimRactivite.fichiers_imco")%>%purrr::flatten_chr(), det_noms )
+        
+      }else{
+        
+        exts_m <- setdiff( ext_to_import, det_noms )
+        
+      }
+      
+      #Creation des fichiers manaquants si besoin
+      if( length(exts_m) > 0 ){
+        
+        dz_fichiers<-c( dz_fichiers, exts_m )
+    
+        #Récupératation nofiness,annee,mois avec le nom de fichier dans l'archive
+        refs<-unlist( stringr::str_split( dz_fichiers[1], '\\.' ) )[1:3]
+    
+        for (ext_m in exts_m){
+          file.create( paste0(getOption("dimRactivite.path"), '/', paste( c(refs[1],refs[2],refs[3],ext_m), collapse = '.' ) ) )
+    
+          
+        }
+        message(
+          "\n",
+          'Fichiers créés : ', toString( exts_m )
+        )
+    
+      }
+      
+     return(dz_fichiers)
+      
   }
-  
- return(dz_fichiers)
 
 
 }
@@ -377,13 +383,17 @@ adzipRemonteee<-function( p, ext_to_import = NULL ){
   files<- getOption("dimRactivite.fichiers_genrsa")%>%dplyr::filter(finess == p$finess,
                                                                     annee ==  as.numeric(p$annee),
                                                                     mois == as.numeric(p$mois),
-                                                                    substr(file,nchar(file)-2,nchar(file))=="zip")%>%
-    dplyr::group_by(file)%>%dplyr::summarise(types =paste0(type, collapse = ","))
+                                                                    substr(file,nchar(file)-2,nchar(file))=="zip")
+  types <- intersect(files$type,ext_to_import)
+  files<-files%>%dplyr::group_by(file)%>%dplyr::summarise(types =paste0(type, collapse = ","))
   
   
   #Dezippage des fichiers archive en fonction de la sélection des types de fichiers (et création d'un fichier vide si manquant)
-  dz_files <- adzipComplet( files$file, ext_to_import )
-  
+  if(length(types)>0){
+    
+      dz_files <- adzipComplet( files$file, ext_to_import )
+      
+  }
   
 }
 
@@ -732,13 +742,20 @@ load_med<- function( remontees_sel ){
     
     
     adzipRemonteee( p, ext_to_import = c("med","medatu") )
+
     
-    if(!is.na(file.info(paste0(getOption("dimRactivite.path"),"/",p$finess,'.',p$annee,'.',p$mois,".med"))$size)){
-    
-      med_t2a<<-dplyr::bind_rows(med_t2a, pmeasyr::imed_mco(p))
-    
+    if( file.exists(paste0(getOption("dimRactivite.path"),"/",p$finess,'.',p$annee,'.',p$mois,".med"))){
+      
+      if(!is.na(file.info(paste0(getOption("dimRactivite.path"),"/",p$finess,'.',p$annee,'.',p$mois,".med"))$size) & 
+          file.info(paste0(getOption("dimRactivite.path"),"/",p$finess,'.',p$annee,'.',p$mois,".med"))$size!=0 ){
+        
+        med_t2a<<-dplyr::bind_rows(med_t2a, pmeasyr::imed_mco(p))
+        
+      }
     }
-    
+
+      
+
     pmeasyr::adelete( p, 
                       liste = c("med","medatu"), 
                       type = "in")
@@ -793,7 +810,30 @@ load_dmi<- function( remontees_sel ){
     
     adzipRemonteee( p, ext_to_import = c("dmip","dmi") )
     
-    dmi_t2a<<-dplyr::bind_rows(dmi_t2a, pmeasyr::idmi_mco(p))
+    #if( file.exists(paste0(getOption("dimRactivite.path"),"/",p$finess,'.',p$annee,'.',p$mois,".dmi")) ){
+    #    
+    #    if(!is.na(file.info(paste0(getOption("dimRactivite.path"),"/",p$finess,'.',p$annee,'.',p$mois,".dmi"))$size) & 
+    #       file.info(paste0(getOption("dimRactivite.path"),"/",p$finess,'.',p$annee,'.',p$mois,".dmi"))$size!=0){
+    #      
+    #      dmi_t2a<<-dplyr::bind_rows(dmi_t2a, pmeasyr::idmi_mco(p,typdmi=="out"))
+    #      
+    #      
+    #    }
+    #  
+    #}
+    
+    
+    if( file.exists(paste0(getOption("dimRactivite.path"),"/",p$finess,'.',p$annee,'.',p$mois,".dmi.txt")) ){
+      
+      if(!is.na(file.info(paste0(getOption("dimRactivite.path"),"/",p$finess,'.',p$annee,'.',p$mois,".dmi.txt"))$size) & 
+         file.info(paste0(getOption("dimRactivite.path"),"/",p$finess,'.',p$annee,'.',p$mois,".dmi.txt"))$size!=0){
+        
+          dmi_t2a<<-dplyr::bind_rows(dmi_t2a, pmeasyr::idmi_mco(p,typdmi="in"))
+        
+      }
+      
+    }
+    
     
     pmeasyr::adelete( p, 
                       liste = c("dmip","dmi"), 
