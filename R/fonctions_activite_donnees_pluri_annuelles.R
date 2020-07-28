@@ -399,21 +399,21 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
   }
 
   if('TherapieCOD'%in%indicateurs){
-    tb[['TherapieCOD']]<-table(df%>%filter(uma_locale2%in%c(76885), doublon==1)%>%select(pivot))
+    tb[['TherapieCOD']]<-table(df%>%filter(cdurm%in%c(76885), doublon==1)%>%select(pivot))
   }
 
   if('DiagnosticCOD'%in%indicateurs){
-    tb[['DiagnosticCOD']]<-table(df%>%filter(uma_locale2%in%c(76689,76208), doublon==1)%>%select(pivot))
+    tb[['DiagnosticCOD']]<-table(df%>%filter(cdurm%in%c(76689,76208), doublon==1)%>%select(pivot))
 
   }
 
   if('TherapieInflammatoire'%in%indicateurs){
-    tb[['TherapieInflammatoire']]<-table(df%>%filter(uma_locale2%in%c(76686,76684), doublon==1)%>%select(pivot))
+    tb[['TherapieInflammatoire']]<-table(df%>%filter(cdurm%in%c(76686,76684), doublon==1)%>%select(pivot))
 
   }
 
   if('DiagnosticInflammatoire'%in%indicateurs){
-    tb[['DiagnosticInflammatoire']]<-table(df%>%filter(uma_locale2%in%c(76687,76206), doublon==1)%>%select(pivot))
+    tb[['DiagnosticInflammatoire']]<-table(df%>%filter(cdurm%in%c(76687,76206), doublon==1)%>%select(pivot))
 
   }
 
@@ -1202,7 +1202,7 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
   if('TitreCaseMixCMD'%in%indicateurs){
     
     if(!exists("cmd")){
-      cmd = get_cmd()
+      cmd <<- get_cmd()
     }
 
     tmp <- df%>%mutate(cmd := substr(ghm,1,2)) %>% left_join(.,cmd)%>% unite(cmd, cmd, libelle_cmd)
@@ -2078,11 +2078,21 @@ get_activite_recettes<-function( df, structures ){
 
 get_actvite_racines<-function(df){
   
-    tmp <- df%>%mutate(cmd := substr(ghm,1,2)) %>% left_join(.,cmd)%>% unite(cmd, cmd, libelle_cmd,sep= " ")
+  if(!exists("racines")){
+    
+    racines <<- get_racines()
+  }
+  
+  if(!exists("cmd")){
+    
+    cmd <<- get_cmd()
+  }
+  
+    tmp <- df%>%mutate(cmd = substr(ghm,1,2)) %>% left_join(.,cmd)%>% unite(cmd, cmd, libelle_cmd,sep= " ")
 
     res<- get_diff( with(tmp,tapply(doublon, list(cmd,pivot), sum)) )
     res2<-get_diff( round(with(tmp,tapply(valopmctmonotime1, list(cmd,pivot), sum))) )
-    res2 = res2[order(abs(res2[,'diff']),decreasing =T),]
+    if(nrow(res2)>1) res2[order(abs(res2[,'diff']),decreasing =T),]
     
     tb = NULL
     for(i in dimnames(res2)[[1]]){
@@ -2103,7 +2113,7 @@ get_actvite_racines<-function(df){
     
     res<- get_diff( with(tmp,tapply(doublon, list(type,pivot), sum)) )
     res2<-get_diff( round(with(tmp,tapply(valopmctmonotime1, list(type,pivot), sum))) )
-    res2 = res2[order(abs(res2[,'diff']),decreasing =T),]
+    if(nrow(res2)>1) res2 = res2[order(abs(res2[,'diff']),decreasing =T),]
     
     tb = rbind(tb,"Type de GHM" = NA)
 
@@ -2116,10 +2126,7 @@ get_actvite_racines<-function(df){
       tb<-rbind(tb,tmp)
     }
     
-    if(!exists("racines")){
-      
-      racines = get_racines()
-    }
+
     
     tmp<-df%>%mutate(racine := substr(ghm,1,5))%>%left_join(.,racines)%>%
       unite(racine,racine,libelle,sep = " ")%>%
@@ -2129,21 +2136,14 @@ get_actvite_racines<-function(df){
     nbc<-cumsum(nb[order(nb,decreasing = T)]*100/sum(nb))
     
     nbc2<-nb[order(nb,decreasing = T)]*100/sum(nb)
-    
-    inner_join(as_tibble(cbind("racine" = names(nb),nb)),
-               as_tibble(cbind("racine" = names(nbc2),nbc2)))%>%
-      inner_join(as_tibble(cbind("racine" = names(nbc),nbc)))
-              
+
     tmp<- tmp %>% mutate(racine = ifelse(racine %in% names(nbc[nbc<95]),racine,'Autres'))%>%
       mutate(racine = factor(racine,levels= c(names(nbc[nbc<95]),'Autres')))
     
     res<- get_diff(with(tmp,tapply(doublon, list(racine,pivot), sum)))
     res2<-get_diff(round(with(tmp,tapply(valopmctmonotime1, list(racine,pivot), sum))))
-   
-    res2<-cbind(res2,"diff2" = res2[,'diff'])
-    res2["Autres","diff2"]<-0
-    
-    res2 = res2[order(abs(res2[,'diff']),decreasing =T),]
+    if(nrow(res2)>1) res2 = res2[order(abs(res2[,'diff']),decreasing =T),]
+  
     tb = rbind(tb,"Racine de GHM" = NA)
 
     for(i in dimnames(res2)[[1]]){
@@ -2156,7 +2156,7 @@ get_actvite_racines<-function(df){
     
 
     tb<-bind_cols("niveau"=rep(3,dim(tb)[[1]]),"nom"=dimnames(tb)[[1]],as_tibble(tb))%>%
-      mutate(niveau = ifelse(grepl("GHM|Catégorie",nom),1,niveau))
+      dplyr::mutate(niveau = ifelse(grepl("GHM|Catégorie",nom),1,niveau))
     
   
   return(tb)

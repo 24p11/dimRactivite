@@ -416,7 +416,9 @@ selection_cancer_pat<-function( df, df_ano ){
     dplyr::ungroup()%>%
     dplyr::group_by(noanon)%>%
     dplyr::filter(score_confiance_diag_cancer == max(score_confiance_diag_cancer))%>%
-    dplyr::distinct(noanon, .keep_all= TRUE)
+    dplyr::distinct(noanon, .keep_all= TRUE)->df
+  
+  return(df)
 }
 
 

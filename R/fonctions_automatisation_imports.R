@@ -304,7 +304,8 @@ adzipComplet<-function( zfichiers, ext_to_import = NULL ){
                          pathto = getOption("dimRactivite.path") )
     
     
-      }
+    }
+  }
     
       #Vérification si tous les fichiers nécessaires sont présents
       det_noms = unique(unlist(stringr::str_split(dz_fichiers,'\\.')))
@@ -341,7 +342,7 @@ adzipComplet<-function( zfichiers, ext_to_import = NULL ){
       
      return(dz_fichiers)
       
-  }
+  
 
 
 }
