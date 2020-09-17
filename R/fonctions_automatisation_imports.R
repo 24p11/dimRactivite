@@ -485,6 +485,7 @@ save_remontees<-function(remontees){
       
       #Pour les années incomplètes on décompresse également l'année antérieure si disponible pour calcul des pmct mono uma
       remontree_ant = nrow(remontees%>%filter(annee == as.numeric(remontees$annee[i])-1,mois == 12))
+      
       if(as.numeric(remontees$mois[i])<12 & remontree_ant > 0){
         
         pN1= pmeasyr::noyau_pmeasyr(finess = remontees$finess[i] ,
@@ -850,11 +851,11 @@ load_dmi<- function( remontees_sel ){
 }
 
 
-#' Import des principaux fichiers de remontées éavec pmeasyr et valorisation des séjours et résumés
+#' Import des principaux fichiers de remontées avec pmeasyr et valorisation des séjours et résumés
 #'
 #' @param p un noyau pmeasyr
 #' @param tarifsante si TRUE utilisation des tarifs de l'année antérieure
-#' @param save si TRUE sauvegarde un fichier .RData dans le répertoire des données de remontée
+#' @param save si TRUE sauvegarde un fichier .RData dans le répertoire des données de remontées
 #' @param persist si TRUE renvoie les données
 #'
 #' @return liste avec principaux fichiers de remontées, et enregistrement sur le disque si besoin
@@ -887,7 +888,7 @@ imco <- function( p, tarifsante = FALSE, save = TRUE, persist = FALSE ){
   #ce qui suppose que les autres paramètres du noyau sont fixes.
 
   if(p$mois !=12){
-    deb  = p$annee -1
+    deb  = p$annee - 1
   }else{
     deb = p$annee
   }
