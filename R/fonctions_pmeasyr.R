@@ -151,11 +151,11 @@ vvr_rum_repa <- function (rsa, rum, pmctmono) {
   #creation table des sommes pour coefficient de repartition (sur pmct à n sans sup):
   dplyr::left_join(rum, fullrsatemp1) %>% dplyr::left_join(.,pmctmono) %>%
 
-    #  somme par rum des actes éligible facturation d'un supplément
-    dplyr::mutate(adial = stringr::str_count(actes, actesdialyse),
-                  ardt = stringr::str_count(actes, actesradio),
-                  aaph = stringr::str_count(actes, actesapherese),
-                  asdc = stringr::str_count(actes, actessdc)) -> fullrsatemp2
+  #  somme par rum des actes éligible facturation d'un supplément
+  dplyr::mutate(adial = stringr::str_count(actes, actesdialyse),
+                ardt = stringr::str_count(actes, actesradio),
+                aaph = stringr::str_count(actes, actesapherese),
+                asdc = stringr::str_count(actes, actessdc)) -> fullrsatemp2
 
   fullrsatemp2%>%dplyr::group_by(nas) %>%
     dplyr::summarise( # sommes des coefficients de répartition mixtes durée rum + pmctmono

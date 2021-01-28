@@ -462,13 +462,13 @@ attribution_type_M4<-function(df){
 #'
 attribution_statut_nx_patient<-function(df){
   
-  ansor_deb<-max(df$ansor); ansor_fin<-min(df$ansor)
+  ansor_deb<-max(df$annee); ansor_fin<-min(df$annee)
   
   df<-df%>%dplyr::mutate(nx_pat = 'N')
   
   for(a in ansor_deb:ansor_fin){
-    tmp <- df %>% dplyr::filter(ansor %in% (a-3):(a-1) )%>% dplyr::select(noanon) %>% purrr::flatten_chr() %>% unique()
-    df <- df%>%dplyr::mutate(nx_pat = ifelse(! noanon %in% tmp & ansor == a,'O',nx_pat))
+    tmp <- df %>% dplyr::filter(annee %in% (a-3):(a-1) )%>% dplyr::select(noanon) %>% purrr::flatten_chr() %>% unique()
+    df <- df%>%dplyr::mutate(nx_pat = ifelse(! noanon %in% tmp & annee == a,'O',nx_pat))
     
   }
   
