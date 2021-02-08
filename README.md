@@ -47,7 +47,7 @@ dimRactivite utilisera un dossier comprenant l'ensemble des fichiers zippés en 
 ```
 L'adresse de ce dossier est renseigné dans l'option du fichier de configuration ``` path_genrsa_files ```  .
 
-Les fichiers contenus dans ce dossier seront analysés, un fichier .RData par remontée et par établissement sera créé s'il n'existe pas encore. Les fichiers RData sont sauvegerdés dans un dossier spécifique (paramètre ``` path_rdata_files ```)
+Les fichiers contenus dans ce dossier seront analysés, un fichier .RData par remontée et par établissement sera créé s'il n'existe pas encore. Les fichiers RData sont sauvegerdés dans un dossier spécifique dont  l'arboresence est générée automatiquement lors de la sauvegarde des fichiers.
 ```
 + rdata
   ¦
@@ -56,11 +56,11 @@ Les fichiers contenus dans ce dossier seront analysés, un fichier .RData par re
       +--- annee
           
 ```
-Cette arboresence est générée automatiquement lors de la sauvegarde des fichiers.
+L'adresse de ce dossier est renseigné dans l'option du fichier de configuration ``` path_rdata_files ```  .
 
 Une fois créées, ces données peuvent être chargées en mémoire plus rapidement (par défaut la remontée la plus récente est prise en compte).
 
-L'adresse de ce dossier est renseigné dans l'option du fichier de configuration ``` path_rdata_files ```  .
+
 
 Import des données PMSI
 -----------------------
@@ -68,9 +68,9 @@ Import des données PMSI
 Cette procédure, qui procède par plusieurs étapes, utilise les fichiers GENRSA avec les fonctions d'imports pmeasyr (cf [doc irsa](https://guillaumepressiat.github.io/pmeasyr/import-des-donnees.html#rsa)):
 
 - in
-    * rss (pmeasyr::irum type 4, transposition des diagnostics, intégration du tra avec pmeasyr::inner_tra)
+    * rss (```pmeasyr::irum``` type 4, transposition des diagnostics, intégration du tra avec ```pmeasyr::inner_tra```)
 - out
-    * rsa (pmeasyr::irsa type 3, intégration du tra avec pmeasyr::inner_tra)
+    * rsa (```pmeasyr::irsa``` type 3, intégration du tra avec ```pmeasyr::inner_tra```)
     * tra
     * ano (sauvegardé sous la forme vano avec données de valorisation)
     * ium
@@ -83,7 +83,7 @@ La procédure réalise ensuite des opérations de transformation et de valorisat
  - ajout au rum des variables de fichier ium et de typologies des autorisations, 
  - valorisation des rsa ,
  - valorisation des rum (cf fonction [```dimRactivite::vvr_rum_repa```](https://24p11.github.io/dimRactivite/reference/vvr_rum_repa.html))
- - ajout des données de facturation à l'ano (vvr_ano_mco)
+ - ajout des données de facturation à l'ano (```pemasyr::vvr_ano_mco```)
 
 Ces fonctions font appel aux données de référentiels suivantes (disponibles dans les packages ***nomensland*** et ***referentiels***) ou dans les tableaux de données de dimRactive:
  - ```nomenclature_uma``` (dimRactivite)
@@ -154,7 +154,8 @@ où option_name est le nom de l'option.
 #### Liste des options
 
 
-- ```path``` = chemin des vers le dossier contenant les archives PMSI
+- ```path_genrsa_files``` = chemin des vers le dossier contenant les archives PMSI  au format zip
+- ```path_rdata_files``` = chemin des vers le dossier contenant les données PMSI au format RData
 - ```path_tdb_files``` = chemin vers un dossier permettant d'enregistrer les tableaux de bord
 
 - ```extensions``` = extension des fichiers qui seront reconnus par la fonction ```scan_path```.
