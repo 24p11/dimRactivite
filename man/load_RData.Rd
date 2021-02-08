@@ -4,13 +4,14 @@
 \alias{load_RData}
 \title{charge en mémoire les objets définitifs rum,rum_v,rsa,rsa_v,diagnostics, actes, vano préparé dans le RData}
 \usage{
-load_RData( remontees_sel )
+load_RData( sel_remontees_import )
 }
 \arguments{
-\item{remontees_sel}{tibble de type analyse_remontee avec l'ensemble des années à charger}
+\item{sel_remontees_import}{tibble de type analyse_remontee avec l'ensemble des années à charger}
 
-\item{extra}{logical, si TRUE importe également les données de valorisation non consolidée de l'année antérieure, 
-et les données de l'année valorisées avec les tarifs de l'année antérieure}
+\item{extra}{logical, si TRUE importe également :
+- les données non consolidée (le même mois de la remontée de l'année en cours) de l'année antérieure, 
+- les données de l'année valorisées avec les tarifs de l'année antérieure}
 }
 \description{
 charge en mémoire les objets définitifs rum,rum_v,rsa,rsa_v,diagnostics, actes, vano préparé dans le RData
@@ -18,7 +19,7 @@ charge en mémoire les objets définitifs rum,rum_v,rsa,rsa_v,diagnostics, actes
 \examples{
 \dontrun{
 
-   load_RData( remontees_sel )
+   load_RData( sel_remontees_import )
    
 }
 

@@ -7,11 +7,11 @@
 adzipRemonteee( p, ext_to_import )
 }
 \arguments{
-\item{p}{nouyau pmeasyr}
+\item{p}{noyau pmeasyr}
 
 \item{ext_to_import}{extension des fichiers à lire et importer}
 
-\item{fichiers_genrsa}{liste des fichiers contenue dans le dossier archive}
+\item{fichiers_genrsa}{liste des fichiers contenus dans le dossier archive}
 }
 \value{
 aucun, dézip des archives en fonction du type de fichier voulus et création de fichier vide pour les types de fichier manquant

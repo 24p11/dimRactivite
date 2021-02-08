@@ -2,7 +2,8 @@
 % Please edit documentation in R/fonctions_automatisation_imports.R
 \name{analyse_dossier_remontees}
 \alias{analyse_dossier_remontees}
-\title{Scan le dossier de sauvegarde des fichiers en sortie de GENRSA, les analyse et prépare un tableau de synthèse des remontées disponibles}
+\title{Scan le dossier de sauvegarde des fichiers en sortie de GENRSA,
+les analyse et prépare un tableau de synthèse des remontées disponibles}
 \usage{
 analyse_dossier_remontees( path, ext, maj_dernier_mois )
 }
@@ -15,7 +16,8 @@ analyse_dossier_remontees( path, ext, maj_dernier_mois )
 tibble, tableau de synthèse des remontées disponibles
 }
 \description{
-Scan le dossier de sauvegarde des fichiers en sortie de GENRSA, les analyse et prépare un tableau de synthèse des remontées disponibles
+Scan le dossier de sauvegarde des fichiers en sortie de GENRSA,
+les analyse et prépare un tableau de synthèse des remontées disponibles
 }
 \examples{
 \dontrun{

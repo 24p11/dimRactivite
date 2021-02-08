@@ -2,7 +2,7 @@
 % Please edit documentation in R/fonctions_automatisation_imports.R
 \name{imco}
 \alias{imco}
-\title{Import des principaux fichiers de remontées éavec pmeasyr et valorisation des séjours et résumés}
+\title{Import des principaux fichiers de remontées avec pmeasyr et valorisation des séjours et résumés}
 \usage{
 imco( p, tarifsante, save, persist,  )
 }
@@ -11,7 +11,7 @@ imco( p, tarifsante, save, persist,  )
 
 \item{tarifsante}{si TRUE utilisation des tarifs de l'année antérieure}
 
-\item{save}{si TRUE sauvegarde un fichier .RData dans le répertoire des données de remontée}
+\item{save}{si TRUE sauvegarde un fichier .RData dans le répertoire des données de remontées}
 
 \item{persist}{si TRUE renvoie les données}
 }
@@ -19,7 +19,7 @@ imco( p, tarifsante, save, persist,  )
 liste avec principaux fichiers de remontées, et enregistrement sur le disque si besoin
 }
 \description{
-Import des principaux fichiers de remontées éavec pmeasyr et valorisation des séjours et résumés
+Import des principaux fichiers de remontées avec pmeasyr et valorisation des séjours et résumés
 }
 \examples{
 \dontrun{
