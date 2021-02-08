@@ -4,7 +4,7 @@ dimRactivite
 
 L'objectif du package est de standardiser avec pmeasyr l'import dans R des données PMSI pour créer un environement de travail synthétique comprenant plusieurs années et plusieurs établissements. Une fois les données intégrées, des fonctions de générations automatiques de tableaux de bord sont disponibles permettant de suivre l'activté des établissements.
 
-Les fonctions d'imports et d'analyse sont construites sur le principe que chaque établissement produit tous les mois des fichiers de facturation mis en entrée du logiciel ATIH GENRSA utilisé pour transmettre les données PMSI aux tutelles (remontées mensuelles).  L’analyse de ces fichiers par GENRSA produit 2 types d’archives (.zip) le in (les fichiers d’entrée) et le out (fichiers préparés pour être envoyés). Le package généralise l’import des fichiers zippés en sortie de GENRSA (in et out) dans un environnement de travail R. Au cours de cet import les RSA et les RUM sont valorisés permettant l'analyse de recettes T2A des séjours des établissements.
+Les fonctions d'imports et d'analyse sont construites sur le principe que chaque établissement produit tous les mois des fichiers de facturation mis en entrée du logiciel ATIH GENRSA utilisés pour transmettre les données PMSI aux tutelles (remontées mensuelles).  Les 2 types d’archives (.zip) le in (les fichiers d’entrée) et le out (fichiers préparés pour être envoyés) sont utilisées. Le package généralise l’import des fichiers zippés (in et out) dans un environnement de travail R. Au cours de cet import les RSA et les RUM sont valorisés permettant l'analyse de recettes T2A des séjours des établissements.
 
 Des informations complèmentaires non contenues dans les formats officiels peuvent être intégrées, en particulier des informations sur les structures, permettant de générer des tableaux de bord compréhensibles et de décliner le calcul d'indicateurs sur les différents niveaux d'analyse d'un groupe hospitalier.
 
@@ -30,9 +30,37 @@ Un scénario complet d'import et de génération peut être trouvé dans la vign
 
 Organisation du file system
 ---------------------------
-Comme préconisé par G.Pressiat dans la documentation du package pmeasyr concernant [les archives PMSI](https://guillaumepressiat.github.io/pmeasyr/archives.html), dimRactivite utilisera un dossier unique comprenant l'ensemble des fichiers zippés en entrée et en sortie de GENRSA pour le MCO. Les fichiers contenus dans ce dossier seront analysés, un fichier .RData par remontée et par établissement sera créé s'il n'existe pas encore, puis les données seront automatiquement chargées dans R à partir des fichiers .RData (par défaut la remontée la plus récente est prise en compte).
+dimRactivite utilisera un dossier comprenant l'ensemble des fichiers zippés en entrée et en sortie de GENRSA pour le MCO. Nous recommandons l'organisation suivante pour ce dossier. Elle permettra en particulier de traiter les remontées lamda identifiées comme les remontées posétieures à M12.
 
-L'adresse de ce dossier est renseigné dans l'option du fichier de configuration ```path```  .
+```
++ genrsa
+  ¦
+  +--- finess_etb_1
+      ¦
+      +--- annee
+          ¦
+          + -- M01
+          .
+          .
+          + -- M24
+          
+```
+L'adresse de ce dossier est renseigné dans l'option du fichier de configuration ``` path_genrsa_files ```  .
+
+Les fichiers contenus dans ce dossier seront analysés, un fichier .RData par remontée et par établissement sera créé s'il n'existe pas encore. Les fichiers RData sont sauvegerdés dans un dossier spécifique (paramètre ``` path_rdata_files ```)
+```
++ rdata
+  ¦
+  +--- finess_etb_1
+      ¦
+      +--- annee
+          
+```
+Cette arboresence est générée automatiquement lors de la sauvegarde des fichiers.
+
+Une fois créées, ces données peuvent être chargées en mémoire plus rapidement (par défaut la remontée la plus récente est prise en compte).
+
+L'adresse de ce dossier est renseigné dans l'option du fichier de configuration ``` path_rdata_files ```  .
 
 Import des données PMSI
 -----------------------
@@ -90,7 +118,7 @@ On distingue un permier ensemble de tableaux de bord permettant de suivre l'évo
 
 Un autre ensemble de tableaux permet de suivre l'évolution annuelle pour chaque niveau (groupe hospitalier, établissement, pole, service,...) d'un ensemble d'indicateurs. Le package permet de le calcul d'environ 200 indicateurs répartis dans tableaux de bord thématiques (activité, DIM, médical) (ex [Tableau De Bord Activite](http://msi.sls.aphp.fr/tdb/index.php?_tbl=TableauDeBordActivite&_service=Lariboisiere&_mois=07&_annee=2019&_type=mens)). 
 
-Ces tableaux sont donc produits à partir des données PMSI importées et des informations sur les structures. Pour les tableaux d'activité on utilise un fichier de paramètres afin  de lister précisément pour chaque niveau de structure et pour chaque tableau thématique l'ensemble des indicateurs qui devront être calculés. Ce processus permet de personnaliser les tableaux de bord en fonction du type d'activité de chaque service ou pôle. Vous trouverez plus de détail sur cette procédure dans le paragraphe [Paramètres](#détail-sur-la-valorisation-des-RUM).
+Ces tableaux sont donc produits à partir des données PMSI importées et des informations sur les structures. Pour les tableaux d'activité, on utilise un fichier de paramètres afin  de lister précisément pour chaque niveau de structure et pour chaque tableau thématique l'ensemble des indicateurs qui devront être calculés. Ce processus permet de personnaliser les tableaux de bord en fonction du type d'activité de chaque service ou pôle. Vous trouverez plus de détail sur cette procédure dans le paragraphe [Paramètres](#détail-sur-la-valorisation-des-RUM).
 
 Des exemples de tableaux de bord sont fournis sous forme de fichiers xls sans aucun formatage, ils ont été produits par les scripts de démonstration (```demos```, ```vignettes```) avec des données tirées au sort, et des structures fictives. Ces fichiers peuvent soit être mis en forme avec dans des templates xlsx, intégrés par un site web, ou utilisé par une application shiny.
 
