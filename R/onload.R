@@ -1,3 +1,7 @@
+
+
+`%>%` <- magrittr::`%>%`
+
 #' Chargement des options du package dimRactivité
 #'
 #' @param file fichier yaml d'options du package dimRactivité
@@ -69,3 +73,5 @@ set_option<-function(opt,val){
 
   invisible()
 }
+
+

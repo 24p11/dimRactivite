@@ -546,7 +546,7 @@ import_remontees<-function(p, persist = T,  tarifsante = T, save = T){
     dplyr::mutate(mois_remontee_ = as.numeric(stringr::str_replace(mois_remontee,"M","") ) ) %>%
     
     dplyr::arrange(  desc(creation) , mois_remontee_, filepath ) %>%
-    dplyr::group_by( finess )%>% filter( mois_remontee_ == max(mois_remontee_) ) %>%
+    dplyr::group_by( finess )%>% dplyr::filter( mois_remontee_ == max(mois_remontee_) ) %>%
     dplyr::ungroup() %>%
     dplyr::distinct( filepath,file , .keep_all =T )%>% 
     dplyr::mutate(file = paste0(filepath,"/",file)) %>%
@@ -555,9 +555,11 @@ import_remontees<-function(p, persist = T,  tarifsante = T, save = T){
   
   if( p$mois < 12 & nrow(filesN1) > 0 ){
     
-      pN1= pmeasyr::noyau_pmeasyr(finess = remontees$finess[i],
-                                  annee = as.numeric(remontees$annee[i])-1,
-                                  mois = 12)
+      pN1= p
+      
+      pN1$annee = p$annee-1
+      
+      pN1$mois = 12
       
       pN1$path =  unique(filesN1$filepath)
   
@@ -715,13 +717,23 @@ load_RData<- function( sel_remontees_import, extra = FALSE ){
     
     load(file_to_load)
     
+    
+    
     rum <<- bind_rows(rum,get(paste0('rum','_',p$annee,'_',p$mois))[['rum']])
+    
     diagnostics <<- bind_rows(diagnostics,get(paste0('rum','_',p$annee,'_',p$mois))[['diags']])
+    
     actes <<- bind_rows(actes,get(paste0('rum','_',p$annee,'_',p$mois))[['actes']])
+    
     rum_v <<- bind_rows(rum_v,get(paste0('rum_v','_',p$annee,'_',p$mois)))
+    
     rsa <<- bind_rows(rsa,get(paste0('rsa','_',p$annee,'_',p$mois)))
+    
     rsa_v <<- bind_rows(rsa_v,get(paste0('rsa_v','_',p$annee,'_',p$mois)))
+    
     vano <<- bind_rows(vano,get(paste0('vano','_',p$annee,'_',p$mois)))
+    
+    
     
     rm(list=c(paste0('rum','_',p$annee,'_',p$mois),
               paste0('rum_v_',p$annee,'_',p$mois),
@@ -841,7 +853,7 @@ load_RData<- function( sel_remontees_import, extra = FALSE ){
   actes<<- dplyr::inner_join(rsa%>%dplyr::select(nofiness,cle_rsa,ansor,nas),
                              actes)
   
-  rum <<- rum%>%dplyr::rename( 
+  rum <<- rum%>% dplyr::rename( 
     sexe = sxpmsi,
     codegeo = cdresi ,
     mois = moissor,
@@ -862,7 +874,7 @@ load_RData<- function( sel_remontees_import, extra = FALSE ){
     actesdurum = actes,
     finess = nofiness)
   
-  rum_v <<- rum_v%>%dplyr::rename( 
+  rum_v <<- rum_v%>% dplyr::rename( 
     finess = nofiness,
     mois = moissor,
     annee = ansor,
@@ -870,7 +882,7 @@ load_RData<- function( sel_remontees_import, extra = FALSE ){
     annee = ansor
   )
   
-  rsa <<- rsa%>%dplyr::rename( 
+  rsa <<- rsa%>% dplyr::rename( 
     finess = nofiness,
     mois = moissor,
     annee = ansor,
@@ -957,7 +969,7 @@ load_RData<- function( sel_remontees_import, extra = FALSE ){
   )
   
   
-  vano <<- vano%>%dplyr::rename( 
+  vano <<- vano %>% dplyr::rename( 
     finess = nofiness,
     mois = moissort,
     annee = anneesort,
@@ -1143,7 +1155,7 @@ get_path_remontee <-function(p){
     dplyr::mutate(mois_remontee_ = as.numeric(stringr::str_replace(mois_remontee,"M","") ) ) %>%
     
     dplyr::arrange(  desc(creation) , mois_remontee_, filepath ) %>%
-    dplyr::group_by( finess )%>% filter( mois_remontee_ == max(mois_remontee_) ) %>%
+    dplyr::group_by( finess )%>% dplyr::filter( mois_remontee_ == max(mois_remontee_) ) %>%
     dplyr::ungroup() %>%
     dplyr::distinct( filepath,file , .keep_all =T )%>% 
     dplyr::mutate(file = paste0(filepath,"/",file)) %>%
@@ -1177,6 +1189,8 @@ get_path_remontee <-function(p){
 #' @export 
 imco <- function( p, tarifsante = FALSE, save = TRUE, persist = FALSE, lamda = FALSE ){
   
+
+  
   if(is.null(p$path)){
     
     p$path = get_path_remontee(p)
@@ -1202,7 +1216,10 @@ imco <- function( p, tarifsante = FALSE, save = TRUE, persist = FALSE, lamda = F
 
   
 
+  #### Référentiels
   
+  #Tarifs
+  library(nomensland)
   
   if(tarifsante==TRUE) {
     tarifs      <- nomensland::get_table('tarifs_mco_ghs') %>% dplyr::distinct(ghs, anseqta, .keep_all = TRUE) %>%
@@ -1215,6 +1232,10 @@ imco <- function( p, tarifsante = FALSE, save = TRUE, persist = FALSE, lamda = F
     supplements <- nomensland::get_table('tarifs_mco_supplements')
     suffixe = ""
   }
+  
+  #nomenclatures UMA
+  nomenclature_uma <- dimRactivite::nomenclatureum_uf
+  names(nomenclature_uma) <- c("typeaut", "libelle_typeaut", "mode_hospitalisation", "discipline", "ancien_code")
   
   #Pour le cacul des pmct mono rum on préfère toujours utiliser les 12 derniers mois.
   #Si l'import concerne un mois autre que décembre, on importe également si elles sont disponibles les données M12 de l'année antérieure
@@ -1330,15 +1351,17 @@ imco <- function( p, tarifsante = FALSE, save = TRUE, persist = FALSE, lamda = F
     
     
     #Intégration des type d'UMA au fichier rum
-    rum$rum = dplyr::left_join(rum$rum,ium%>%dplyr::select(noum,typeaut,typehosp,libelle_typeaut,
+    rum$rum = dplyr::left_join(rum$rum,
+                               ium%>%dplyr::select(noum,typeaut,typehosp,libelle_typeaut,
                                                            discipline),by=c("cdurm" = "noum"))
     #Transformation des diagnostics du rum
     rum <- pmeasyr::tdiag(rum)
     
     #Valorisation des séjours
     rsa_v <- pmeasyr::vvr_ghs_supp(rsa = vrsa,
-                                   tarifs = tarifs%>%mutate(ghs = as.character(ghs), anseqta =  as.character(anseqta)),
-                                   supplements =  supplements %>% mutate(anseqta = as.character(anseqta)),
+                                   tarifs = tarifs%>% dplyr::mutate(ghs = as.character(ghs), 
+                                                                    anseqta =  as.character(anseqta)),
+                                   supplements =  supplements %>% dplyr::mutate(anseqta = as.character(anseqta)),
                                    ano = vano,
                                    porg = porg,
                                    diap = diap,
@@ -1346,14 +1369,15 @@ imco <- function( p, tarifsante = FALSE, save = TRUE, persist = FALSE, lamda = F
                                    bee = FALSE)
     
     rsa_v <- pmeasyr::inner_tra( rsa_v , tra %>% dplyr::select(cle_rsa,nas,dtsort), sel=2)%>%
-      dplyr::mutate(ansor = format(dtsort,'%Y'),moissor = format(dtsort,'%m'))%>%select(-dtsort)%>%
+      dplyr::mutate(ansor = format(dtsort,'%Y'),moissor = format(dtsort,'%m'))%>% 
+      dplyr::select(-dtsort)%>%
       dplyr::mutate(nofiness = p_import$nofiness)
     
     rsa_v2 <- dplyr::left_join(rsa$rsa, dplyr::distinct( rsa_v, cle_rsa, .keep_all = TRUE) )
     
     
     
-    vano = vano%>%dplyr::select(names(vano)[ ! grepl('^cr',names(vano))])%>%
+    vano = vano %>% dplyr::select(names(vano)[ ! grepl('^cr',names(vano))])%>%
       dplyr::mutate( ansor = as.character(a) )
     
     #Objets temporaires à valoriser pour rum et rsa avec année antérieure
@@ -1428,7 +1452,8 @@ imco <- function( p, tarifsante = FALSE, save = TRUE, persist = FALSE, lamda = F
     if(save){
       save( list = c(paste0('rum_v_',suffixe,i),
                      paste0('rsa_v_',suffixe,i)),
-            file = paste0(p$path_RData,"/",p$finess,".",p$annee,".",p$mois_remontee,".",substr(suffixe,1,nchar(suffixe)-1),".RData")
+            file = paste0(p$path_RData,"/",p$finess,".",p$annee,".",p$mois_remontee,".",
+                          substr(suffixe,1,nchar(suffixe)-1),".RData")
       )
     }
     
