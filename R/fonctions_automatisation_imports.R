@@ -21,10 +21,15 @@ scan_path<-function( path = getOption("dimRactivite.path_genrsa_files"),
   fichiers_rdata = NULL
   
   list.dirs(path = getOption("dimRactivite.path_genrsa_files"), full.names = TRUE, recursive = FALSE) -> dir_list
-  dir_list <- stringr::str_replace(dir_list, getOption("dimRactivite.path_genrsa_files"), getOption("dimRactivite.path_rdata_files") ) 
   
-  for(d in dir_list){
-    dir.create(d)
+  dir_list <- stringr::str_replace(dir_list,
+                                   getOption("dimRactivite.path_genrsa_files"),
+                                   getOption("dimRactivite.path_rdata_files") ) 
+  
+  for( d in dir_list ){
+    
+    ifelse( ! dir.exists(d), dir.create(d), FALSE )
+    
   }
   
   
@@ -487,7 +492,9 @@ verif_structure<-function(rum,fichier_structure){
 
 #' Création des fichiers .RData contenant l'ensemble des données d'une remontée à partir d'un noyau pmeasyr
 #'
-#' @param p 
+#' @param persist : si TRUE renvoie les données
+#' @param tarifsante : si TRUE réalise également le traitement avec les tarifs de l'année antérieure
+#' @param save : si TRUE savegarde les données au format .RData
 #' 
 #' @return 
 #' @examples
@@ -572,12 +579,12 @@ import_remontees<-function(p, persist = T,  tarifsante = T, save = T){
   
   
   #Création du fichier RData  
-  dt<-imco( p, persist = persist,  tarifsante = F, save = save )
+  dt<-imco( p, persist = persist,  tarifsante = F, save = save, lamda = lamda )
 
   #Création du fichier RData valorisés avec les tarifs de l'année antérieure
   if(tarifsante == T){
     
-    dt<-imco( p, tarifsante = T, lamda = lamda )  
+    dt_tarifsante<-imco( p, tarifsante = T, lamda = lamda )  
     
   }
   
@@ -659,6 +666,9 @@ save_remontees<-function(remontees){
   return(remontees_dispo)
   
 }
+
+
+
 
 #' charge en mémoire les objets définitifs rum,rum_v,rsa,rsa_v,diagnostics, actes, vano préparé dans le RData
 #'
@@ -866,8 +876,9 @@ load_RData<- function( sel_remontees_import, extra = FALSE ){
     datesortie_rum = d8soue,
     modesortie_rum = mdsoue,
     duree_rum = dureesejpart,
-    uma_aphp = cdurm,
+    uma = cdurm,
     lit_palliatif = kytypautlit,
+    ghm = cdghm,
     dpdurum  = dp,
     drdurum = dr,
     dasdurum = das,
@@ -878,65 +889,58 @@ load_RData<- function( sel_remontees_import, extra = FALSE ){
     finess = nofiness,
     mois = moissor,
     annee = ansor,
-    mois = moissor,
-    annee = ansor
+    supp_rea_repa = nbsuprea_repa,
+    supp_si_repa = nssir_repa,
+    rec_si_repa = rec_sir_repa,
+    supp_src_repa = nbsupsrc_repa,
+    supp_stf_repa = nsstf_repa
   )
   
   rsa <<- rsa%>% dplyr::rename( 
     finess = nofiness,
     mois = moissor,
     annee = ansor,
-    mois = moissor
+    mois = moissor,
     # ano_date,
     # mois_entree,
     # annee_entree,
-    # duree,
-    # finess,
     # ghm2,
-    # ghs,
-    # dp,
-    # dr,
-    # sexe,
-    # modeentree,
-    # provenance,
-    # modesortie,
-    # destination,
-    # typ_sej,
-    # mois,
-    # annee,
-    # codegeo,
-    # exb,
-    # supp_defib_card,
-    # age,
-    # agejour,
-    # regles,
+    ghs = noghs,
+    modeentree = echpmsi,
+    provenance = prov,
+    modesortie = schpmsi,
+    destination = dest,
+    typ_sej = typesej,
+    codegeo = cdgeo,
+    age = agean,
+    agejour = agejr,
+    regles = delaireg,
     # nb_pgv,
-    # nbacte,
-    # nbrum,
-    # nbseance,
-    # poids,
-    # nbexh,
-    # nbsupprdth,
-    # supp_hemo,
-    # supp_dip_a,
-    # supp_dip_c,
-    # supp_ent_hemo,
-    # nbact_ghs9615,
+    nbacte = na,
+    nbexb = nbjrexb,
+    exb = sejinfbi,
+    nbexh = nbjrbs,
+   # nbsupprdth  = nb_rdth,
+    supp_hemo = nbsuphs,
+    supp_dip_a = nbsupahs,
+    supp_dip_c = nbsupchs,
+    supp_ent_hemo = nbsupehs,
+    nbact_ghs9615 = nbacte9615,
     # supp_rdthp,
     # supp_ante,
-    # caisson,
-    # supp_rea,
-    # supp_si,
-    # supp_stf,
-    # supp_src,
-    # supp_nn1,
-    # supp_nn2,
-    # supp_nn3,
-    # supp_rep,
-    # age_gest,
-    # nbexb,
+    caisson = nbsupcaisson,
+    supp_rea = nbsuprea,
+    supp_si = nbsupsi,
+    supp_stf = nbsupstf,
+    supp_src = nbsupsrc,
+    supp_nn1 = nbsupnn1,
+    supp_nn2 = nbsupnn2,
+    supp_nn3 = nbsupnn3,
+    supp_rep = nbsupreaped,
+    age_gest = agegest,
+
     # seqmco,
-    # rumdudp,
+    rumdudp = noseqrum,
     # aut_pgv1,
     # aut_pgv2,
     # rdthghs1,
@@ -945,25 +949,28 @@ load_RData<- function( sel_remontees_import, extra = FALSE ){
     # rdthnb1,
     # rdthnb2,
     # rdthnb3,
-    # lit_palliatif,
-    # typ_porg,
-    # top_uhcd,
-    # rdth_machine,
-    # rdth_dosimetrie,
-    # top_valve,
+    rdth_machine = typmachradio,
+    rdth_dosimetrie = typedosim,
+    lit_palliatif = paslitsp,
+    typ_porg = typrestpo,
+    top_uhcd = uhcd,
+    top_valve = valvaort,
+    # supp_defib_card,
     # type_rsa_auto,
     # ghs_ss_inno,
-    # top_mais_naiss,
-    # top_avastin,
-    # conv_hchp,
-    # raac,
+    top_mais_naiss = topadmnais,
+    top_avastin = topradavastin,
+    conv_hchp = conversion_hc,
+    raac = pc_raac,
     # forfait_dia,
-    # nbda,
+    nbda = ndas
     # nbtotdiag,
     # 
   )
+
+  
   rsa_v <<- rsa_v%>%dplyr::rename( 
-    
+    finess = nofiness,    
     mois = moissor,
     annee = ansor
   )
@@ -975,13 +982,26 @@ load_RData<- function( sel_remontees_import, extra = FALSE ){
     annee = anneesort,
     motif = motnofact,
     cmu = pbcmu,
-    type_amc = typecont
+    type_amc = typecont,
+    dateentree = dtent,
+    datesortie = dtsort     
   )
   
   
+  diagnostics <<- diagnostics %>% dplyr::rename( 
+    finess = nofiness,
+    annee = ansor,
+    rum = norum,
+  )
   
+  actes <<- actes %>% dplyr::rename( 
+    finess = nofiness,
+    annee = ansor,
+    rum = norum,
+  )
   
-  
+  rsa <<- rsa %>% dplyr::right_join(vano %>% dplyr::select(finess,cle_rsa,nas,annee,dateentree,datesortie),.)
+  rum <<- rum %>% dplyr::right_join(vano %>% dplyr::select(finess,cle_rsa,nas,annee,dateentree,datesortie),.)  
   
 }
 

@@ -2,7 +2,7 @@
 #'  Applicable sur des objets en sortie de pmeasyr
 #' @param df tibble, un tibble en sortie de pmeasyr
 #' @param ref chaine de caractères, la variable de référence qui sera utilisée pour la selection temporel
-#'    - si ref = ansor : les variables pmeasyr ansor et moisor sont utilisé pour la sélection avec les paramètres m et a
+#'    - si ref = annee : les variables pmeasyr annee et moisor sont utilisé pour la sélection avec les paramètres m et a
 #'    par exemple pour des objets de type rum ou rsa
 #' @param m vecteur numérique, un vecteur de nombre entiers indiquant les mois à selectionner
 #' @param a vecteur numérique, un vecteur de nombre entiers indiquant les années à selectionner
@@ -15,14 +15,14 @@
 #' @export get_data
 #'
 #' @examples
-get_data<-function( DF, ref = 'ansor', m, a, val = NULL, niveau = NULL, opt = T ){
+get_data<-function( DF, ref = 'annee', m, a, val = NULL, niveau = NULL, opt = T ){
 
 
-  if( ref == 'ansor' ){
+  if( ref == 'annee' ){
 
-    DF <- DF  %>% filter ( as.numeric(ansor) %in% a,
-                           as.numeric(moissor) %in% m )%>%
-      mutate(ansor = factor(ansor,levels = min(a):max(a)))
+    DF <- DF  %>% filter ( as.numeric(annee) %in% a,
+                           as.numeric(mois) %in% m )%>%
+      mutate(annee = factor(annee,levels = min(a):max(a)))
 
   }else{
 
@@ -53,22 +53,22 @@ get_data<-function( DF, ref = 'ansor', m, a, val = NULL, niveau = NULL, opt = T 
 
 
 #source(paste(PathFonctions,"GetData.R",sep=""))
-get_data_glissant<-function( DF, ref = 'ansor', m, a, val = NULL, niveau = NULL, opt = T ){
+get_data_glissant<-function( DF, ref = 'annee', m, a, val = NULL, niveau = NULL, opt = T ){
   #(Data,DateRef,Month,Years,val=NULL,niveau=NULL){
   
-  if( ref == 'ansor' ){
+  if( ref == 'annee' ){
     
-    DF <- DF  %>% dplyr::mutate(ansor = if_else( as.numeric(moissor) > max(m), 
-                                          as.character( as.numeric(ansor) + 1 ),
-                                          ansor ) ) %>%
-      dplyr::filter( as.numeric(ansor) %in% a ) %>%
-      dplyr::mutate(ansor = factor( ansor, levels = min(a):max(a) ) )
+    DF <- DF  %>% dplyr::mutate(annee = if_else( as.numeric(mois) > max(m), 
+                                          as.character( as.numeric(annee) + 1 ),
+                                          annee ) ) %>%
+      dplyr::filter( as.numeric(annee) %in% a ) %>%
+      dplyr::mutate(annee = factor( annee, levels = min(a):max(a) ) )
   
   }else{
     
-    DF <- DF  %>% dplyr::mutate(anref = as.numeric( format( !!sym(ref), '%Y')),
+    DF <- DF  %>% dplyr::mutate( anref = as.numeric( format( !!sym(ref), '%Y')),
                         moisref = as.numeric( format( !!sym(ref), '%m')))%>%
-      dplyr::mutate(anref = if_else( as.numeric(moisref) > max(m), 
+      dplyr::mutate( anref = if_else( as.numeric(moisref) > max(m), 
                                as.numeric(anref) + 1 , anref ) ) %>%
       dplyr::filter( as.numeric(anref) %in% a )
     
@@ -144,8 +144,8 @@ options_locales<-function(DF,val=NULL,niveau=NULL){
 
       if( niveau == i | val == i  ){
 
-        DF <- DF %>%  group_by( nofiness, ansor, cle_rsa, !!sym(n) ) %>%
-                      arrange( nofiness,ansor, cle_rsa, !!sym(n), d8eeue ) %>%
+        DF <- DF %>%  group_by( finess, annee, cle_rsa, !!sym(n) ) %>%
+                      arrange( finess,annee, cle_rsa, !!sym(n), dateentree_rum ) %>%
                       mutate( nb_rum = n(),
                               doublon = if_else( row_number() == 1, 1, 0 ) ) %>%
                       ungroup()
@@ -158,11 +158,11 @@ options_locales<-function(DF,val=NULL,niveau=NULL){
   
   if( is.null(niveau) ){
     
-    DF <- DF %>%  group_by( nofiness, ansor, cle_rsa ) %>%
-      arrange( nofiness,ansor, cle_rsa, d8eeue ) %>%
-      mutate( nb_rum = n(),
-              doublon = if_else( row_number() == 1, 1, 0 ) ) %>%
-      ungroup()
+    DF <- DF %>%  dplyr::group_by( finess, annee, cle_rsa ) %>%
+      dplyr::arrange( finess,annee, cle_rsa, dateentree_rum ) %>%
+      dplyr::mutate( nb_rum = dplyr::n(),
+              doublon = if_else( dplyr::row_number() == 1, 1, 0 ) ) %>%
+      dplyr::ungroup()
     
   }
 
@@ -184,7 +184,7 @@ options_locales<-function(DF,val=NULL,niveau=NULL){
 #'
 get_indicateurs<-function(nom,val,df= references){
 
-  df<- df%>% filter(grepl(nom,tdb))
+  df<- df%>% dplyr::filter(grepl(nom,tdb))
 
   #Si pas de niveau identifie attribution des indicateurs par defaut=GH
 
@@ -296,7 +296,7 @@ IP_SERVICE<-function(df){
 #' @examples
 IP_SEJOUR<-function(df){
   df<-df%>%filter(noghs!=9999,duree>0,dms_n>0)%>%
-    distinct(ansor,nofiness,cle_rsa,.keep_all = T)
+    distinct(annee,finess,cle_rsa,.keep_all = T)
 
   NUMERATEUR<-sum(df$duree,na.rm=T)
   DENOMINATEUR<-sum(df$dms_n,na.rm=T)
@@ -462,11 +462,11 @@ attribution_type_M4<-function(df){
 #'
 attribution_statut_nx_patient<-function(df){
   
-  ansor_deb<-max(df$annee); ansor_fin<-min(df$annee)
+  annee_deb<-max(df$annee); annee_fin<-min(df$annee)
   
   df<-df%>%dplyr::mutate(nx_pat = 'N')
   
-  for(a in ansor_deb:ansor_fin){
+  for(a in annee_deb:annee_fin){
     tmp <- df %>% dplyr::filter(annee %in% (a-3):(a-1) )%>% dplyr::select(noanon) %>% purrr::flatten_chr() %>% unique()
     df <- df%>%dplyr::mutate(nx_pat = ifelse(! noanon %in% tmp & annee == a,'O',nx_pat))
     

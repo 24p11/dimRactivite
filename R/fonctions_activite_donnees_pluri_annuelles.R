@@ -30,7 +30,8 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
     
     stopifnot(!is.null(unit_pivot))
     
-    df<-df%>%mutate(pivot = !!sym(pivot))%>%mutate(pivot = factor(as.numeric(format(pivot,unit_pivot))))
+    df<-df%>%dplyr::mutate(pivot = !!sym(pivot))%>%
+      dplyr::mutate(pivot = factor(as.numeric(format(pivot,unit_pivot))))
     
   }
   
@@ -39,24 +40,26 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
   #Utile pour le calcul du nombre de lit utilisé sur la période d'étude
   #--------------------------------------------------------------------
   #Les bornes de dates pour chaque niveau de la variable pivot (ex : année 2014, borne inf = 01-01-2014, borne sup = 31-12-2014)
-  df<-df%>%group_by(pivot)%>%mutate(date_min_pivot = as.Date(paste0(min(as.numeric(df$ansor)),'-', min(as.numeric(df$moissor)),'-01')),
-                                    date_max_pivot =  ifelse(max(as.numeric(df$moissor)) == 12,
-                                                            as.Date(paste0(max(as.numeric(df$ansor)),'-12-31'))+1,
-                                                            as.Date(paste0(max(as.numeric(df$ansor)),'-', max(as.numeric(df$moissor))+1,'-01'))))%>%
+  df<-df%>%dplyr::group_by(pivot)%>%
+    dplyr::mutate(date_min_pivot = as.Date(paste0(min(as.numeric(df$annee)),'-', min(as.numeric(df$mois)),'-01')),
+                                    date_max_pivot =  ifelse(max(as.numeric(df$mois)) == 12,
+                                                            as.Date(paste0(max(as.numeric(df$annee)),'-12-31'))+1,
+                                                            as.Date(paste0(max(as.numeric(df$annee)),'-', max(as.numeric(df$mois))+1,'-01'))))%>%
 
-        ungroup()%>%
-    mutate(date_max_pivot = as.Date(date_max_pivot,origin = "1970-01-01"))
+        dplyr::ungroup()%>%
+    dplyr::mutate(date_max_pivot = as.Date(date_max_pivot,origin = "1970-01-01"))
 
-  if( 'd8eeue' %in% names(df) ){
-    df<-df%>%mutate(d8eeue2 = as.Date(ifelse(date_min_pivot < d8eeue,d8eeue,date_min_pivot),origin = '1970-01-01'),
-                    d8soue2 = as.Date(ifelse(date_max_pivot > d8soue,d8soue,date_max_pivot),origin = '1970-01-01' ),
-                    dureesejpart2 = ifelse(d8soue2 > d8eeue2, d8soue2 - d8eeue2, 0 ) )
+  if( 'dateentree_rum' %in% names(df) ){
+    
+    df<-df%>%dplyr::mutate(dateentree_rum2 = as.Date(ifelse(date_min_pivot < dateentree_rum,dateentree_rum,date_min_pivot),origin = '1970-01-01'),
+                    datesortie_rum2 = as.Date(ifelse(date_max_pivot > datesortie_rum,datesortie_rum,date_max_pivot),origin = '1970-01-01' ),
+                    duree_rum2 = ifelse(datesortie_rum2 > dateentree_rum2, datesortie_rum2 - dateentree_rum2, 0 ) )
 
 
   }else{
-    df<-df%>%mutate(dtent2 = as.Date(ifelse(date_min_pivot < dtent, dtent, date_min_pivot ),origin = '1970-01-01'),
+    df<-df%>% dplyr::mutate(dtent2 = as.Date(ifelse(date_min_pivot < dtent, dtent, date_min_pivot ),origin = '1970-01-01'),
                     dtsort2 = as.Date(ifelse(date_max_pivot > dtsort, dtsort, date_max_pivot ),origin = '1970-01-01' ),
-                    dureesejpart2 = ifelse(dtsort2 > dtent2,dtsort2 - dtent2,0 ) )
+                    duree_rum2 = ifelse(dtsort2 > dtent2,dtsort2 - dtent2,0 ) )
 
 
   }
@@ -82,19 +85,19 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
   #A voir comment selectionner la variable TypeDossier
 
   if('HCtot'%in%indicateurs){
-    tb[['HCtot']] <- table( df %>% dplyr::filter( typehosp=="C", doublon==1 ) %>% dplyr::select( pivot ) )
+    tb[['HCtot']] <- table( df %>% dplyr::filter( type_hospum_1=="C", doublon==1 ) %>% dplyr::select( pivot ) )
   }
 
   if('nb_jour_hc_sej'%in%indicateurs){
 
-    tb[['nb_jour_hc_sej']]<-with( df%>% dplyr::filter( typehosp=="C" ,doublon==1 ),
+    tb[['nb_jour_hc_sej']]<-with( df%>% dplyr::filter( type_hospum_1=="C" ,doublon==1 ),
                          tapply( duree, pivot, sum ) )
   }
   
   if('nb_jour_hc'%in%indicateurs){
     
-    tb[['nb_jour_hc']]<-with( df%>% dplyr::filter( typehosp=="C" ,doublon==1 ),
-                         tapply( dureesejpart, pivot, sum ) )
+    tb[['nb_jour_hc']]<-with( df%>% dplyr::filter( type_hospum_1=="C" ,doublon==1 ),
+                         tapply( duree_rum, pivot, sum ) )
   }
 
 
@@ -103,7 +106,7 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
   ###########################################################################
   if('HC0'%in%indicateurs){
 
-    tb[['HC0']]<-table(df %>% dplyr::filter(typehosp=="C", duree == 0, doublon==1) %>%select(pivot) )
+    tb[['HC0']]<-table(df %>% dplyr::filter(type_hospum_1=="C", duree == 0, doublon==1) %>%select(pivot) )
 
   }
 
@@ -151,12 +154,12 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
   ###########################################################################      
   if('nb_sej_multi_uma'%in%indicateurs){
     
-    tb[['nb_sej_multi_uma']]<-table(df %>% dplyr::filter(nbrum > 1 , doublon==1 ) %>%select(pivot) ) 
+    tb[['nb_sej_multi_uma']]<-table(df %>% dplyr::filter(rum > 1 , doublon==1 ) %>%select(pivot) ) 
   }
   
   if('p_sej_multi_uma'%in%indicateurs){
     
-    tb[['p_sej_multi_uma']]<- round( table(df %>% dplyr::filter(nbrum > 1 , doublon==1 ) %>%select(pivot) ) *100 / tb[['HCtot']] )
+    tb[['p_sej_multi_uma']]<- round( table(df %>% dplyr::filter(rum > 1 , doublon==1 ) %>%select(pivot) ) *100 / tb[['HCtot']] )
   }
   
   ###########################################################################
@@ -164,7 +167,7 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
   ###########################################################################
   if('HPTot'%in%indicateurs){
 
-    tb[['HPTot']]<-table(df %>% dplyr::filter(typehosp=="P", doublon==1) %>%select(pivot) )
+    tb[['HPTot']]<-table(df %>% dplyr::filter(type_hospum_1=="P", doublon==1) %>%select(pivot) )
   }
 
   ###########################################################################
@@ -173,7 +176,7 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
 
   if('Seances'%in%indicateurs){
 
-    tb[['Seances']]<-table(df %>% dplyr::filter(cdghm%in%ghmseances$ghm, doublon==1) %>%select(pivot) )
+    tb[['Seances']]<-table(df %>% dplyr::filter(ghm%in%ghmseances$ghm, doublon==1) %>%select(pivot) )
 
   }
   ###########################################################################
@@ -181,7 +184,7 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
   ############################################################################
   if('SeancesDialyses'%in%indicateurs){
 
-    tb[['SeancesDialyses']]<-table(df %>% dplyr::filter(cdghm%in%ghmseances$ghm[ghmseances$type=='Dialyse'],
+    tb[['SeancesDialyses']]<-table(df %>% dplyr::filter(ghm%in%ghmseances$ghm[ghmseances$type=='Dialyse'],
                                                         doublon==1) %>%
                                      select(pivot) )
   }
@@ -191,7 +194,7 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
   ###########################################################################
   if('SeancesChimio'%in%indicateurs){
 
-    tb[['SeancesChimio']]<-table(df %>% dplyr::filter(cdghm%in%ghmseances$ghm[ghmseances$type=='Chimio'],
+    tb[['SeancesChimio']]<-table(df %>% dplyr::filter(ghm%in%ghmseances$ghm[ghmseances$type=='Chimio'],
                                                       doublon==1) %>%
                                    select(pivot) )
   }
@@ -201,7 +204,7 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
   ###########################################################################
   if('SeancesRadio'%in%indicateurs){
 
-    tb[['SeancesRadio']]<-table(df %>% dplyr::filter(cdghm%in%ghmseances$ghm[ghmseances$type=='Radio'],
+    tb[['SeancesRadio']]<-table(df %>% dplyr::filter(ghm%in%ghmseances$ghm[ghmseances$type=='Radio'],
                                                      doublon==1) %>%
                                   select(pivot) )
   }
@@ -210,7 +213,7 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
   ###########################################################################
   if('SeancesPrepaRadio'%in%indicateurs){
 
-    tb[['SeancesPrepaRadio']]<-table(df %>% dplyr::filter(cdghm%in%ghmseances$ghm[ghmseances$type=='PrepaRadio'],
+    tb[['SeancesPrepaRadio']]<-table(df %>% dplyr::filter(ghm%in%ghmseances$ghm[ghmseances$type=='PrepaRadio'],
                                                           doublon==1) %>%
                                        select(pivot) )
   }
@@ -219,7 +222,7 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
   ###########################################################################
   if('HPMed'%in%indicateurs){
 
-    tb[['HPMed']]<-table(df %>% dplyr::filter(typehosp=="P", substr(cdghm,3,3)=='M', doublon==1) %>% select(pivot) )
+    tb[['HPMed']]<-table(df %>% dplyr::filter(type_hospum_1=="P", substr(ghm,3,3)=='M', doublon==1) %>% select(pivot) )
   }
 
   ###########################################################################
@@ -227,19 +230,19 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
   ###########################################################################
 
   if('HPChir'%in%indicateurs){
-    tb[['HPChir']]<-table(df %>% dplyr::filter(typehosp=="P", substr(cdghm,3,3)=='C', doublon==1) %>% select(pivot) )
+    tb[['HPChir']]<-table(df %>% dplyr::filter(type_hospum_1=="P", substr(ghm,3,3)=='C', doublon==1) %>% select(pivot) )
   }
 
 
 
   if('HPMedTech'%in%indicateurs){
-    tb[['HPMedTech']]<-table(df %>% dplyr::filter(typehosp=="P", substr(cdghm,3,3)=='K', doublon==1) %>% select(pivot) )
+    tb[['HPMedTech']]<-table(df %>% dplyr::filter(type_hospum_1=="P", substr(ghm,3,3)=='K', doublon==1) %>% select(pivot) )
   }
 
 
 
   if('NbIVG'%in%indicateurs){
-    tb[['NbIVG']]<-table(df %>% dplyr::filter(cdghm=='14Z08Z', doublon==1) %>% select(pivot) )
+    tb[['NbIVG']]<-table(df %>% dplyr::filter(ghm=='14Z08Z', doublon==1) %>% select(pivot) )
   }
 
 
@@ -263,7 +266,7 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
   #}
   #Volume des patients HP
   #if('VolBlocHP'%in%indicateurs){
-  #  tb[['VolBlocHP']]<-table(DataIpop$pivot[which(!DataIpop$typehosp=="C")])
+  #  tb[['VolBlocHP']]<-table(DataIpop$pivot[which(!DataIpop$type_hospum_1=="C")])
   #}
 
   #Pourcentage de séjours chirurgicaux
@@ -271,7 +274,7 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
   if('nb_sej_chir'%in%indicateurs){
     
     tb[['nb_sej_chir']]<-round(
-      table(df %>% dplyr::filter( substr(cdghm,3,3)=='C', doublon==1) %>% select(pivot) )
+      table(df %>% dplyr::filter( substr(ghm,3,3)=='C', doublon==1) %>% select(pivot) )
     )
   }
   
@@ -279,7 +282,7 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
   if('p_sej_chir_hc'%in%indicateurs){
 
     tb[['p_sej_chir_hc']]<-round(
-      table(df %>% dplyr::filter(typehosp=="C", substr(cdghm,3,3)=='C', doublon==1) %>% select(pivot) )*100/
+      table(df %>% dplyr::filter(type_hospum_1=="C", substr(ghm,3,3)=='C', doublon==1) %>% select(pivot) )*100/
         tb[['HCtot']],1
     )
   }
@@ -301,28 +304,28 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
   if('nb_sej_chir_0j'%in%indicateurs){
 
     tb[['nb_sej_chir_0j']]<-round(
-      table(df %>% dplyr::filter(duree==0, substr(cdghm,3,3)=='C', doublon==1) %>%  dplyr::select(pivot) )
+      table(df %>% dplyr::filter(duree==0, substr(ghm,3,3)=='C', doublon==1) %>%  dplyr::select(pivot) )
     )
   }
   
   if('p_sej_chir_0j'%in%indicateurs){
     
     tb[['p_sej_chir_0j']]<-round(
-      table(df %>% dplyr::filter(duree==0, substr(cdghm,3,3)=='C', doublon==1) %>%  dplyr::select(pivot) )*100/
-        table(df %>% dplyr::filter( substr(cdghm,3,3)=='C', doublon==1)  %>%  dplyr::select(pivot)),1
+      table(df %>% dplyr::filter(duree==0, substr(ghm,3,3)=='C', doublon==1) %>%  dplyr::select(pivot) )*100/
+        table(df %>% dplyr::filter( substr(ghm,3,3)=='C', doublon==1)  %>%  dplyr::select(pivot)),1
     )
   }
 
   #if('pSejChirOjUCA'%in%indicateurs){
   #  tb[['pSejChir0jUCA']]<-round(
-  #    table(df$pivot[substr(df$cdghm,3,3)=='C'&df$duree_sej==0&df$uma_locale2%in%UHambu])*100/
-  #      table(df$pivot[substr(df$cdghm,3,3)=='C'&df$duree_sej==0])
+  #    table(df$pivot[substr(df$ghm,3,3)=='C'&df$duree_sej==0&df$uma_locale2%in%UHambu])*100/
+  #      table(df$pivot[substr(df$ghm,3,3)=='C'&df$duree_sej==0])
   #  )
   #}
   #Activite unite chirurige ambulatoire :
   #if('ActiviteUniteChirAmbu'%in%indicateurs){
   #  tb[['NbSejUCA']]<-table(df$pivot[df$uma_locale2%in%UHambu])
-  #  tb[['pSejChirUCA']]<-round(table(df$pivot[df$uma_locale2%in%UHambu&substr(df$cdghm,3,3)=='C'])*100/tb[['NbSejUCA']])
+  #  tb[['pSejChirUCA']]<-round(table(df$pivot[df$uma_locale2%in%UHambu&substr(df$ghm,3,3)=='C'])*100/tb[['NbSejUCA']])
   #  tb[['NbSejUCAservChir']]<-table(df$pivot[df$uma_locale2%in%UHambu&df$service%in%ServicesChirurgie])
 
   #}
@@ -352,7 +355,7 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
   #}
   if('Greffes'%in%indicateurs){
 
-    tb[['Greffes']]<-table(df %>% dplyr::filter(cdghm%in%subset(ghmgreffes,
+    tb[['Greffes']]<-table(df %>% dplyr::filter(ghm%in%subset(ghmgreffes,
                                                                 organe%in%c('AutoGreffeCellulesSouches',
                                                                             'AllogreffeCellulesSouches'))$ghm,
                                                 doublon==1) %>%
@@ -363,7 +366,7 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
 
   if('AutoGreffes'%in%indicateurs){
 
-    tb[['AutoGreffes']]<-table(df %>% dplyr::filter(cdghm%in%subset(ghmgreffes,
+    tb[['AutoGreffes']]<-table(df %>% dplyr::filter(ghm%in%subset(ghmgreffes,
                                                                     organe%in%c('AutoGreffeCellulesSouches'))$ghm,
                                                     doublon==1) %>% select(pivot) )
 
@@ -371,7 +374,7 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
 
   if('AlloGreffes'%in%indicateurs){
 
-    tb[['AlloGreffes']]<-table(df %>% dplyr::filter(cdghm%in%subset(ghmgreffes,
+    tb[['AlloGreffes']]<-table(df %>% dplyr::filter(ghm%in%subset(ghmgreffes,
                                                                     organe%in%c('AllogreffeCellulesSouches'))$ghm,
                                                     doublon==1) %>%
                                  select(pivot) )
@@ -379,20 +382,20 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
 
   if('Transplantations'%in%indicateurs){
 
-    tb[['Transplantations']]<-table(df %>% dplyr::filter(cdghm%in%subset(ghmgreffes,
+    tb[['Transplantations']]<-table(df %>% dplyr::filter(ghm%in%subset(ghmgreffes,
                                                                          organe%in%c('Rein','Pancreas'))$ghm,
                                                          doublon==1) %>%
                                       select(pivot) )
   }
   if('TransplantationsRenales'%in%indicateurs){
 
-    tb[['TransplantationsRenales']]<-table(df %>% dplyr::filter(cdghm%in%subset(ghmgreffes,organe%in%c('Rein'))$ghm,
+    tb[['TransplantationsRenales']]<-table(df %>% dplyr::filter(ghm%in%subset(ghmgreffes,organe%in%c('Rein'))$ghm,
                                                                 doublon==1) %>%
                                              select(pivot) )
   }
   if('TransplantationsPancreas'%in%indicateurs){
 
-    tb[['TransplantationsPancreas']]<-table(df %>% dplyr::filter(cdghm%in%subset(ghmgreffes,
+    tb[['TransplantationsPancreas']]<-table(df %>% dplyr::filter(ghm%in%subset(ghmgreffes,
                                                                                  organe%in%c('Pancreas'))$ghm,
                                                                  doublon==1) %>%
                                               select(pivot) )
@@ -420,8 +423,8 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
   if('PCHIR'%in%indicateurs){
 
     tb[['PCHIR']]<-round(
-      table(df %>% dplyr::filter(typehosp=="C", substr(cdghm,3,3)=='C', doublon==1) %>%  dplyr::select(pivot) )*100/
-        table(df %>% dplyr::filter(typehosp=="C", doublon==1)  %>%  dplyr::select(pivot)),1
+      table(df %>% dplyr::filter(type_hospum_1=="C", substr(ghm,3,3)=='C', doublon==1) %>%  dplyr::select(pivot) )*100/
+        table(df %>% dplyr::filter(type_hospum_1=="C", doublon==1)  %>%  dplyr::select(pivot)),1
     )
 
   }
@@ -444,13 +447,13 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
   #Duree moyenne des resumes
   ###########################################################################
   if('DMR'%in%indicateurs){
-    tb[['DMR']]<-round( with( df %>% filter( duree > 0 ), tapply( dureesejpart, pivot, sum, na.rm = T ) )/
+    tb[['DMR']]<-round( with( df %>% filter( duree > 0 ), tapply( duree_rum, pivot, sum, na.rm = T ) )/
                          table( df %>% filter( duree > 0, doublon == 1 ) %>% select( pivot ) ),
                        1)
   }
   
   if('DMR_centrale'%in%indicateurs){
-    tb[['DMR_centrale']]<-round( with( df %>% filter( duree > 0, duree < dms_n +30 ), tapply( dureesejpart, pivot, sum, na.rm = T ) )/
+    tb[['DMR_centrale']]<-round( with( df %>% filter( duree > 0, duree < dms_n +30 ), tapply( duree_rum, pivot, sum, na.rm = T ) )/
                           table( df %>% filter( duree > 0, duree < dms_n +30, doublon == 1 ) %>% select( pivot ) ),
                         1)
   }
@@ -477,13 +480,13 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
   ###########################################################################
   if('NS'%in%indicateurs){
     tb[['NS']]<-round(
-      table(df%>%filter(duree>3,substr(cdghm,6,6)%in%2:4, doublon==1)%>%select(pivot))*100/
+      table(df%>%filter(duree>3,substr(ghm,6,6)%in%2:4, doublon==1)%>%select(pivot))*100/
         table(df%>%filter(duree>3)%>%select(pivot)),
       1)
   }
   if('NS_2'%in%indicateurs){
     tb[['NS_2']]<-round(
-      table(df%>%filter(duree>3,substr(cdghm,6,6)==2, doublon==1)%>%select(pivot))*100/
+      table(df%>%filter(duree>3,substr(ghm,6,6)==2, doublon==1)%>%select(pivot))*100/
         table(df%>%filter(duree>3)%>%select(pivot)),
       1)
   }
@@ -491,14 +494,14 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
 
   if('NS_3'%in%indicateurs){
     tb[['NS_3']]<-round(
-      table(df%>%filter(duree>3,substr(cdghm,6,6)==3, doublon==1)%>%select(pivot))*100/
+      table(df%>%filter(duree>3,substr(ghm,6,6)==3, doublon==1)%>%select(pivot))*100/
         table(df%>%filter(duree>3)%>%select(pivot)),
       1)
   }
 
   if('NS_4'%in%indicateurs){
     tb[['NS_4']]<-round(
-      table(df%>%filter(duree>3,substr(cdghm,6,6)==4, doublon==1)%>%select(pivot))*100/
+      table(df%>%filter(duree>3,substr(ghm,6,6)==4, doublon==1)%>%select(pivot))*100/
         table(df%>%filter(duree>3)%>%select(pivot)),
       1)
   }
@@ -511,14 +514,14 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
   ###########################################################################
   if('nbsuprea'%in%indicateurs){
 
-    tb[['nbsuprea']]<-round(with(df,tapply(nbsuprea_repa,pivot,sum)))
+    tb[['nbsuprea']]<-round(with(df,tapply(supp_rea_repa,pivot,sum)))
 
   }
 
 
   if('nssir'%in%indicateurs){
 
-    tb[['nssir']]<- round(with(df,tapply(nssir_repa,pivot,sum)))
+    tb[['nssir']]<- round(with(df,tapply(supp_si_repa,pivot,sum)))
 
   }
 
@@ -538,13 +541,13 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
   ############################################################################
   if('nsstf'%in%indicateurs){
 
-    tb[['nsstf']]<- round(with(df,tapply(nssir_repa+nsstf_repa,pivot,sum)))
+    tb[['nsstf']]<- round( with(df, tapply( supp_si_repa+supp_stf_repa, pivot, sum ) ) ) 
   }
 
 
   if('stf_hr'%in%indicateurs){
 
-    tb[['stf_hr']]<-round(tapply(df$nsstf_repa,df$pivot,sum))
+    tb[['stf_hr']]<- round( tapply( df$supp_stf_repa, df$pivot, sum ) )
 
   }
 
@@ -552,7 +555,7 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
   ############################################################################
   if('nbsupsrc'%in%indicateurs){
 
-    tb[['nbsupsrc']]<-round(tapply(df$nbsupsrc_repa,df$pivot,sum))
+    tb[['nbsupsrc']]<-round( tapply( df$supp_src_repa, df$pivot, sum ) )
 
   }
 
@@ -560,9 +563,9 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
   ############################################################################
   if('p_nbsupsrc'%in%indicateurs){
 
-    tb[['p_nbsupsrc']]<-round(tb[['nbsupsrc']]*100/
-                                with(df%>%filter(substr(typeaut,1,2)%in% c("03","14")),
-                                     tapply(dureesejpart,pivot,sum)),
+    tb[['p_nbsupsrc']]<-round( tb[['nbsupsrc']]*100/
+                                with( df %>% dplyr::filter( substr( type_rum_1, 1, 2 ) %in% c( "03", "14" ) ),
+                                     tapply( duree_rum, pivot, sum ) ),
                               1)
   }
 
@@ -571,8 +574,8 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
   #TODO
   if('dialhosp'%in%indicateurs){
 
-    tb[['dialhosp']]<-with(df%>%mutate(adial = stringr::str_count(actes, paste(actes_dialyse_sup$acte,collapse = "|"))),
-                           tapply(adial,pivot,sum))
+    tb[['dialhosp']]<-with(df%>%dplyr::mutate( adial = stringr::str_count(actes, paste( actes_dialyse_sup$acte, collapse = "|"))),
+                           tapply( adial, pivot, sum ) )
   }
 
   #Poids moyen du cas traite :
@@ -583,16 +586,17 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
   if('rec_totale'%in%indicateurs){
     tb[['rec_totale']]<-
       round(
-        with(df%>%distinct(nofiness,ansor,cle_rsa,.keep_all = T),
-             tapply(rec_totale,pivot,sum,na.rm=T))
+        with(df %>% dplyr::distinct( finess, annee, cle_rsa, .keep_all = T ),
+             tapply( rec_totale, pivot, sum, na.rm=T ) )
         
       )
   }
   if('rec_totale_hc'%in%indicateurs){
     tb[['rec_totale_hc']]<-
       round(
-        with(df%>%filter(typehosp=='C')%>%distinct(nofiness,ansor,cle_rsa,.keep_all = T),
-             tapply(rec_totale,pivot,sum,na.rm=T))
+        with( df%>% dplyr::filter( type_hospum_1=='C' )%>%
+                dplyr::distinct( finess, annee, cle_rsa, .keep_all = T ),
+             tapply( rec_totale, pivot, sum, na.rm=T ) )
         
       )
   }
@@ -600,8 +604,8 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
   if('rec_base'%in%indicateurs){
     tb[['rec_base']]<-
       round(
-        with(df%>%distinct(nofiness,ansor,cle_rsa,.keep_all = T),
-             tapply(rec_base,pivot,sum,na.rm=T))
+        with(df %>% dplyr::distinct( finess, annee, cle_rsa, .keep_all = T ),
+             tapply( rec_base, pivot, sum, na.rm=T ) )
 
       )
   }
@@ -609,8 +613,9 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
   if('rec_base_hc'%in%indicateurs){
     tb[['rec_base_hc']]<-
       round(
-        with(df%>%filter(typehosp=='C')%>%distinct(nofiness,ansor,cle_rsa,.keep_all = T),
-             tapply(rec_base,pivot,sum,na.rm=T))
+        with( df %>% dplyr::filter( type_hospum_1=='C' ) %>% 
+                dplyr::distinct( finess, annee, cle_rsa, .keep_all = T ),
+             tapply( rec_base, pivot, sum, na.rm=T ) )
 
       )
   }
@@ -618,16 +623,18 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
   if('rec_supp'%in%indicateurs){
     tb[['rec_supp']]<-
       round(
-        with(df%>%filter(typehosp=='C')%>%distinct(nofiness,ansor,cle_rsa,.keep_all = T),
-             tapply(rec_totale-rec_base,pivot,sum,na.rm=T))
+        with( df %>% dplyr::filter( type_hospum_1=='C' ) %>%
+                dplyr::distinct( finess, annee, cle_rsa, .keep_all = T ),
+             tapply( rec_totale-rec_base, pivot, sum, na.rm=T ) )
         
       )
   } 
   if('rec_supp_repa'%in%indicateurs){
     tb[['rec_supp_repa']]<-
       round(
-        with(df%>%filter(typehosp=='C')%>%distinct(nofiness,ansor,cle_rsa,.keep_all = T),
-             tapply(rec_sup_repa,pivot,sum,na.rm=T))
+        with( df %>% dplyr::filter( type_hospum_1=='C' ) %>%
+                dplyr::distinct( finess, annee, cle_rsa, .keep_all = T ),
+             tapply( rec_sup_repa, pivot, sum, na.rm=T ) )
         
       )
   } 
@@ -635,7 +642,7 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
   if('rec_totale_repa'%in%indicateurs){
     tb[['rec_totale_repa']]<-
       round(
-        with(df,tapply(valopmctmonotime1,pivot,sum,na.rm=T))
+        with( df, tapply( valopmctmonotime1, pivot, sum, na.rm=T ) )
         
       )
   }
@@ -643,7 +650,7 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
   if('rec_base_repa'%in%indicateurs){
     tb[['rec_base_repa']]<-
       round(
-        with(df,tapply(valopmctmonotime1-rec_sup_repa,pivot,sum,na.rm=T))
+        with( df, tapply( valopmctmonotime1 - rec_sup_repa, pivot, sum, na.rm=T ) )
 
       )
   }
@@ -651,15 +658,16 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
   if('rec_totale_repa_hc'%in%indicateurs){
     tb[['rec_totale_repa_hc']]<-
       round(
-        with(df%>%filter(typehosp=="C"),tapply(valopmctmonotime1,pivot,sum,na.rm=T))
+        with( df%>% dplyr::filter( type_hospum_1=="C" ),
+              tapply( valopmctmonotime1, pivot, sum, na.rm=T ) )
         
       )
   }
   if('rec_base_repa_hc'%in%indicateurs){
     tb[['rec_base_repa_hc']]<-
       round(
-        with(df%>%filter(typehosp=="C"),
-             tapply(valopmctmonotime1-rec_sup_repa,pivot,sum,na.rm=T))
+        with( df%>%dplyr::filter( type_hospum_1=="C" ),
+             tapply( valopmctmonotime1 - rec_sup_repa, pivot, sum, na.rm=T ) )
 
       )
   }
@@ -667,8 +675,8 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
   if('rec_base_repa_mono_uma'%in%indicateurs){
     tb[['rec_base_repa_mono_uma']]<-
       round(
-        with(df%>%filter(typehosp=="C",nbrum==1),
-             tapply(valopmctmonotime1-rec_sup_repa,pivot,sum,na.rm=T))
+        with( df %>% dplyr::filter( type_hospum_1=="C", rum==1 ),
+             tapply( valopmctmonotime1 - rec_sup_repa, pivot, sum, na.rm=T ) )
 
       )
   }
@@ -676,8 +684,8 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
   if('rec_base_repa_multi_uma'%in%indicateurs){
     tb[['rec_base_repa_multi_uma']]<-
       round(
-        with(df%>%filter(typehosp=="C",nbrum!=1),
-             tapply(valopmctmonotime1-rec_sup_repa,pivot,sum,na.rm=T))
+        with( df %>% dplyr::filter( type_hospum_1=="C", rum!=1 ),
+             tapply( valopmctmonotime1 - rec_sup_repa, pivot, sum, na.rm=T ) )
 
       )
   }
@@ -685,8 +693,8 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
   if('rec_base_hp'%in%indicateurs){
     tb[['rec_base_hp']]<-
       round(
-        with(df%>%filter(typehosp=="P"),
-             tapply(rec_base,pivot,sum,na.rm=T))
+        with( df %>% dplyr::filter( type_hospum_1=="P" ),
+             tapply( rec_base, pivot, sum, na.rm=T ) )
 
       )
   }
@@ -694,8 +702,11 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
   if('rmct_hc'%in%indicateurs){
     
     tb[['rec_totale_hc']]<- round(
-      with(df%>%filter(typehosp=='C')%>%distinct(nofiness,ansor,cle_rsa,.keep_all = T),
-           tapply(rec_totale,pivot,sum,na.rm=T))
+      
+      with( df %>% dplyr::filter( type_hospum_1=='C' )%>%
+              dplyr::distinct( finess, annee, cle_rsa, .keep_all = T ),
+           tapply( rec_totale, pivot, sum, na.rm=T ) )
+      
     )
     
     tb[['rmct_hc']] <- round( tb[['rec_totale_hc']] / tb[['HCtot']] ) 
@@ -703,9 +714,10 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
   
   if('rmct_repa_hc'%in%indicateurs){
     
-    tb[['rec_totale_repa_hc']]<-
-      round(
-        with(df%>%filter(typehosp=="C"),tapply(valopmctmonotime1,pivot,sum,na.rm=T))
+    tb[['rec_totale_repa_hc']]<- round(
+        
+        with( df %>% dplyr::filter( type_hospum_1=="C" ),
+              tapply( valopmctmonotime1, pivot, sum, na.rm=T ) )
         
       )
     
@@ -729,7 +741,8 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
   if('pmct_repa_mono_uma'%in%indicateurs){
 
     tb[['pmct_repa_mono_uma']]<- round( tb[['rec_base_repa_mono_uma']] / 
-                                          table( df %>% dplyr::filter( typehosp=="C", nbrum==1 ) %>% dplyr::select( pivot ) ) 
+                                          table( df %>% dplyr::filter( type_hospum_1=="C", rum==1 ) %>% 
+                                                   dplyr::select( pivot ) ) 
                                        )
                                           
 
@@ -738,7 +751,8 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
   if('pmct_repa_multi_uma'%in%indicateurs){
 
     tb[['pmct_repa_multi_uma']]<- round( tb[['rec_base_repa_mono_uma']] / 
-                                           table( df %>% dplyr::filter( typehosp=="C", nbrum!=1,  doublon==1 ) %>% dplyr::select( pivot ) ) 
+                                           table( df %>% dplyr::filter( type_hospum_1=="C", rum!=1,  doublon==1 ) %>% 
+                                                    dplyr::select( pivot ) ) 
     )
   }
 
@@ -765,14 +779,20 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
   ##Détails recettes
   if('0_nuit_nb_sej'%in%indicateurs){
     
-    nb_journees <- with( df %>% filter( typehosp == 'C' ), tapply( dureesejpart, pivot, sum, na.rm=T ) )
-    rescettes_totales <- with( df %>% filter( typehosp == 'C' ), tapply( valopmctmonotime1, pivot, sum, na.rm=T ) )    
+    nb_journees <- with( df %>% filter( type_hospum_1 == 'C' ), tapply( duree_rum, pivot, sum, na.rm=T ) )
     
-    tb[['0_nuit_nb_sej']] <- table( df %>% filter( typehosp == 'C', duree == 0 ) %>% select( pivot ) )
+    
+    rescettes_totales <- with( df %>% filter( type_hospum_1 == 'C' ), tapply( valopmctmonotime1, pivot, sum, na.rm=T ) )
+    
+    
+    tb[['0_nuit_nb_sej']] <- table( df %>% filter( type_hospum_1 == 'C', duree == 0 ) %>% select( pivot ) )
 
-    tb[['0_nuit_recettes']] <- round( with( df %>% filter( typehosp == 'C', duree == 0 ), tapply( valopmctmonotime1, pivot,sum, na.rm=T ) ) )
+    
+    tb[['0_nuit_recettes']] <- round( with( df %>% filter( type_hospum_1 == 'C', duree == 0 ), tapply( valopmctmonotime1, pivot,sum, na.rm=T ) ) )
 
+    
     tb[['0_nuit_pourc_recettes']] <-  round( tb[['0_nuit_recettes']] * 100 / rescettes_totales, 1 )
+    
     
     tb[['0_nuit_recettes_jour']]  <- round( tb[['0_nuit_recettes']] /  tb[['0_nuit_nb_sej']] )
     
@@ -789,7 +809,7 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
     
     
     
-    tb[['2_nuits_nb_journees']] <- with( df %>% filter( duree > 1 , duree < dms_n + 30 ), tapply( dureesejpart, pivot, sum, na.rm=T ) ) 
+    tb[['2_nuits_nb_journees']] <- with( df %>% filter( duree > 1 , duree < dms_n + 30 ), tapply( duree_rum, pivot, sum, na.rm=T ) ) 
     
     tb[['2_nuits_pourc_journees']] <- round( tb[['2_nuits_nb_journees']]*100 /  nb_journees, 1 )
     
@@ -800,7 +820,7 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
     tb[['2_nuits_recettes_jour']] <- round(tb[['2_nuits_recettes']] /  tb[['2_nuits_nb_journees']] )
     
     
-    tb[['sej_longs_nb_journees']] <- with( df %>% filter( duree >= dms_n +30 ), tapply( dureesejpart, pivot, sum, na.rm=T ) ) 
+    tb[['sej_longs_nb_journees']] <- with( df %>% filter( duree >= dms_n +30 ), tapply( duree_rum, pivot, sum, na.rm=T ) ) 
     
     tb[['sej_longs_pourc_journees']] <-  round( tb[['sej_longs_nb_journees']]*100 /  nb_journees, 1 )
     
@@ -819,7 +839,8 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
   if('SuppTotal'%in%indicateurs){
 
     tb[['SuppTotal']]<-round(
-      with(df,tapply(rec_sup_repa,pivot,sum,na.rm=T))
+      
+      with( df, tapply( rec_sup_repa, pivot, sum, na.rm=T ) )
 
     )
   }
@@ -827,133 +848,152 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
   if('SuppSIRea'%in%indicateurs){
 
     tb[['SuppSIRea']]<-round(
-      with(df,tapply(rec_sir_repa,pivot,sum,na.rm=T))
+      
+      with( df, tapply( rec_si_repa, pivot, sum, na.rm=T ) )
 
     )
   }
   if('SuppSIhorsRea'%in%indicateurs){
 
     tb[['SuppSIhorsRea']]<-round(
-      with(df,tapply(rec_stf_hr_repa,pivot,sum,na.rm=T))
+      
+      with( df, tapply( rec_stf_hr_repa, pivot, sum, na.rm=T ) )
 
     )
   }
   if('SuppRea'%in%indicateurs){
 
     tb[['SuppRea']]<-round(
-      with(df,tapply(rec_rea_repa,pivot,sum,na.rm=T))
+      
+      with( df, tapply( rec_rea_repa, pivot, sum, na.rm=T ) )
 
     )
   }
   if('SuppSRC'%in%indicateurs){
 
     tb[['SuppSRC']]<-round(
-      with(df,tapply(rec_src_repa,pivot,sum,na.rm=T))
+      
+      with( df, tapply( rec_src_repa, pivot, sum, na.rm=T ) )
 
     )
   }
   if('SuppReaPED'%in%indicateurs){
 
     tb[['SuppReaPED']]<-round(
-      with(df,tapply(rec_rep_repa,pivot,sum,na.rm=T))
+      
+      with( df, tapply( rec_rep_repa, pivot, sum, na.rm=T ) )
 
     )
   }
   if('SuppNN1'%in%indicateurs){
 
     tb[['SuppNN1']]<-round(
-      with(df,tapply(rec_nn1_repa,pivot,sum,na.rm=T))
+      
+      with( df, tapply( rec_nn1_repa, pivot, sum, na.rm=T ) )
 
     )
   }
   if('SuppNN2'%in%indicateurs){
 
     tb[['SuppNN2']]<-round(
-      with(df,tapply(rec_nn2_repa,pivot,sum,na.rm=T))
+      
+      with( df, tapply( rec_nn2_repa, pivot, sum, na.rm=T ) )
 
     )
   }
   if('SuppNN3'%in%indicateurs){
 
     tb[['SuppNN3']]<-round(
-      with(df,tapply(rec_nn3_repa,pivot,sum,na.rm=T))
+      
+      with( df, tapply( rec_nn3_repa, pivot, sum, na.rm=T ) )
 
     )
   }
   if('SuppCaisHyp'%in%indicateurs){
 
     tb[['SuppCaisHyp']]<-round(
-      with(df,tapply(rec_caishyp_repa,pivot,sum,na.rm=T))
+      
+      with( df, tapply( rec_caishyp_repa, pivot, sum, na.rm=T ) )
 
     )
   }
   if('SuppPO'%in%indicateurs){
 
     tb[['SuppPO']]<-round(
-      with(df,tapply(rec_po_tot_repa,pivot,sum,na.rm=T))
+      
+      with( df, tapply( rec_po_tot_repa, pivot, sum, na.rm=T ) )
 
     )
   }
   if('SuppANT'%in%indicateurs){
 
     tb[['SuppANT']]<-round(
-      with(df,tapply(rec_ant_repa,pivot,sum,na.rm=T))
+      
+      with( df, tapply( rec_ant_repa, pivot, sum, na.rm=T ) )
 
     )
   }
   if('SuppRDT'%in%indicateurs){
 
     tb[['SuppRDT']]<-round(
-      with(df,tapply(rec_rdt_tot_repa,pivot,sum,na.rm=T))
+      
+      with( df, tapply( rec_rdt_tot_repa, pivot, sum, na.rm=T ) )
 
     )
   }
   if('SuppRAP'%in%indicateurs){
 
     tb[['SuppRAP']]<-round(
-      with(df,tapply(rec_rap_repa,pivot,sum,na.rm=T))
+      
+      with( df, tapply( rec_rap_repa, pivot, sum, na.rm=T ) )
 
     )
   }
   if('SuppDial'%in%indicateurs){
 
     tb[['SuppDial']]<-round(
-      with(df,tapply(rec_dialhosp_repa,pivot,sum,na.rm=T))
+      
+      with( df, tapply( rec_dialhosp_repa, pivot, sum, na.rm=T ))
 
     )
   }
   if('SuppApherese'%in%indicateurs){
 
     tb[['SuppApherese']]<-round(
-      with(df,tapply(rec_aph_repa,pivot,sum,na.rm=T))
+      
+      with( df, tapply( rec_aph_repa, pivot, sum, na.rm=T ) )
 
     )
   }
   if('SuppApherese'%in%indicateurs){
 
     tb[['SuppApherese']]<-round(
-      with(df,tapply(rec_aph_repa,pivot,sum,na.rm=T))
+      
+      with( df, tapply( rec_aph_repa, pivot, sum, na.rm=T ) )
 
     )
   }
   if('SuppApherese'%in%indicateurs){
 
     tb[['SuppApherese']]<-round(
-      with(df,tapply(rec_aph_repa,pivot,sum,na.rm=T))
+      
+      with( df, tapply( rec_aph_repa, pivot, sum, na.rm=T ) )
 
     )
   }
   if('SuppSDC'%in%indicateurs){
 
     tb[['SuppSDC']]<-round(
-      with(df,tapply(rec_sdc_repa,pivot,sum,na.rm=T))
+      
+      with( df, tapply( rec_sdc_repa, pivot, sum, na.rm=T ) ) 
 
     )
   }
   if('SuppRehosp'%in%indicateurs){
 
     tb[['SuppRehosp']]<-round(
-      with(df,tapply(rec_rehosp_ghm_repa,pivot,sum,na.rm=T))
+      
+      with( df, tapply( rec_rehosp_ghm_repa, pivot, sum, na.rm=T ) )
 
     )
   }
@@ -1102,33 +1142,46 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
   #if('pSejCibles'%in%indicateurs){
   #  tb[['pSejCibles']]<-round(
   #    table(df$pivot[!duplicated(df$nas)&df$nas%in%NdaCiblage])*100/
-  #      table(df$pivot[df$typehosp=="C"]),digit=1
+  #      table(df$pivot[df$type_hospum_1=="C"]),digit=1
   #  )
   #}
   #########################################################################
   ###Activite de cancerologie
   #########################################################################
-  if('ActiviteCancero'%in%indicateurs|"SP"%in%indicateurs){
+  
+  if( 'ActiviteCancero' %in% indicateurs | "SP" %in% indicateurs ){
 
-    df_cancer<-inner_join(df,cancer_rsa%>%select(-dp,-noanon,-nas))
+    df_cancer<-inner_join( df, cancer_rsa %>% select( -dp, -noanon, -nas ) )
 
 
-    tb[['NbPat']]<-with(df_cancer,tapply(noanon, pivot, nb_unique))
-    tb[['NbNxPat']]<-with(df_cancer%>%filter(nx_pat == 'O'),tapply(noanon, pivot, nb_unique))
-    tb[['NbSejHC']]<- table(df_cancer%>%dplyr::filter(typehosp=="C",doublon == 1)%>%dplyr::select(pivot))
-    tb[['NbSejHP']]<-table(df_cancer%>%dplyr::filter(typehosp=="P",doublon == 1)%>%dplyr::select(pivot))
+    tb[['NbPat']]<-with( df_cancer, tapply( noanon, pivot, nb_unique ) )
+    
+    
+    tb[['NbNxPat']]<-with( df_cancer %>% filter( nx_pat == 'O' ), tapply( noanon, pivot, nb_unique ) )
+    
+    
+    tb[['NbSejHC']]<- table( df_cancer %>% dplyr::filter( type_hospum_1=="C", doublon == 1 ) %>% dplyr::select( pivot ) )
+    
+    
+    tb[['NbSejHP']]<- table( df_cancer %>% dplyr::filter( type_hospum_1=="P", doublon == 1 ) %>% dplyr::select( pivot ) )
+    
+    
     #tb[['pSejHC']]<-round(table(DataCancero$pivot[!duplicated(DataCancero$NORSS)&DataCancero$TypeDossier%in%c('A','N')])*100/
-    #                        table(df$pivot[!df$typehosp=="P"]))
+    #                        table(df$pivot[!df$type_hospum_1=="P"]))
     #
     #tb[['pSejHP']]<-round(table(DataCancero$pivot[which(DataCancero$TypeDossier%in%c('I','S'))])*100/
-    #                        table(df$pivot[df$typehosp=="P"]))
-    tb[['NbSejChir']]<-table(df_cancer%>%dplyr::filter(substr(cdghm,3,3)=="C",doublon == 1)%>%dplyr::select(pivot))
+    #                        table(df$pivot[df$type_hospum_1=="P"]))
+    
+    tb[['NbSejChir']]<-table( df_cancer %>% dplyr::filter( substr( ghm, 3, 3 ) == "C", doublon == 1 )%>%
+                                dplyr::select( pivot ) )
+ 
+    
+    tb[['NbPatientsParAppareilInca']]<-with( df_cancer, tapply( noanon, list( appareil, pivot ), nb_unique ) )
 
-    tb[['NbPatientsParAppareilInca']]<-with(df_cancer,tapply(noanon, list(appareil,pivot), nb_unique))
-
+    
     if(length(dimnames( tb[['NbPatientsParAppareilInca']])[[1]])>0){
 
-      dimnames( tb[['NbPatientsParAppareilInca']])[[1]]<-paste(' -',tolower(dimnames( tb[['NbPatientsParAppareilInca']])[[1]]))
+      dimnames( tb[['NbPatientsParAppareilInca']])[[1]]<-paste(' -', tolower( dimnames( tb[['NbPatientsParAppareilInca']])[[1]]))
     }
 
     tb[['ActiviteParAppareilInca']]<-with( df_cancer %>% filter( doublon == 1 ),
@@ -1136,7 +1189,7 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
 
     if(length(dimnames( tb[['ActiviteParAppareilInca']])[[1]])>0){
 
-      dimnames( tb[['ActiviteParAppareilInca']])[[1]]<-paste(' -',tolower(dimnames( tb[['ActiviteParAppareilInca']])[[1]]))
+      dimnames( tb[['ActiviteParAppareilInca']])[[1]]<-paste(' -', tolower( dimnames( tb[['ActiviteParAppareilInca']])[[1]]))
     }
   }
   #########################################################################
@@ -1149,48 +1202,75 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
     if(nrow(df_sp)>10){
     
         tb[['SejSp']] <- table( df_sp %>% filter(doublon==1) %>% select(pivot) )
+        
     
-        tb[['JourneesSp']] <- with( df_sp, tapply( dureesejpart, pivot, sum, na.rm=T ) )
+        tb[['JourneesSp']] <- with( df_sp, tapply( duree_rum, pivot, sum, na.rm=T ) )
+        
     
         tb[['NbPatSP']] <- with( df_sp, tapply(noanon, pivot, nb_unique) )
+        
     
-        tb[['SejSpGhmNonSP']]<-table( df_sp %>% filter( substr(cdghm,1,5)!='23Z02', doublon == 1 )%>% select(pivot) )
+        tb[['SejSpGhmNonSP']]<-table( df_sp %>% dplyr::filter( substr(ghm,1,5)!='23Z02', doublon == 1 )%>% 
+                                        dplyr::select(pivot) )
+        
     
-        tb[['SejSpLitsStandards']]<-table( df_sp%>%filter( noghs%in%c('7991','7992') )%>% select(pivot) )
-        tb[['SejSpLitsDedies']]<-table( df_sp%>%filter(noghs%in%c('7993'))%>%select(pivot))
-        tb[['NbPatSpLitsDedies']]<-with(df_sp%>%filter(noghs%in%c('7993')),tapply(noanon,pivot,nb_unique))
-        tb[['NbLitsDediesUtilises']]<-round(with(df_sp,tapply(dureesejpart2,pivot,sum,na.rm=T))/
-                                              with(df_sp,tapply(date_max_pivot-date_min_pivot,pivot,min)),
+        tb[['SejSpLitsStandards']]<-table( df_sp %>% dplyr::filter( ghs%in%c('7991','7992') ) %>% dplyr::select(pivot) )
+        
+        
+        tb[['SejSpLitsDedies']]<-table( df_sp %>% dplyr::filter(ghs%in%c('7993'))%>% dplyr::select(pivot))
+        
+        
+        tb[['NbPatSpLitsDedies']]<-with( df_sp %>% dplyr::filter( ghs%in%c('7993') ), tapply( noanon, pivot, nb_unique ) )
+        
+        
+        tb[['NbLitsDediesUtilises']]<-round( with( df_sp,tapply( duree_rum2, pivot, sum, na.rm=T ) ) /
+                                              with( df_sp, tapply( date_max_pivot - date_min_pivot, pivot, min ) ),
                                             1)
     
-        tb[['SejSpUsp']]<-table(df_sp %>% filter( noghs %in% c('7994') ) %>% select( pivot ) )
+        tb[['SejSpUsp']]<-table(df_sp %>% filter( ghs %in% c('7994') ) %>% select( pivot ) )
+        
+        
+        tb[['JourneesSpLitsStandards']]<- with( df_sp %>% dplyr::filter( ghs %in% c('7991','7992') ),
+                                               tapply( duree_rum, pivot, sum, na.rm=T ) )
+        
+        
+        tb[['JourneesSpLitsDedies']]<- with( df_sp %>% dplyr::filter( ghs %in% c('7993') ),
+                                            tapply( duree_rum, pivot, sum, na.rm=T ) )
+        
+        
     
-        tb[['JourneesSpLitsStandards']]<- with( df_sp %>% filter( noghs %in% c('7991','7992') ),
-                                               tapply( dureesejpart, pivot, sum, na.rm=T ) )
-        tb[['JourneesSpLitsDedies']]<- with( df_sp %>% filter( noghs %in% c('7993') ),
-                                            tapply( dureesejpart, pivot, sum, na.rm=T ) )
+        tb[['JourneesSpUsp']]<- with( df_sp %>% dplyr::filter( ghs %in% c('7994') ),
+                                     tapply( duree_rum, pivot, sum, na.rm=T ) )
+        
+        
     
-        tb[['JourneesSpUsp']]<- with( df_sp %>% filter( noghs %in% c('7994') ),
-                                     tapply( dureesejpart, pivot, sum, na.rm=T ) )
+        tb[['NbDCD']]<- table( df %>% dplyr::filter( modesortie_rum == 9 ) %>%
+                                dplyr::distinct( nas, .keep_all = T ) %>% select( pivot ) )
+        
+        
+     
+        tb[['NbDCD_SP']]<- table( df_sp %>% dplyr::filter( modesortie_rum == 9 ) %>% dplyr::select( pivot ) )
+        
     
-        tb[['NbDCD']]<-table( df %>% filter( mdsoue == 9 ) %>%
-                                distinct( nas, .keep_all = T ) %>% select( pivot ) )
+        tb[['NbDCDNonSP']]<- tb[['NbDCD']] -  tb[['NbDCD_SP']]
+        
     
-        tb[['NbDCD_SP']]<-table( df_sp %>% filter( mdsoue == 9 ) %>% select( pivot ) )
+        tb[['NbDCDcancer']]<- table( df_cancer %>% dplyr::filter(modesortie_rum == 9) %>% dplyr::select(pivot) )
+        
     
-        tb[['NbDCDNonSP']]<-tb[['NbDCD']] -  tb[['NbDCD_SP']]
+        tb[['NbDCDspGhmNonSP']]<-table( df%>% dplyr::filter(modesortie_rum == 9,substr(ghm,1,5)!='23Z02') %>% dplyr::select(pivot))
     
-        tb[['NbDCDcancer']]<-table(df_cancer%>%filter(mdsoue == 9) %>%select(pivot))
+        
+        tb[['NbDCDspGhmSP']]<-table( df %>% dplyr::filter(modesortie_rum == 9,substr(ghm,1,5)=='23Z02') %>% dplyr::distinct(nas,.keep_all = T)%>%select(pivot))
     
-        tb[['NbDCDspGhmNonSP']]<-table(df%>%filter(mdsoue == 9,substr(cdghm,1,5)!='23Z02') %>% select(pivot))
+        
+        tb[['NbDCDspLitsStandards']]<-table( df%>% dplyr::filter( modesortie_rum == 9, ghs %in% c('7991','7992')) %>% dplyr::select(pivot) )
     
-        tb[['NbDCDspGhmSP']]<-table(df%>%filter(mdsoue == 9,substr(cdghm,1,5)=='23Z02') %>% distinct(nas,.keep_all = T)%>%select(pivot))
+        
+        tb[['NbDCDspLitsDedies']]<-table( df %>% dplyr::filter(modesortie_rum == 9 , ghs%in%c('7993') ) %>% dplyr::select(pivot) )
     
-        tb[['NbDCDspLitsStandards']]<-table( df%>% filter( mdsoue == 9, noghs %in% c('7991','7992')) %>% select(pivot) )
-    
-        tb[['NbDCDspLitsDedies']]<-table( df %>% filter(mdsoue == 9 , noghs%in%c('7993') ) %>% select(pivot) )
-    
-        tb[['NbDCDspUsp']]<-table( df %>% filter(mdsoue == 9, noghs%in%c('7994') ) %>% select(pivot) )
+        
+        tb[['NbDCDspUsp']]<-table( df %>% dplyr::filter(modesortie_rum == 9, ghs%in%c('7994') ) %>% dplyr::select(pivot) )
     
     }
 
@@ -1205,15 +1285,19 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
       cmd <<- get_cmd()
     }
 
-    tmp <- df%>%mutate(cmd := substr(ghm,1,2)) %>% left_join(.,cmd)%>% unite(cmd, cmd, libelle_cmd)
+    tmp <- df%>%dplyr::mutate(cmd := substr(ghm,1,2)) %>% left_join(.,cmd)%>% unite(cmd, cmd, libelle_cmd)
+    
     nb <- table(tmp$cmd)
+    
     nb <- nb[order(nb,decreasing = T)]
+    
     nbc <- cumsum(nb[order(nb,decreasing = T)])*100/sum(nb)
 
-    tmp<- tmp %>% mutate(cmd = ifelse(cmd %in% names(nbc[nbc<91]),cmd,'Autres'))%>%
-      mutate(cmd = factor(cmd,levels= c(names(nbc[nbc<91]),'Autres')))
+    tmp<- tmp %>% dplyr::mutate(cmd = ifelse(cmd %in% names(nbc[nbc<91]),cmd,'Autres'))%>%
+      dplyr::mutate(cmd = factor(cmd,levels= c(names(nbc[nbc<91]),'Autres')))
     
     res<-with(tmp,tapply(doublon, list(cmd,pivot), sum))
+    
     res2<-round(with(tmp,tapply(valopmctmonotime1, list(cmd,pivot), sum)))
     
     tb[['CaseMixCMD']] = NULL
@@ -1226,19 +1310,21 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
     }
 
     
-    tmp<-df%>%mutate(type := substr(ghm,3,3))%>%mutate(type = ifelse(type == 'C',"Chirurgie",
+    tmp <- df %>% dplyr::mutate(type := substr(ghm,3,3))%>% dplyr::mutate(type = ifelse(type == 'C',"Chirurgie",
                                                                         ifelse(type == "M", "Médecine",
                                                                         ifelse(type == "K", "Médico_technique",
                                                                         "Autres"))))
     
-    res<-with(tmp,tapply(doublon, list(type,pivot), sum))
-    res2<-round(with(tmp,tapply(valopmctmonotime1, list(type,pivot), sum)))
+    res <- with( tmp, tapply( doublon, list( type, pivot ), sum ) )
     
+    res2 <- round( with( tmp, tapply( valopmctmonotime1, list( type, pivot ), sum ) ) )
+     
     tb[['CaseMixType']]<-NULL
     
     for(i in dimnames(res)[[1]]){
       
       tmp = rbind(res[i,],res2[i,])
+      
       dimnames(tmp)[[1]]<-c(paste(' -',i),"")
       
       tb[['CaseMixType']]<-rbind(tb[['CaseMixType']],tmp)
@@ -1249,18 +1335,23 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
       racines = get_racines()
     }
     
-    tmp<-df%>%mutate(racine := substr(ghm,1,5))%>%left_join(.,racines)%>%
-      unite(racine,racine,libelle,sep = " ")%>%
-      mutate(racine = paste0(substr(racine,1,50),ifelse(nchar(racine)>51,"...","")))
+    tmp<-df%>%dplyr::mutate(racine := substr(ghm,1,5))%>%
+      dplyr::left_join( ., racines )%>%
+      tidyr::unite( racine, racine, libelle,sep = " ")%>%
+      dplyr::mutate( racine = paste0( substr( racine, 1, 50 ), ifelse( nchar( racine ) > 51, "...", "" ) ) )
+    
     nb<-table(tmp$racine)
+    
     nb<-nb[order(nb,decreasing = T)]
+    
     nbc<-cumsum(nb[order(nb,decreasing = T)])*100/sum(nb)
     
-    tmp<- tmp %>% mutate(racine = ifelse(racine %in% names(nbc[nbc<91]),racine,'Autres'))%>%
-      mutate(racine = factor(racine,levels= c(names(nbc[nbc<91]),'Autres')))
+    tmp<- tmp %>% dplyr::mutate( racine = ifelse( racine %in% names( nbc[nbc<91] ), racine, 'Autres' ) )%>%
+      dplyr::mutate( racine = factor( racine, levels= c( names( nbc[nbc<91] ), 'Autres' ) ) )
     
-    res<-with(tmp,tapply(doublon, list(racine,pivot), sum))
-    res2<-round(with(tmp,tapply(valopmctmonotime1, list(racine,pivot), sum)))
+    res<-with( tmp, tapply( doublon, list(racine,pivot), sum ) )
+    
+    res2<-round( with( tmp, tapply( valopmctmonotime1, list( racine, pivot ), sum ) ) ) 
     
 
     tb[['CaseMixGHM']] = NULL
@@ -1282,16 +1373,22 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
   # Infectieux
   ########################################################################################
    if('Infectieux'%in%indicateurs){
-     tmp<-df%>%filter(dp%in%infections_otoctones$code|dr%in%infections_otoctones$code|
-                        grepl(paste(infections_otoctones$code,collapse = '|'),das))
      
-     tb[['NbSejoursInfectieux']]<-table( tmp%>% filter(doublon ==1) %>% select(pivot))
      
-     tmp<-df%>%filter(dp%in%resistance_atb$code|dr%in%resistance_atb$code|
-                        grepl(paste(resistance_atb$code,collapse = '|'),das))
+     tmp<- df%>% dplyr::filter(dpdurum%in%infections_otoctones$code|drdurum%in%infections_otoctones$code|
+                        grepl( paste( infections_otoctones$code, collapse = '|'), dasdurum ) )
      
-      tb[['NbPateintsBMR']]<-with( tmp,tapply(noanon,pivot,nb_unique) )
-      tb[['NbSejoursBMR']]<-table( tmp%>% filter(doublon ==1) %>% select(pivot))
+     
+     tb[['NbSejoursInfectieux']]<-table( tmp%>% filter(doublon ==1) %>% dplyr::select(pivot) )
+     
+     
+     tmp<-df%>%filter(dpdurum %in% resistance_atb$code | drdurum %in% resistance_atb$code|
+                        grepl( paste( resistance_atb$code, collapse = '|'), dasdurum ) )
+     
+      tb[['NbPateintsBMR']] <- with( tmp, tapply( noanon, pivot, nb_unique ) )
+      
+      tb[['NbSejoursBMR']] <- table( tmp%>% dplyr::filter(doublon ==1) %>% dplyr::select( pivot ) )
+      
     }
 
   ########################################################################################
@@ -1300,12 +1397,12 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
 
   if('Douleur'%in%indicateurs){
 
-    tmp<-df%>%filter(dp%in%douleur$code|dr%in%douleur$code|
-                       grepl(paste(douleur$code,collapse = '|'),das))
+    tmp<-df%>%filter( dpdurum%in%douleur$code | drdurum%in%douleur$code |
+                       grepl( paste( douleur$code, collapse = '|' ), dasdurum ) )
 
-    tb[['PatientsDouleur']]<-with( tmp,tapply(noanon,pivot,nb_unique) )
+    tb[['PatientsDouleur']]<-with( tmp,tapply( noanon, pivot, nb_unique) )
 
-    tb[['SejoursDouleur']]<-table( tmp%>% filter(doublon ==1) %>% select(pivot))
+    tb[['SejoursDouleur']]<-table( tmp%>% filter(doublon ==1) %>% dplyr::select( pivot ) )
 
   }
 
@@ -1315,44 +1412,57 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
   if('AutresPathologiesChroniques'%in%indicateurs){
 
     ###VIH
-    tmp<-df%>%filter(dp%in%vih$code|dr%in%vih$code|
-                       grepl(paste(vih$code,collapse = '|'),das))
+    tmp<-df%>%filter(dpdurum %in% vih$code | drdurum %in% vih$code |
+                       grepl( paste( vih$code,collapse = '|'), dasdurum ) )
+    
 
-    tb[['PatientsVIH']]<- with( tmp, tapply(noanon,pivot,nb_unique) )
+    tb[['PatientsVIH']]<- with( tmp, tapply( noanon, pivot, nb_unique) )
+    
+    
+    tb[['SejoursVIH_HC']]<-table( tmp %>% dplyr::filter(type_hospum_1=='C',doublon ==1) %>% dplyr::select( pivot ) )
+    
 
-    tb[['SejoursVIH_HC']]<-table( tmp%>%filter(typehosp=='C',doublon ==1) %>% select(pivot) )
-
-    tb[['SejoursVIH_HP']]<-table(tmp%>%filter(typehosp=='P')%>%select(pivot))
+    tb[['SejoursVIH_HP']]<- table( tmp%>% dplyr::filter(type_hospum_1=='P') %>% dplyr::select( pivot ) )
+    
 
     #Diabète
-    tmp<-df%>%filter(dp%in%diabete$code|dr%in%diabete$code|
-                       grepl(paste(diabete$code,collapse = '|'),das))
+    tmp <- df%>%dplyr::filter( dpdurum %in% diabete$code | drdurum %in% diabete$code |
+                       grepl( paste( diabete$code, collapse = '|'), dasdurum ) )
+    
 
-    tb[['PatientsDiabete']]<-with(tmp, tapply(noanon,pivot,nb_unique) )
+    tb[['PatientsDiabete']]<-with(tmp, tapply( noanon, pivot, nb_unique) )
+    
 
-    tb[['SejoursDiabete_HC']]<-table(tmp %>% filter(typehosp=='C', doublon==1 ) %>% select(pivot) )
+    tb[['SejoursDiabete_HC']]<-table( tmp %>% dplyr::filter(type_hospum_1=='C', doublon==1 ) %>% dplyr::select(pivot) )
+    
 
-    tb[['SejoursDiabete_HP']]<-table(tmp %>% filter(typehosp=='P') %>% select(pivot) )
+    tb[['SejoursDiabete_HP']]<-table( tmp %>% dplyr::filter(type_hospum_1=='P') %>% dplyr::select(pivot) )
 
     #Insuffisance rénale chronique
-    tmp<-df%>%filter(dp%in%insuffisance_renale_chronique$code|dr%in%insuffisance_renale_chronique$code|
-                       grepl(paste(insuffisance_renale_chronique$code,collapse = '|'),das))
+    tmp<-df%>%filter( dpdurum %in% insuffisance_renale_chronique$code| drdurum %in% insuffisance_renale_chronique$code |
+                       grepl(paste(insuffisance_renale_chronique$code,collapse = '|'),dasdurum))
+    
 
-    tb[['PatientsInsRenaleChronique']]<-with( tmp, tapply(noanon,pivot,nb_unique) )
+    tb[['PatientsInsRenaleChronique']]<-with( tmp, tapply( noanon, pivot, nb_unique ) )
+    
 
-    tb[['SejoursInsRenaleChronique_HC']]<-table( tmp %>% filter(typehosp=='C', doublon==1) %>% select(pivot) )
+    tb[['SejoursInsRenaleChronique_HC']]<-table( tmp %>% dplyr::filter( type_hospum_1=='C', doublon==1 ) %>% dplyr::select(pivot) )
 
-    tb[['SejoursInsRenaleChronique_HP']]<-table( tmp %>% filter(typehosp=='P') %>% select(pivot) )
+    
+    tb[['SejoursInsRenaleChronique_HP']]<-table( tmp %>% dplyr::filter( type_hospum_1=='P' ) %>% dplyr::select(pivot) )
+    
 
     #Insuffisance respiratoire chronique
-    tmp<-df%>%filter(dp%in%insuffisance_respiratoire_chronique$code|dr%in%insuffisance_respiratoire_chronique$code|
-                       grepl(paste(insuffisance_respiratoire_chronique$code,collapse = '|'),das))
+    tmp<-df%>%filter( dpdurum %in% insuffisance_respiratoire_chronique$code | drdurum %in% insuffisance_respiratoire_chronique$code|
+                       grepl( paste( insuffisance_respiratoire_chronique$code, collapse = '|' ), dasdurum ) )
+    
 
     tb[['PatientsInsRespiratoireChronique']]<-with( tmp, tapply(noanon,pivot,nb_unique) )
+    
 
-    tb[['SejoursInsRespiratoireChronique_HC']]<-table( tmp %>% filter(typehosp=='C', doublon ==1) %>% select(pivot) )
+    tb[['SejoursInsRespiratoireChronique_HC']]<-table( tmp %>% dplyr::filter(type_hospum_1=='C', doublon ==1) %>% dplyr::select(pivot) )
 
-    tb[['SejoursInsRespiratoireChronique_HP']]<-table( tmp %>% filter(typehosp=='P') %>% select(pivot) )
+    tb[['SejoursInsRespiratoireChronique_HP']]<-table( tmp %>% dplyr::filter(type_hospum_1=='P') %>% dplyr::select(pivot) )
 
   }
   #########################################################################################
@@ -1362,9 +1472,9 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
 
   if('IndicateursRea'%in%indicateurs){
 
-    tmp_rea<-df %>% dplyr::filter(typeaut=="01A")
+    tmp_rea<-df %>% dplyr::filter(type_rum_1=="01A")
 
-    tb[['HCtotAutRea']]<-table(tmp_rea%>% filter(doublon == 1) %>%select(pivot) )
+    tb[['HCtotAutRea']]<-table( tmp_rea %>% dplyr::filter( doublon == 1 ) %>% dplyr::select( pivot ) )
 
     ##Re-hospitalisation precoses
     #df3<-merge(Data[o,c('NIP','SERVICE','DateEntreeResume','DateSortieResume','A')],
@@ -1378,30 +1488,32 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
 
     tb[['IGSmoyen']]<-round( with( tmp_rea, tapply( as.numeric(igs), pivot, mean, na.rm=T) ), 1 )
 
-    tb[['IGS0']]<-table(tmp_rea %>% filter( as.numeric(igs)==0 ) %>% select( pivot ) )
+    tb[['IGS0']]<-table(tmp_rea %>% dplyr::filter( as.numeric(igs)==0 ) %>% dplyr::select( pivot ) )
 
     l_actes = paste(c(as.character(actes_ventilation_intubation$acte),
                       as.character(actes_ventilation_tracheotomie$acte),
                       as.character(actes_vni$acte)),
                     collapse = '|')
+    
 
-    tb[['NbSejoursPatientVentiles']]<- table(df %>% filter( grepl( l_actes, actes ) )
-                                             %>% filter( doublon == 1 )
-                                             %>% select( pivot ) )
+    tb[['NbSejoursPatientVentiles']]<- table(df %>% dplyr::filter( grepl( l_actes, actes ) )%>% 
+                                                 dplyr::filter( doublon == 1 )%>% 
+                                                 dplyr::select( pivot ) )
+    
 
-    tb[['pPatientVentiles']]<- round( table(df %>%filter(grepl(l_actes,actes))
-                                            %>%filter(doublon == 1)
-                                            %>%select(pivot) ) *100 / tb[['HCtotAutRea']],
+    tb[['pPatientVentiles']]<- round( table(df %>% dplyr::filter( grepl( l_actes, actes ) ) %>% 
+                                              dplyr::filter( doublon == 1 ) %>%
+                                              dplyr::select( pivot) ) *100 / tb[['HCtotAutRea']],
                                       1)
 
     ###Nombre de patients ventiles plus de 48h
-    tb[['NbSejoursPatientVentiles48h']]<- table( tmp_rea %>% mutate(nb_actes = stringr::str_count(actes, l_actes))
-                                                 %>% filter(nb_actes > 1)
-                                                 %>% filter(doublon == 1)
-                                                 %>% select(pivot) )
+    tb[['NbSejoursPatientVentiles48h']]<- table( tmp_rea %>% dplyr::mutate( nb_actes = stringr::str_count(actes, l_actes)) %>% 
+                                                   dplyr::filter( nb_actes > 1 ) %>% 
+                                                   dplyr::filter( doublon == 1 ) %>% 
+                                                   dplyr::select( pivot ) )
 
 
-    tb[['NbJourneesVentilesInt']]<-with( tmp_rea %>% mutate(nb_actes = stringr::str_count(actes, l_actes)),
+    tb[['NbJourneesVentilesInt']]<-with( tmp_rea %>% dplyr::mutate( nb_actes = stringr::str_count( actes, l_actes ) ),
                                          tapply(nb_actes,pivot,sum,na.rm=T))
 
     l_actes = paste(actes_ventilation_intubation$acte,collapse = '|')
@@ -1476,12 +1588,12 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
 
     ###Pourcentage de deces en reanimation
 
-    tb[['pDcdRea']]<- round(table( df %>% filter(mdsoue == 9, typeaut=="01A" ) %>% select(pivot) )*100/
+    tb[['pDcdRea']]<- round(table( df %>% filter(modesortie_rum == 9, type_rum_1=="01A" ) %>% select(pivot) )*100/
                               tb[['HCtotAutRea']],
                             digit=1)
 
-    tb[['pDcdHopRea']]<-round(table( inner_join(df, tmp_rea %>% select(nofiness,cle_rsa,ansor)%>%distinct(nofiness,cle_rsa,ansor))
-                                     %>%filter(mdsoue == 9, typeaut=="01A" )
+    tb[['pDcdHopRea']]<-round(table( inner_join(df, tmp_rea %>% select(finess,cle_rsa,annee)%>%distinct(finess,cle_rsa,annee))
+                                     %>%filter(modesortie_rum == 9, type_rum_1=="01A" )
                                      %>% select(pivot) )*100/
                                 tb[['HCtotAutRea']],
                               digit=1)
@@ -1509,7 +1621,7 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
 
   if('p_sej_bh'%in%indicateurs){
     tb[['p_sej_bh']]<-round(tb[['nb_sej_bh']] * 100 / 
-                              table( df %>% dplyr::filter( typehosp=="C", doublon==1 ) %>% dplyr::select(pivot) )
+                              table( df %>% dplyr::filter( type_hospum_1=="C", doublon==1 ) %>% dplyr::select(pivot) )
                           ,digit=1)
   }
 
@@ -1546,7 +1658,7 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
   if('nb_jour_sup_dms_repa'%in%indicateurs){
     
     tb[['nb_jour_sup_dms_repa']] <-  round( with( df %>% filter( duree>dms_n, doublon == 1 ),
-                                              tapply( dureesejpart - ( dms_n*coeftime ), pivot, sum, na.rm = T ) ) )
+                                              tapply( duree_rum - ( dms_n*coeftime ), pivot, sum, na.rm = T ) ) )
     
     
   }
@@ -1728,15 +1840,15 @@ get_tdb<-function(df, indicateurs, pivot = 'pivot', unit_pivot = NULL){
 #' @examples
 racine_diff_recettes <- function( df ) {
   
-  annee_ = max(as.numeric(df$ansor))
+  annee_ = max(as.numeric(df$annee))
   
   
   giac1 <- df %>%
-    dplyr::mutate( racine = substr( cdghm, 1, 5) ) %>%
-    dplyr::group_by( ansor, racine ) %>%
-    dplyr::summarise( sej_racine = n_distinct(cle_rsa,nofiness,cle_rsa), 
-                      nb_journees = sum(dureesejpart),
-                      dmr = round( sum(dureesejpart) / sej_racine,1),
+    dplyr::mutate( racine = substr( ghm, 1, 5) ) %>%
+    dplyr::group_by( annee, racine ) %>%
+    dplyr::summarise( sej_racine = n_distinct(cle_rsa,finess,cle_rsa), 
+                      nb_journees = sum(duree_rum),
+                      dmr = round( sum(duree_rum) / sej_racine,1),
                       coef_racine = sum( coefpmctmonotime1 ),
                       rec_base_racine = sum( tarif_base * coefpmctmonotime1 ),
                       rec_totale_racine = round( sum( rec_totale * coefpmctmonotime1 ) ) ,
@@ -1748,8 +1860,8 @@ racine_diff_recettes <- function( df ) {
   
   
   
-  giac <- dplyr::full_join( giac1 %>% filter( as.numeric( ansor ) == annee_-1 )%>% dplyr::select( -ansor ),
-                            giac1 %>% filter( as.numeric( ansor ) == annee_ ) %>%  dplyr::select( -ansor ),
+  giac <- dplyr::full_join( giac1 %>% filter( as.numeric( annee ) == annee_-1 )%>% dplyr::select( -annee ),
+                            giac1 %>% filter( as.numeric( annee ) == annee_ ) %>%  dplyr::select( -annee ),
                           suffix = c( "_n_1", "_n" ),
                           by = c( "racine" )  )%>%
     replace(., is.na(.), 0)%>%
@@ -1784,15 +1896,15 @@ racine_diff_recettes <- function( df ) {
 #' @examples
 detail_diff_recettes <- function( df, pivot ) {
   
-  annee_ = max(as.numeric(df$ansor))
+  annee_ = max(as.numeric(df$annee))
   
   df<-df%>%mutate(pivot:=!!sym(pivot))
   
   giac1 <- df %>%
-    dplyr::mutate( racine = substr( cdghm, 1, 5) ) %>%
-    dplyr::group_by( pivot, ansor, racine ) %>%
-    dplyr::summarise( sej_racine = n_distinct( cle_rsa, nofiness, cle_rsa ), 
-                      nb_journees = sum( dureesejpart ),
+    dplyr::mutate( racine = substr( ghm, 1, 5) ) %>%
+    dplyr::group_by( pivot, annee, racine ) %>%
+    dplyr::summarise( sej_racine = n_distinct( cle_rsa, finess, cle_rsa ), 
+                      nb_journees = sum( duree_rum ),
                       coef_racine = sum( coefpmctmonotime1 ) ,
                       rec_base_racine = sum( tarif_base * coefpmctmonotime1 ),
                       rec_totale_racine = round( sum( valopmctmonotime1 ) ) ,
@@ -1803,8 +1915,8 @@ detail_diff_recettes <- function( df, pivot ) {
   
   
   
-  giac <- dplyr::full_join( giac1 %>% filter( as.numeric( ansor ) == annee_-1 )%>% dplyr::select( -ansor ),
-                            giac1 %>% filter( as.numeric( ansor ) == annee_ ) %>%  dplyr::select( -ansor ),
+  giac <- dplyr::full_join( giac1 %>% filter( as.numeric( annee ) == annee_-1 )%>% dplyr::select( -annee ),
+                            giac1 %>% filter( as.numeric( annee ) == annee_ ) %>%  dplyr::select( -annee ),
                             suffix = c( "_n_1", "_n" ),
                             by = c( "pivot", "racine" )  )%>%
     replace(., is.na(.), 0)
@@ -1858,14 +1970,14 @@ diff_sej_recettes<-function( df, pivot ){
   df<-df%>%mutate(pivot:=!!sym(pivot))
   
   #Diférentiel séjours
-  tmp <- round( with( df, tapply(  doublon , list(pivot,ansor), sum , na.rm =T ) ) )
+  tmp <- round( with( df, tapply(  doublon , list(pivot,annee), sum , na.rm =T ) ) )
   tmp[which(is.na(tmp))]<- 0
   tmp <- get_diff( tmp )
   dimnames(tmp)[[2]]<-paste0("nb_sej_",dimnames(tmp)[[2]])
   res <- tmp [ , -c(1,4) ]
   
   #Différentiels recettes
-  tmp <-  round( with( df, tapply( valopmctmonotime1, list( pivot, ansor ), sum, na.rm=T ) ) ) 
+  tmp <-  round( with( df, tapply( valopmctmonotime1, list( pivot, annee ), sum, na.rm=T ) ) ) 
   tmp[which(is.na(tmp))]<- 0
   tmp <- get_diff( tmp ) 
   dimnames(tmp)[[2]]<-paste0("recettes_totales_",dimnames(tmp)[[2]])
@@ -1888,15 +2000,15 @@ diff_sej_recettes<-function( df, pivot ){
 #' @examples
 diff_sej_recettes_v2 <- function( df, pivot ) {
   
-  annee_ = max(as.numeric(df$ansor))
+  annee_ = max(as.numeric(df$annee))
   
   df<-df%>%mutate(pivot:=!!sym(pivot))
   
   giac1 <- df %>%
-    dplyr::mutate( racine = substr( cdghm, 1, 5) ) %>%
-    dplyr::group_by( pivot, ansor ) %>%
+    dplyr::mutate( racine = substr( ghm, 1, 5) ) %>%
+    dplyr::group_by( pivot, annee ) %>%
     dplyr::summarise( sej_pivot = sum( doublon ), 
-                      nb_journees_pivot = sum( dureesejpart ),
+                      nb_journees_pivot = sum( duree_rum ),
                       coef_pivot = sum( coefpmctmonotime1 ) ,
                       rec_base_pivot = sum( tarif_base * coefpmctmonotime1 ),
                       rec_totale_pivot = round( sum( valopmctmonotime1 ) ) ,
@@ -1907,8 +2019,8 @@ diff_sej_recettes_v2 <- function( df, pivot ) {
   
   
   
-  giac <- dplyr::full_join( giac1 %>% filter( as.numeric( ansor ) == annee_-1 )%>% dplyr::select( -ansor ),
-                            giac1 %>% filter( as.numeric( ansor ) == annee_ ) %>%  dplyr::select( -ansor ),
+  giac <- dplyr::full_join( giac1 %>% filter( as.numeric( annee ) == annee_-1 )%>% dplyr::select( -annee ),
+                            giac1 %>% filter( as.numeric( annee ) == annee_ ) %>%  dplyr::select( -annee ),
                             suffix = c( "_n_1", "_n" ),
                             by = c( "pivot" )  )%>%
     replace(., is.na(.), 0)
@@ -2017,19 +2129,19 @@ get_activite_sejours<-function( df, structure ){
   
     tdb <-list()
     
-    df<-df%>%mutate(typehosp = factor(typehosp))
+    df<-df%>%mutate(type_hospum_1 = factor(type_hospum_1))
     
-    tdb[['services']] <- table( df %>%  distinct( nofiness, cle_rsa, ansor, service, .keep_all = T)%>%
-                                 select(service, ansor, typehosp) )
+    tdb[['services']] <- table( df %>%  distinct( finess, cle_rsa, annee, service, .keep_all = T)%>%
+                                 select(service, annee, type_hospum_1) )
     
-    tdb[['poles']] <- table( df %>%  distinct( nofiness, cle_rsa, ansor, service, .keep_all = T )%>%
-                              select( pole, ansor, typehosp ) )
+    tdb[['poles']] <- table( df %>%  distinct( finess, cle_rsa, annee, service, .keep_all = T )%>%
+                              select( pole, annee, type_hospum_1 ) )
     
-    tdb[['hopitaux']]  <- table( df %>%  distinct(nofiness, cle_rsa, ansor, .keep_all = T)%>%
-                                  select(hopital, ansor, typehosp ) )
+    tdb[['hopitaux']]  <- table( df %>%  distinct(finess, cle_rsa, annee, .keep_all = T)%>%
+                                  select(hopital, annee, type_hospum_1 ) )
     
-    tdb[['gh']] <- table(df %>% distinct( nofiness, cle_rsa, ansor, .keep_all = T )%>%
-                           select( typehosp, ansor ) )
+    tdb[['gh']] <- table(df %>% distinct( finess, cle_rsa, annee, .keep_all = T )%>%
+                           select( type_hospum_1, annee ) )
 
     tdb <- dimRactivite:::order_by_structure( tdb, structure )
 
@@ -2057,15 +2169,15 @@ get_activite_recettes<-function( df, structures ){
   
   tdb_v <-list()
   
-  df<-df%>%mutate(typehosp = factor(typehosp))
+  df<-df%>%mutate(type_hospum_1 = factor(type_hospum_1))
 
-  tdb_v[['services']] <- round( with( df, tapply( valopmctmonotime1, list(service,ansor,typehosp), sum, na.rm=T ) ) )
+  tdb_v[['services']] <- round( with( df, tapply( valopmctmonotime1, list(service,annee,type_hospum_1), sum, na.rm=T ) ) )
   
-  tdb_v[['poles']]  <- round( with( df, tapply( valopmctmonotime1, list(pole,ansor,typehosp), sum, na.rm=T ) ) )
+  tdb_v[['poles']]  <- round( with( df, tapply( valopmctmonotime1, list(pole,annee,type_hospum_1), sum, na.rm=T ) ) )
   
-  tdb_v[['hopitaux']] <- round( with( df, tapply( valopmctmonotime1, list(hopital,ansor,typehosp), sum, na.rm=T ) ) )
+  tdb_v[['hopitaux']] <- round( with( df, tapply( valopmctmonotime1, list(hopital,annee,type_hospum_1), sum, na.rm=T ) ) )
   
-  tdb_v[['gh']] <- t(round( with( df, tapply( valopmctmonotime1, list(ansor,typehosp), sum, na.rm=T ) ) ))
+  tdb_v[['gh']] <- t(round( with( df, tapply( valopmctmonotime1, list(annee,type_hospum_1), sum, na.rm=T ) ) ))
 
   tdb_v <- order_by_structure( tdb_v, structures )
 
@@ -2199,8 +2311,8 @@ make_tdb <- function( val, niveau, annee, mois ){
   
   tdb<-list()
   #Données cumulées
-  df<-get_data( rum, ref = "ansor", m = 1:mois, a = (annee-getOption('dimRactivite.profondeur_tdb')):annee, val, niveau, opt = T )%>%
-    mutate( pivot = factor( ansor, levels = ( annee - getOption('dimRactivite.profondeur_tdb')):annee ) )
+  df<-get_data( rum, ref = "annee", m = 1:mois, a = (annee-getOption('dimRactivite.profondeur_tdb')):annee, val, niveau, opt = T )%>%
+    mutate( pivot = factor( annee, levels = ( annee - getOption('dimRactivite.profondeur_tdb')):annee ) )
   
   if (nrow(df)==0) {
     message(
@@ -2212,16 +2324,16 @@ make_tdb <- function( val, niveau, annee, mois ){
   
   
   df<-dplyr::left_join(inner_join(df,rum_v),
-                inner_join(rsa,rsa_v)%>%mutate(anseqta = as.numeric(anseqta))%>%select(nofiness,cle_rsa,ansor,noghs,
-                                                                                       anseqta,duree,rec_base,nbrum,noseqrum,
+                inner_join(rsa,rsa_v)%>%mutate(anseqta = as.numeric(anseqta))%>%select(finess,cle_rsa,annee,ghs,
+                                                                                       anseqta,duree,rec_base,rum,noseqrum,
                                                                                        ghm,duree,nbjrbs,sejinfbi,rec_totale,rec_base,
                                                                                        rec_exh,rec_exb))%>%
     dplyr::left_join(.,rsa_dms)%>%
-    dplyr::left_join(.,vano%>%inner_join(., df%>%select(nofiness,cle_rsa,ansor,nas)) %>% select( nas, noanon )%>% distinct(nas,noanon))
+    dplyr::left_join(.,vano%>%inner_join(., df%>%select(finess,cle_rsa,annee,nas)) %>% select( nas, noanon )%>% distinct(nas,noanon))
   
   #Données utiles pour la valorisation
   df<-dplyr::left_join( df %>% mutate(  anseqta = as.character(anseqta) ),
-                        tarifs_mco_ghs%>%rename( noghs = ghs, bb = borne_basse, bh = borne_haute )%>%select( anseqta, ghm, noghs, bb, bh ) )
+                        tarifs_mco_ghs%>%rename( ghs = ghs, bb = borne_basse, bh = borne_haute )%>%select( anseqta, ghm, ghs, bb, bh ) )
   
   
   
@@ -2252,7 +2364,7 @@ make_tdb <- function( val, niveau, annee, mois ){
   }
   
   #Données mensuelles
-  df <- df %>% filter( as.numeric(moissor) == mois )
+  df <- df %>% filter( as.numeric(mois) == mois )
   
   if (nrow(df)==0) {
     message(
